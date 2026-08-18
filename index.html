@@ -451,7 +451,7 @@ dialog::backdrop{background:rgba(6,42,61,.68)}
       <a href="#plan">Study plan</a>
       <a href="#pricing">Pricing</a>
     </nav>
-    <a class="btn btn--gold hdr__cta" href="#signup">Start free diagnostic</a>
+    <a class="btn btn--gold hdr__cta" href="app.html">Start free diagnostic</a>
   </div>
 </header>
 
@@ -725,7 +725,7 @@ dialog::backdrop{background:rgba(6,42,61,.68)}
           <li>20 practice items a week</li>
           <li>Weekly plan for that subject</li>
         </ul>
-        <a class="btn btn--line" href="#signup" style="width:100%">Start free</a>
+        <a class="btn btn--line" href="app.html" style="width:100%">Start free</a>
       </div>
 
       <div class="plan-card plan-card--main rv" style="--d:.06s">
@@ -740,7 +740,7 @@ dialog::backdrop{background:rgba(6,42,61,.68)}
           <li>Error log that rewrites the plan every week</li>
           <li>Monthly progress summary for parents</li>
         </ul>
-        <a class="btn btn--gold" href="#signup" style="width:100%">Start free, upgrade later</a>
+        <a class="btn btn--gold" href="app.html" style="width:100%">Start free, upgrade later</a>
       </div>
     </div>
 
@@ -1569,10 +1569,9 @@ dialog::backdrop{background:rgba(6,42,61,.68)}
       return;
     }
     msg.dataset.tone = "ok";
-    msg.textContent = "";
-    /* Replace with a POST to your own endpoint. Validate again on the server. */
-    msg.append(document.createTextNode("Check " + value + " for the confirmation link."));
-    signup.reset();
+    msg.textContent = "Opening the sign up form...";
+    /* hands the address to app.html, which prefills the register form */
+    window.location.href = "app.html?email=" + encodeURIComponent(value);
   });
 
   /* --------------------------------------------------------------- dialogs */
