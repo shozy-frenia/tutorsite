@@ -167,8 +167,9 @@ whole point.
 
 ### Deploying on Vercel
 
-The app is a stock Next.js App Router project — import the repository and it
-builds with no configuration. The one thing to set is the key:
+The app is a stock Next.js App Router project. `package.json` sits at the
+repository root and `vercel.json` pins the framework preset, so an import needs
+no further build configuration. The one thing to set is the key:
 
 1. **Project → Settings → Environment Variables**
 2. Add `FREETHEAI_API_KEY` (or `GEMINI_API_KEY`) with the key as its value.
@@ -190,6 +191,20 @@ server.
 To check which mode a deployment is in without reading the logs: the tutor
 drawer and the assistant panel both show an `OFFLINE` badge when no key is
 resolving, and `/api/tutor` returns an `X-Tutor-Mode` header.
+
+#### “No Next.js version detected”
+
+Vercel raises this when it cannot find a `package.json` with `next` in it at
+the directory it is building. Two causes, in order of likelihood:
+
+1. **The branch being built genuinely has no `package.json`.** A revert branch
+   that undoes the initial commit is empty, so its preview build fails exactly
+   this way. That is a fact about the branch, not about the app — check what
+   `git ls-tree --name-only <branch>` actually contains before changing any
+   Vercel setting.
+2. **Root Directory is pointing somewhere else.** Project → Settings → Build
+   and Deployment → Root Directory must be empty (the repository root), since
+   that is where `package.json` lives.
 
 ### Running without a key
 
