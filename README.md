@@ -27,6 +27,7 @@ The app runs fully without any API key — see [AI tutor](#ai-tutor) below.
 | `/api/tutor` | Streams a tutor explanation for one question. |
 | `/api/generate` | Returns a new question at the same topic and mark tariff. |
 | `/api/chat` | The site-wide assistant behind the **ASK TALAP** panel. |
+| `/api/assess` | Marks one extended written answer against the published rubric. |
 
 ## Curriculum architecture
 
@@ -103,7 +104,7 @@ in the workspace so the number is never silently massaged.
 
 ## Mock papers
 
-Five papers, and the difference between them matters:
+Eight papers, and the difference between them matters:
 
 | Paper | Grade | Provenance |
 |---|---|---|
@@ -111,6 +112,9 @@ Five papers, and the difference between them matters:
 | Mathematics Paper 1 — 16 April 2021 | 10 | **Transcribed** from the source `.docx` |
 | Chemistry Paper 1 — May 2021 | 10 | **Transcribed** from the source PDF |
 | Computer Science Component 2 — May 2025 | 10 | **Transcribed** from the source PDF |
+| History of Kazakhstan Component 1 | 10 | **Transcribed** from the published test specification |
+| Kazakh Я1 Component 1 | 10 | **Transcribed** from the sample paper |
+| Russian Я1 Component 2 — 2025 | 10 | **Transcribed** from the graded-answers collection |
 | Mathematics Paper 1 — Pure | 12 | **Authored** to A-Level standard |
 
 The Grade 10 papers are transcribed question by question, with English stems,
@@ -136,7 +140,7 @@ fully auto-markable. `Paper.provenance` carries this distinction and the UI
 labels every paper `PAST PAPER` or `PRACTICE` wherever it is offered — the app
 never implies an authored paper is a real sitting.
 
-Questions are marked one of two ways, mirroring how the real paper is graded:
+Questions are marked one of three ways, mirroring how the real paper is graded:
 
 - **auto** — a determinate answer (number, coordinate pair, expression), marked
   by the machine. The normaliser in `lib/exam-types.ts` accepts `(-16, -9)`,
@@ -146,8 +150,62 @@ Questions are marked one of two ways, mirroring how the real paper is graded:
   paper actually awards method marks, and self-marking against a scheme is
   itself an exam skill.
 
+- **assessed** — extended writing: the Я1 language papers and History. There is
+  no answer key, only a banded rubric, so these go to `/api/assess`. See
+  [Marking extended answers](#marking-extended-answers).
+
 Only questions whose answer is unambiguous are set to `auto`. Diagram-dependent
 questions carry the original figure from the paper (`public/exams/`).
+
+## Marking extended answers
+
+Three subjects cannot be marked by comparison. Kazakh Я1 and Russian Я1 ask for
+analysis and composition; History of Kazakhstan asks for an argument built from
+printed sources. All three are marked the way the real paper marks them —
+against banded descriptors — so `Question.criteria` carries the published bands
+verbatim and `/api/assess` marks the script against them.
+
+What makes this defensible rather than a model grading prose it happens to
+like:
+
+- **The rubric is the published one.** Russian Я1 Component 2 splits twenty
+  marks into content and organisation (10) and range and accuracy of language
+  (10), because that is what the mark scheme does. Kazakh Я1 uses the paper's
+  own 0–10 band scale, and questions 1 and 2 additionally carry the specific
+  scheme — what the examiner expects a candidate to notice about form,
+  audience, purpose, content, style and language in each text.
+- **Every judgement has to cite the script.** The model returns, per criterion,
+  the band it applied, the descriptor phrase that decided it, the evidence in
+  the student's own words, and what would move it up one band.
+- **Marks are reconciled server-side.** A criterion the model invented is
+  dropped, one it skipped comes back unmarked, a mark above the maximum is
+  clamped, and the total is computed here rather than taken from the model.
+  `npm run check` asserts the criteria sum to the tariff and that every
+  criterion has a zero band and a top band equal to its maximum.
+
+### Source use, counted
+
+History marks depend on using the sources, and the specification is explicit:
+credit needs contextual knowledge across **at least three** of them. So the four
+sources travel with the request, and the marked script comes back naming which
+ones the answer actually used as evidence. Naming a source is not using it, and
+the two answers below are the same length:
+
+| Answer | Mark | Sources used |
+|---|---|---|
+| Lists all four sources, then generalises about the Thaw | **1 / 12** | none |
+| Reads B against its own two articles, dates D to 2018, weighs A as a 1989 publication | **10 / 12** | A, B, D |
+
+The reference the model reports is matched back to the paper's own references,
+so "B", "Source B" and "Источник B" all resolve to the same source, and anything
+it did not credit as used is reported as ignored rather than quietly dropped.
+
+### Without a key
+
+`/api/assess` never invents a mark offline. It returns the bands for
+self-marking, the word count against what the paper asked for, and — where the
+question has sources — which references appear in the script at all, with the
+warning that appearing is not using.
 
 ## AI tutor
 

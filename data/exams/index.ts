@@ -5,12 +5,18 @@ import { MATHS_10_P1_APRIL } from "./maths-10-p1-april";
 import { MATHS_12_P1_CALCULUS } from "./maths-12-p1-calculus";
 import { CHEMISTRY_10_P1_MAY } from "./chemistry-10-p1-may";
 import { CS_10_P2_MAY_2025 } from "./cs-10-p2-may-2025";
+import { HISTORY_10_2025 } from "./history-10-2025";
+import { KAZAKH_L1_10_P1 } from "./kazakh-l1-10-p1";
+import { RUSSIAN_L1_10_P2 } from "./russian-l1-10-p2";
 
 export const PAPERS: Paper[] = [
   MATHS_10_P1_MARCH,
   MATHS_10_P1_APRIL,
   CHEMISTRY_10_P1_MAY,
   CS_10_P2_MAY_2025,
+  HISTORY_10_2025,
+  KAZAKH_L1_10_P1,
+  RUSSIAN_L1_10_P2,
   MATHS_12_P1_CALCULUS,
 ];
 
