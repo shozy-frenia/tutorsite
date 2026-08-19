@@ -61,6 +61,16 @@ export interface Question {
   hint: string;
 }
 
+/**
+ * Where a paper's questions came from.
+ *
+ * `transcribed` — copied question by question from a real NIS past paper.
+ * `authored`    — written to the syllabus standard for practice. Still graded
+ *                 on the official boundary table, but it is not a past paper
+ *                 and the UI must never imply that it is.
+ */
+export type Provenance = "transcribed" | "authored";
+
 export interface Paper {
   id: string;
   subjectId: string;
@@ -68,11 +78,14 @@ export interface Paper {
   componentIndex: number;
   title: string;
   gradeYear: 10 | 11 | 12;
-  /** Sitting date as printed on the paper. */
+  /** Sitting date as printed on the paper, or the standard it was written to. */
   sitting: string;
   durationMinutes: number;
   totalMarks: number;
   calculator: boolean;
+  provenance: Provenance;
+  /** One line on origin, shown wherever the paper is offered. */
+  provenanceNote: string;
   instructions: string[];
   questions: Question[];
 }

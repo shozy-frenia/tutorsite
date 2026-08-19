@@ -18,6 +18,9 @@ export const MATHS_10_P1_MARCH: Paper = {
   durationMinutes: 90,
   totalMarks: 80,
   calculator: false,
+  provenance: "transcribed",
+  provenanceNote:
+    "Transcribed question by question from the original NIS question paper.",
   instructions: [
     "Answer all questions.",
     "Calculators are not permitted.",

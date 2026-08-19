@@ -21,6 +21,11 @@ export interface Subject {
   grades: GradeYear[];
   /** Syllabus strands, used to tag questions and drive the mastery radar. */
   topics: string[];
+  /**
+   * Strands that only appear at Grade 12 (A-Level standard). Kept separate so
+   * a Grade 10 view never advertises calculus the student has not met yet.
+   */
+  topicsAdvanced?: string[];
   glyph: string;
   blurb: string;
 }
@@ -48,6 +53,16 @@ export const SUBJECTS: Subject[] = [
       "Probability",
       "Solid Geometry",
       "Inequalities",
+    ],
+    topicsAdvanced: [
+      "Differentiation",
+      "Integration",
+      "Differential Equations",
+      "Exponentials & Logarithms",
+      "Binomial Series",
+      "Complex Numbers",
+      "Vectors 3D",
+      "Parametric Equations",
     ],
     glyph: "∑",
     blurb: "Paper 1 & Paper 2 to the 160-mark subject scale.",

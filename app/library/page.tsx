@@ -32,7 +32,9 @@ export default function Library() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-5">
-          {PAPERS.map((paper) => {
+          {[...PAPERS]
+            .sort((a, b) => a.gradeYear - b.gradeYear)
+            .map((paper) => {
             const subject = subjectById(paper.subjectId);
             const component = boundariesFor(paper.subjectId)?.components[paper.componentIndex];
             const marks = availableMarks(paper);
@@ -51,13 +53,34 @@ export default function Library() {
                     <h2 className="t-subheading mt-1">{paper.title}</h2>
                     <span className="t-label mt-1 block">{paper.sitting}</span>
                   </div>
-                  <span
-                    className="t-micro px-2 py-1 shrink-0"
-                    style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
-                  >
-                    {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className="t-micro px-2 py-1"
+                      style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
+                    >
+                      {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
+                    </span>
+                    <span
+                      className="t-micro px-2 py-1"
+                      style={{
+                        border: "2px solid var(--color-ink)",
+                        background:
+                          paper.provenance === "transcribed"
+                            ? "var(--color-acid-lime)"
+                            : "var(--color-canvas)",
+                      }}
+                    >
+                      {paper.provenance === "transcribed" ? "PAST PAPER" : "PRACTICE"}
+                    </span>
+                  </div>
                 </div>
+
+                <p
+                  className="px-5 py-3 text-[14px] m-0"
+                  style={{ borderBottom: "1px solid var(--color-ink)", lineHeight: 1.35 }}
+                >
+                  {paper.provenanceNote}
+                </p>
 
                 <dl className="grid grid-cols-3 ruled-none">
                   {[

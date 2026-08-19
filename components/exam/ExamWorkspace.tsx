@@ -205,7 +205,18 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
           </Link>
           <span className="t-label truncate">{paper.title}</span>
           <span className="t-micro hidden md:inline" style={{ opacity: 0.6 }}>
-            {paper.sitting} · {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
+            GRADE {paper.gradeYear} · {paper.sitting} ·{" "}
+            {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
+          </span>
+          <span
+            className="t-micro px-2 py-0.5 hidden lg:inline shrink-0"
+            style={{
+              border: "1px solid var(--color-canvas)",
+              opacity: 0.8,
+            }}
+            title={paper.provenanceNote}
+          >
+            {paper.provenance === "transcribed" ? "PAST PAPER" : "PRACTICE"}
           </span>
         </div>
 

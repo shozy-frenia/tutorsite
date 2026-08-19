@@ -21,7 +21,7 @@ The app runs fully without any API key — see [AI tutor](#ai-tutor) below.
 | Route | What it is |
 |---|---|
 | `/` | Landing page. Neo-brutalist, with an interactive 3D grade ladder (React Three Fiber). |
-| `/library` | Paper library and curriculum coverage. |
+| `/library` | Paper library and curriculum coverage, labelled by provenance. |
 | `/exam/[paperId]` | The test sheet: one question at a time, live scoring, AI tutor drawer. |
 | `/dashboard` | Personal tracking: topic mastery radar, grade trend, streak, history. |
 | `/api/tutor` | Streams a tutor explanation for one question. |
@@ -29,12 +29,14 @@ The app runs fully without any API key — see [AI tutor](#ai-tutor) below.
 
 ## Curriculum architecture
 
-- **Grade 10** — core Maths and Sciences. Both seeded mock papers live here.
+- **Grade 10** — core Maths and Sciences. Two transcribed mock papers live here.
 - **Grade 11** — Cambridge English as a Second Language, plus the two compulsory
   national subjects (History of Kazakhstan, Kazakh / Russian language).
 - **Grade 12** — two profile subjects taken to A-Level standard.
 
-Defined in `data/curriculum.ts`.
+Defined in `data/curriculum.ts`. Mathematics carries its Grade 10 strands and
+its A-Level strands separately (`topics` and `topicsAdvanced`) so a Grade 10
+view never advertises calculus the student has not met yet.
 
 ## Grading
 
@@ -63,10 +65,26 @@ in the workspace so the number is never silently massaged.
 
 ## Mock papers
 
-Two full NIS Grade 10 Mathematics Paper 1 sittings (5 March 2021 and 16 April
-2021), transcribed question by question from the source `.docx` files, with
-English stems, the original Kazakh alongside, worked answers and step-by-step
-mark schemes.
+Three papers, and the difference between them matters:
+
+| Paper | Grade | Provenance |
+|---|---|---|
+| Mathematics Paper 1 — 5 March 2021 | 10 | **Transcribed** from the source `.docx` |
+| Mathematics Paper 1 — 16 April 2021 | 10 | **Transcribed** from the source `.docx` |
+| Mathematics Paper 1 — Pure | 12 | **Authored** to A-Level standard |
+
+The two Grade 10 papers are transcribed question by question, with English
+stems, the original Kazakh alongside, worked answers and step-by-step mark
+schemes.
+
+The Grade 12 paper is **not a past paper** — no Grade 12 paper was supplied, so
+its 15 questions are written to the A-Level pure mathematics standard a profile
+candidate sits: calculus as the spine (differentiation, integration,
+differential equations) plus the series, complex number, vector and parametric
+work that travels with it. Every answer is exact, so it stays non-calculator and
+fully auto-markable. `Paper.provenance` carries this distinction and the UI
+labels every paper `PAST PAPER` or `PRACTICE` wherever it is offered — the app
+never implies an authored paper is a real sitting.
 
 Questions are marked one of two ways, mirroring how the real paper is graded:
 
@@ -104,9 +122,16 @@ With no `ANTHROPIC_API_KEY` set, both routes degrade rather than fail:
 - **Generate** uses the deterministic generators in `lib/offline-variants.ts`,
   which re-parameterise a real question type and compute the answer
   arithmetically — correct by construction, and non-calculator by design
-  (Pythagorean triples, exact surds, common angles). Twelve topics have a true
-  generator; the rest fall back to a same-tariff question on another topic and
-  say so.
+  (Pythagorean triples, exact surds, common angles). Twenty topics have a true
+  generator, spanning both levels: the Grade 10 strands and the A-Level ones
+  (differentiation, integration, differential equations, binomial series,
+  complex numbers, 3D vectors, parametric equations, exponentials and logs).
+  Anything uncovered falls back to a same-tariff question on another topic and
+  says so.
+
+  Level matching is the point: ask for another question on a Grade 12 calculus
+  question and you get calculus at the same mark tariff, not a Grade 10
+  substitute.
 
 To enable the live tutor:
 

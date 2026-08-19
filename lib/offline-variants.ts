@@ -68,6 +68,52 @@ const nPr = (n: number, k: number): number => {
   return result;
 };
 
+const SUPERSCRIPTS = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
+
+/** Render a non-negative integer as Unicode superscript digits. */
+const sup = (n: number): string =>
+  String(Math.abs(Math.trunc(n)))
+    .split("")
+    .map((d) => SUPERSCRIPTS[Number(d)])
+    .join("");
+
+/**
+ * Render `base` raised to `n` the way a person writes it: x¹ is just x, and
+ * anything to the power 0 disappears. Without this the generators emit "x¹e³ˣ"
+ * and "(x² + 5)¹", which read as mistakes even though the maths is right.
+ */
+const pow = (base: string, n: number): string =>
+  n === 0 ? "1" : n === 1 ? base : `${base}${sup(n)}`;
+
+/** Multiply a coefficient into a term, dropping a redundant leading 1. */
+const coeff = (value: string, term: string): string =>
+  value === "1" ? term : value === "-1" ? `−${term}` : `${value}${term}`;
+
+/** Render a signed number with the Unicode minus the rest of the app uses. */
+const num = (value: number): string => String(value).replace("-", "−");
+
+/**
+ * Distribute a mark tariff across mark-scheme steps so the total always
+ * matches exactly — the property `npm run check` asserts.
+ *
+ * More marks than steps: the spare marks land on the final step, which is
+ * where the answer is stated. Fewer marks than steps: the tail steps are
+ * merged into one so no step is ever worth zero.
+ */
+function spreadMarks(steps: string[], marks: number): Array<{ text: string; marks: number }> {
+  if (steps.length === 0) return [{ text: "Correct answer", marks }];
+
+  if (steps.length <= marks) {
+    return steps.map((text, i) => ({
+      text,
+      marks: i === steps.length - 1 ? marks - (steps.length - 1) : 1,
+    }));
+  }
+
+  const kept = steps.slice(0, marks - 1).map((text) => ({ text, marks: 1 }));
+  return [...kept, { text: steps.slice(marks - 1).join("; then "), marks: 1 }];
+}
+
 type Generator = (marks: number, r: () => number) => GeneratedQuestion;
 
 /* -------------------------------------------------------------------------
@@ -449,6 +495,336 @@ const inequalities: Generator = (marks, r) => {
   };
 };
 
+/* ------------------------------- A-Level (Grade 12) topics ---------------- */
+
+const differentiation: Generator = (marks, r) => {
+  const forms = [
+    () => {
+      // Product rule with an exponential: d/dx(xⁿ e^{kx})
+      const n = between(2, 4, r);
+      const k = between(2, 5, r);
+      const inner = pow("x", n - 1);
+      return {
+        prompt: `Differentiate y = ${pow("x", n)}e${sup(k)}ˣ with respect to x, giving your answer in a fully factorised form.`,
+        answer: `${inner}e${sup(k)}ˣ(${n} + ${k}x)`,
+        steps: [
+          "Identify a product and state the rule: d(uv)/dx = u′v + uv′",
+          `u = ${pow("x", n)} gives u′ = ${n}${inner}`,
+          `v = e${sup(k)}ˣ gives v′ = ${k}e${sup(k)}ˣ by the chain rule`,
+          `Combine and factorise: ${inner}e${sup(k)}ˣ(${n} + ${k}x)`,
+        ],
+        hint: `The chain rule inside the product is where marks go missing — the derivative of e${sup(k)}ˣ is ${k}e${sup(k)}ˣ, not e${sup(k)}ˣ.`,
+      };
+    },
+    () => {
+      // Stationary points of a cubic with integer roots of the derivative.
+      const a = between(1, 3, r);
+      const b = a + between(1, 4, r); // derivative roots a and b
+      // y = x³ − (3/2)(a+b)x² + 3ab x  →  keep integers: use y' = 3(x−a)(x−b)
+      const p = -3 * (a + b) / 2;
+      // Choose a+b even so the x² coefficient stays an integer.
+      const sum = a + b;
+      if (sum % 2 !== 0) {
+        // fall through to a guaranteed-integer pair
+        return {
+          prompt:
+            "The curve C has equation y = x³ − 6x² + 9x + 4. Find the coordinates of the stationary points of C and determine the nature of each.",
+          answer: "(1; 8) maximum, (3; 4) minimum",
+          steps: [
+            "dy/dx = 3x² − 12x + 9 = 3(x − 1)(x − 3)",
+            "Stationary where dy/dx = 0, so x = 1 and x = 3",
+            "y(1) = 8 and y(3) = 4",
+            "d²y/dx² = 6x − 12: negative at x = 1 (maximum), positive at x = 3 (minimum)",
+          ],
+          hint: "Finding the x values is only half the question — substitute back for y and test the second derivative for the nature.",
+        };
+      }
+      const c = between(1, 6, r);
+      const y = (x: number) => x ** 3 + p * x ** 2 + 3 * a * b * x + c;
+      return {
+        prompt: `The curve C has equation y = x³ ${p < 0 ? "−" : "+"} ${Math.abs(p)}x² + ${3 * a * b}x + ${c}. Find the coordinates of the stationary points of C and determine the nature of each.`,
+        answer: `(${a}; ${num(y(a))}) maximum, (${b}; ${num(y(b))}) minimum`,
+        steps: [
+          `dy/dx = 3x² ${2 * p < 0 ? "−" : "+"} ${Math.abs(2 * p)}x + ${3 * a * b} = 3(x − ${a})(x − ${b})`,
+          `Stationary where dy/dx = 0, so x = ${a} and x = ${b}`,
+          `y(${a}) = ${num(y(a))} and y(${b}) = ${num(y(b))}`,
+          `d²y/dx² = 6x ${2 * p < 0 ? "−" : "+"} ${Math.abs(2 * p)}: negative at x = ${a} (maximum), positive at x = ${b} (minimum)`,
+        ],
+        hint: "Finding the x values is only half the question — substitute back for y and test the second derivative for the nature.",
+      };
+    },
+    () => {
+      // Quotient rule tangent at a clean point.
+      const a = between(2, 5, r);
+      const b = between(1, 4, r);
+      const c = between(2, 5, r);
+      // y = (ax − b)/(x + c); y' = (a·c + b)/(x + c)²
+      const num = a * c + b;
+      const x0 = 1;
+      const y0den = x0 + c;
+      // Reduce it — a student who answers 2/3 must not be marked wrong for 24/36.
+      const grad = fraction(num, y0den * y0den);
+      return {
+        prompt: `Find the gradient of the tangent to the curve y = (${a}x − ${b})/(x + ${c}) at the point where x = ${x0}, giving your answer in lowest terms.`,
+        answer: grad,
+        steps: [
+          `At x = ${x0}, y = ${fraction(a * x0 - b, y0den)}`,
+          `Quotient rule with u = ${a}x − ${b} and v = x + ${c}`,
+          `dy/dx = [${a}(x + ${c}) − (${a}x − ${b})]/(x + ${c})² = ${num}/(x + ${c})²`,
+          `At x = ${x0} the gradient is ${num}/${y0den * y0den} = ${grad}`,
+        ],
+        hint: "The numerator of the quotient rule collapses to a constant here — the x terms cancel, so the derivative is simpler than it first looks.",
+      };
+    },
+  ];
+
+  const form = pick(forms, r)();
+  return {
+    prompt: form.prompt,
+    topic: "Differentiation",
+    marks,
+    answer: form.answer,
+    markScheme: spreadMarks(form.steps, marks),
+    hint: form.hint,
+  };
+};
+
+const integration: Generator = (marks, r) => {
+  const forms = [
+    () => {
+      // Area under an inverted parabola y = k² − x², roots ±k.
+      const k = between(2, 5, r);
+      const area = fraction(4 * k ** 3, 3);
+      return {
+        prompt: `Find the exact area of the finite region bounded by the curve y = ${k * k} − x² and the x-axis.`,
+        answer: area,
+        steps: [
+          `Solve ${k * k} − x² = 0 for the limits: x = −${k} and x = ${k}`,
+          `Set up ∫₋${k}${k} (${k * k} − x²) dx`,
+          `Integrate: [${k * k}x − x³/3]`,
+          `Substitute the limits and double the half-area: ${area}`,
+        ],
+        hint: "The limits are not given — they are where the curve meets the x-axis. Find them before you integrate anything.",
+      };
+    },
+    () => {
+      // Substitution u = x² + a, integral of 2x/(x²+a)ⁿ.
+      const a = between(1, 5, r);
+      const n = between(2, 4, r);
+      // n = 2 would otherwise render as "1(x² + a)¹". The whole denominator
+      // stays inside brackets either way, or the answer reads as a product.
+      const denominator =
+        n === 2 ? `x² + ${a}` : `${n - 1}(x² + ${a})${sup(n - 1)}`;
+      const result = `−1/(${denominator}) + C`;
+      return {
+        prompt: `Using the substitution u = x² + ${a}, find ∫ 2x/(x² + ${a})${sup(n)} dx.`,
+        answer: result,
+        steps: [
+          `du/dx = 2x, so du = 2x dx`,
+          `The numerator is exactly du, so the integral becomes ∫ u⁻${sup(n)} du`,
+          `Integrate: u⁻${sup(n - 1)}/(−${n - 1})`,
+          `Substitute back and add the constant: ${result}`,
+        ],
+        hint: "The 2x on top is not a coincidence — it is precisely du, so the substitution consumes it and no stray x remains.",
+      };
+    },
+    () => {
+      // Area between y = x² and y = mx.
+      const m = between(2, 6, r);
+      return {
+        prompt: `Find the exact area of the finite region enclosed between the curve y = x² and the line y = ${m}x.`,
+        answer: fraction(m ** 3, 6),
+        steps: [
+          `Set x² = ${m}x, so x(x − ${m}) = 0 and the limits are x = 0 and x = ${m}`,
+          "Between the limits the line lies above the curve",
+          `Area = ∫₀${m} (${m}x − x²) dx = [${m}x²/2 − x³/3]`,
+          `= ${m ** 3}/2 − ${m ** 3}/3 = ${fraction(m ** 3, 6)}`,
+        ],
+        hint: "Integrate (upper − lower), not each curve separately. Test a value between the limits to see which is on top.",
+      };
+    },
+  ];
+
+  const form = pick(forms, r)();
+  return {
+    prompt: form.prompt,
+    topic: "Integration",
+    marks,
+    answer: form.answer,
+    markScheme: spreadMarks(form.steps, marks),
+    hint: form.hint,
+  };
+};
+
+const differentialEquations: Generator = (marks, r) => {
+  // Even k keeps the integrated coefficient a whole number, so the exponent
+  // reads as e^(2x²) rather than the ambiguous e^(5/2x²).
+  const k = pick([2, 4, 6, 8], r);
+  const y0 = between(2, 6, r);
+  const half = fraction(k, 2);
+  const exponent = coeff(half, "x²");
+
+  return {
+    prompt: `Solve the differential equation dy/dx = ${k}xy, given that y = ${y0} when x = 0.`,
+    topic: "Differential Equations",
+    marks,
+    answer: `y = ${y0}e^(${exponent})`,
+    markScheme: spreadMarks(
+      [
+        `Separate the variables: (1/y) dy = ${k}x dx`,
+        "Integrate the left side: ln|y|",
+        `Integrate the right side: ${exponent} + c`,
+        `General solution y = Ae^(${exponent})`,
+        `Apply y(0) = ${y0} to get A = ${y0}`,
+      ],
+      marks
+    ),
+    hint: "Get every y on one side and every x on the other before integrating. Fold the constant into A = e^c at the exponential stage.",
+  };
+};
+
+const exponentialsLogs: Generator = (marks, r) => {
+  const start = pick([200, 400, 500, 800], r);
+  const rate = pick([0.2, 0.4, 0.5], r);
+  const factor = pick([2, 3, 4, 5], r);
+  const target = start * factor;
+  const invRate = 1 / rate;
+
+  return {
+    prompt: `A population is modelled by N = ${start}e^(${rate}t), where N is the number after t hours. Find, in exact form, the time taken for the population to reach ${target}, and the rate at which it is increasing at t = 0.`,
+    topic: "Exponentials & Logarithms",
+    marks,
+    answer: `t = ${invRate} ln ${factor} hours; rate = ${start * rate} per hour`,
+    markScheme: spreadMarks(
+      [
+        `Set ${target} = ${start}e^(${rate}t) and divide to get ${factor} = e^(${rate}t)`,
+        `Take natural logarithms: ${rate}t = ln ${factor}`,
+        `t = (ln ${factor})/${rate} = ${invRate} ln ${factor} hours`,
+        `Differentiate: dN/dt = ${start * rate}e^(${rate}t), which is ${start * rate} per hour at t = 0`,
+      ],
+      marks
+    ),
+    hint: "An exact answer means leave it as a logarithm — do not reach for a decimal. The rate is a derivative, not a substitution into N.",
+  };
+};
+
+const complexNumbers: Generator = (marks, r) => {
+  // Arguments that land on an exact multiple of π when raised to a power.
+  const cases = [
+    { z: "1 + i√3", mod: 2, arg: "π/3", n: 6, result: "64" },
+    { z: "√3 + i", mod: 2, arg: "π/6", n: 12, result: "4096" },
+    { z: "1 + i", mod: "√2", arg: "π/4", n: 8, result: "16" },
+    { z: "−1 + i", mod: "√2", arg: "3π/4", n: 8, result: "16" },
+  ];
+  const c = pick(cases, r);
+
+  return {
+    prompt: `The complex number z is given by z = ${c.z}. Find the exact modulus and argument of z, and hence express z${sup(c.n)} in the form a + bi.`,
+    topic: "Complex Numbers",
+    marks,
+    answer: `|z| = ${c.mod}, arg z = ${c.arg}, z${sup(c.n)} = ${c.result}`,
+    markScheme: spreadMarks(
+      [
+        `|z| = ${c.mod}`,
+        `arg z = ${c.arg}`,
+        "State de Moivre's theorem: zⁿ = rⁿ(cos nθ + i sin nθ)",
+        `Raising to the power ${c.n} turns the argument into a whole multiple of 2π, giving z${sup(c.n)} = ${c.result}`,
+      ],
+      marks
+    ),
+    hint: "Do not expand the bracket repeatedly. Convert to modulus–argument form and use de Moivre — the argument multiplies to land exactly on an axis.",
+  };
+};
+
+const vectors3D: Generator = (marks, r) => {
+  // Pick vectors from A whose lengths are Pythagorean so |AB| and |AC| are integers.
+  const legs: Array<[number, number, number, number]> = [
+    [3, 4, 0, 5],
+    [1, 2, 2, 3],
+    [2, 3, 6, 7],
+    [6, 6, 7, 11],
+    [2, 6, 9, 11],
+  ];
+  const [bx, by, bz, bLen] = pick(legs, r);
+  let [cx, cy, cz, cLen] = pick(legs, r);
+  // Make sure the two directions differ.
+  if (bx === cx && by === cy && bz === cz) [cx, cy, cz, cLen] = [1, 2, 2, 3];
+
+  const ax = between(-2, 3, r);
+  const ay = between(-2, 3, r);
+  const az = between(-2, 3, r);
+  // Vary the signs so the dot product is not always positive.
+  const sy = r() < 0.5 ? -1 : 1;
+  const dot = bx * cx + by * (cy * sy) + bz * cz;
+
+  return {
+    prompt: `The points A, B and C have position vectors A(${ax}; ${ay}; ${az}), B(${ax + bx}; ${ay + by}; ${az + bz}) and C(${ax + cx}; ${ay + cy * sy}; ${az + cz}). Find the exact value of cos(∠BAC).`,
+    topic: "Vectors 3D",
+    marks,
+    answer: fraction(dot, bLen * cLen),
+    markScheme: spreadMarks(
+      [
+        `AB = B − A = (${bx}; ${by}; ${bz}) with |AB| = ${bLen}`,
+        `AC = C − A = (${cx}; ${cy * sy}; ${cz}) with |AC| = ${cLen}`,
+        `AB · AC = ${bx * cx} + ${by * cy * sy} + ${bz * cz} = ${dot}`,
+        `cos(∠BAC) = ${dot}/(${bLen} × ${cLen}) = ${fraction(dot, bLen * cLen)}`,
+      ],
+      marks
+    ),
+    hint: "Both vectors must start at A — that is what makes the angle ∠BAC. Using BA instead of AB flips the sign of your answer.",
+  };
+};
+
+const parametric: Generator = (marks, r) => {
+  const k = between(2, 6, r);
+
+  return {
+    prompt: `A curve is defined by the parametric equations x = t², y = t³ − ${3 * k}t. Find dy/dx in terms of t, and hence find the values of t at which the tangent to the curve is parallel to the x-axis.`,
+    topic: "Parametric Equations",
+    marks,
+    answer: `dy/dx = 3(t² − ${k})/(2t); t = ±√${k}`,
+    markScheme: spreadMarks(
+      [
+        "dx/dt = 2t",
+        `dy/dt = 3t² − ${3 * k}`,
+        `dy/dx = (dy/dt)/(dx/dt) = (3t² − ${3 * k})/(2t)`,
+        `Horizontal tangent needs dy/dx = 0, so t² = ${k} and t = ±√${k}`,
+      ],
+      marks
+    ),
+    hint: "dy/dx is the ratio of the two parameter derivatives, not their difference. Set the numerator to zero, and check the denominator is not also zero there.",
+  };
+};
+
+const binomialSeries: Generator = (marks, r) => {
+  // (1 + kx)^(1/2) expansions — coefficients stay rational for any integer k.
+  const k = pick([2, 4, 6], r);
+  // Coefficients of (1+u)^(1/2) are 1/2, −1/8, 1/16; u = kx brings kⁿ with it.
+  const t1 = coeff(fraction(k, 2), "x");
+  const t2 = coeff(fraction(k * k, 8), "x²");
+  const t3 = coeff(fraction(k ** 3, 16), "x³");
+  const expansion = `1 + ${t1} − ${t2} + ${t3}`;
+  const validity = `|x| < ${fraction(1, k)}`;
+
+  return {
+    prompt: `Expand (1 + ${k}x)^(1/2) in ascending powers of x, up to and including the term in x³, and state the range of values of x for which the expansion is valid.`,
+    topic: "Binomial Series",
+    marks,
+    answer: `${expansion}, valid for ${validity}`,
+    markScheme: spreadMarks(
+      [
+        "State the general binomial series (1 + u)ⁿ = 1 + nu + n(n−1)u²/2! + n(n−1)(n−2)u³/3!",
+        "With n = 1/2 the coefficients of u, u² and u³ are 1/2, −1/8 and 1/16",
+        `Substitute u = ${k}x, remembering u² = ${k * k}x² and u³ = ${k ** 3}x³`,
+        `Simplify to ${expansion}`,
+        `Valid when |${k}x| < 1, that is ${validity}`,
+      ],
+      marks
+    ),
+    hint: `Expand in u first, then substitute u = ${k}x — the powers of ${k} come along with it.`,
+  };
+};
+
 const GENERATORS: Record<string, Generator> = {
   Vectors: vectors,
   "Coordinate Geometry": coordinateGeometry,
@@ -462,6 +838,16 @@ const GENERATORS: Record<string, Generator> = {
   Functions: functions,
   Probability: probability,
   Inequalities: inequalities,
+
+  // A-Level (Grade 12) topics
+  Differentiation: differentiation,
+  Integration: integration,
+  "Differential Equations": differentialEquations,
+  "Exponentials & Logarithms": exponentialsLogs,
+  "Complex Numbers": complexNumbers,
+  "Vectors 3D": vectors3D,
+  "Parametric Equations": parametric,
+  "Binomial Series": binomialSeries,
 };
 
 /**

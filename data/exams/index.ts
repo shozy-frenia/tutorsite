@@ -2,8 +2,16 @@ import type { Paper } from "@/lib/exam-types";
 import { paperMarkTotal } from "@/lib/exam-types";
 import { MATHS_10_P1_MARCH } from "./maths-10-p1-march";
 import { MATHS_10_P1_APRIL } from "./maths-10-p1-april";
+import { MATHS_12_P1_CALCULUS } from "./maths-12-p1-calculus";
 
-export const PAPERS: Paper[] = [MATHS_10_P1_MARCH, MATHS_10_P1_APRIL];
+export const PAPERS: Paper[] = [
+  MATHS_10_P1_MARCH,
+  MATHS_10_P1_APRIL,
+  MATHS_12_P1_CALCULUS,
+];
+
+export const papersForYear = (year: 10 | 11 | 12): Paper[] =>
+  PAPERS.filter((p) => p.gradeYear === year);
 
 export const paperById = (id: string): Paper | undefined =>
   PAPERS.find((p) => p.id === id);
