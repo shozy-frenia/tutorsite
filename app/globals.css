@@ -1,0 +1,335 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   TALAP DESIGN SYSTEM
+   Hybrid: Neo-Brutalism (landing) + Swiss Bento Minimalism (workspace).
+
+   Palette, type scale and the "border is the card" grammar come straight from
+   DESIGN.md (Swiss broadsheet behind a highlighter pen). The brief then asks
+   for neo-brutalist structure on the landing page, so two things extend the
+   reference deliberately:
+
+     1. Hard offset shadows. DESIGN.md is shadowless. The landing page uses
+        `5px 5px 0` offsets — these are flat black rectangles, not soft
+        elevation, so the "printed, not screen" rule survives intact.
+     2. A second chromatic mark (--color-acid-lime). DESIGN.md forbids a
+        second accent *decoratively*; here lime is strictly semantic — it only
+        ever means "correct" or "A*". Yellow remains the sole highlighter.
+   ========================================================================== */
+
+@theme {
+  /* Colors — from DESIGN.md */
+  --color-highlighter: #fff824;
+  --color-ink: #151515;
+  --color-canvas: #f3f3f3;
+  --color-pure-black: #000000;
+  --color-paper: #e5e5e5;
+
+  /* Semantic marks (functional, never decorative) */
+  --color-acid-lime: #b8f000;
+  --color-signal-red: #ff4b26;
+
+  /* Workspace-only surfaces — muted cream/matte gray for long study focus */
+  --color-study: #eceae3;
+  --color-sheet: #ffffff;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Type scale — DESIGN.md, made fluid so 108px display survives mobile */
+  --text-micro: 10px;
+  --text-label: 12px;
+  --text-body: 18px;
+  --text-subheading: 30px;
+  --text-heading-sm: 54px;
+  --text-heading: 84px;
+  --text-display: 108px;
+
+  /* Spacing — 4px base unit */
+  --spacing-4: 4px;
+  --spacing-5: 5px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-15: 15px;
+  --spacing-18: 18px;
+  --spacing-20: 20px;
+  --spacing-34: 34px;
+  --spacing-47: 47px;
+
+  --radius-full: 9999px;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Neo-brutalist structure tokens (landing) */
+  --border-brutal: 3px;
+  --shadow-brutal: 5px 5px 0 var(--color-ink);
+  --shadow-brutal-sm: 3px 3px 0 var(--color-ink);
+  --shadow-brutal-lg: 8px 8px 0 var(--color-ink);
+
+  /* Swiss structure tokens (workspace) */
+  --border-swiss: 2px;
+  --shadow-swiss: 3px 3px 0 var(--color-ink);
+}
+
+* {
+  border-color: var(--color-ink);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.17;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-highlighter);
+  color: var(--color-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Typography primitives — tight leading and negative tracking are the identity
+   -------------------------------------------------------------------------- */
+
+.t-display {
+  font-size: clamp(44px, 9.2vw, 108px);
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  font-weight: 400;
+}
+
+.t-heading {
+  font-size: clamp(36px, 7vw, 84px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 400;
+}
+
+.t-heading-sm {
+  font-size: clamp(28px, 4.6vw, 54px);
+  line-height: 0.93;
+  letter-spacing: -0.03em;
+  font-weight: 400;
+}
+
+.t-subheading {
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+.t-label {
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.t-micro {
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.t-mono {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* --------------------------------------------------------------------------
+   Structural components
+   -------------------------------------------------------------------------- */
+
+/* The highlighter swipe — the only way to categorize content (DESIGN.md) */
+.mark {
+  background: var(--color-highlighter);
+  color: var(--color-ink);
+  padding: 2px 8px 4px;
+  display: inline-block;
+}
+
+/* Neo-brutalist frame: heavy border + hard offset shadow */
+.brutal {
+  border: var(--border-brutal) solid var(--color-ink);
+  box-shadow: var(--shadow-brutal);
+  background: var(--color-canvas);
+}
+
+.brutal-sm {
+  border: var(--border-brutal) solid var(--color-ink);
+  box-shadow: var(--shadow-brutal-sm);
+  background: var(--color-canvas);
+}
+
+/* Swiss frame: hairline-to-2px rule, minimal offset — the border IS the card */
+.swiss {
+  border: var(--border-swiss) solid var(--color-ink);
+  box-shadow: var(--shadow-swiss);
+  background: var(--color-sheet);
+}
+
+.swiss-flat {
+  border: 1px solid var(--color-ink);
+  background: var(--color-sheet);
+}
+
+/* Press interaction: the card travels into its own shadow */
+.press {
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.press:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.press:active {
+  transform: translate(5px, 5px);
+  box-shadow: 0 0 0 var(--color-ink);
+}
+
+.press-swiss {
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.press-swiss:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
+.press-swiss:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--color-ink);
+}
+
+/* Pill — the single rounded element in the system (DESIGN.md) */
+.pill {
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: var(--text-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 2px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.pill-filled {
+  background: var(--color-highlighter);
+}
+
+/* Ruled grid: hairline dividers between cells, no gaps */
+.ruled > * + * {
+  border-top: 1px solid var(--color-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Focus + accessibility
+   -------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Motion — all decorative motion is opt-out
+   -------------------------------------------------------------------------- */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 26s linear infinite;
+  will-change: transform;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rise {
+  animation: rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-in {
+  animation: drawer-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.blink {
+  animation: blink 1.1s steps(2, start) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .press:hover,
+  .press-swiss:hover {
+    transform: none;
+  }
+}
+
+/* Scrollbar — keep it printed, not glossy */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink);
+}
