@@ -26,6 +26,7 @@ The app runs fully without any API key — see [AI tutor](#ai-tutor) below.
 | `/dashboard` | Personal tracking: topic mastery radar, grade trend, streak, history. |
 | `/api/tutor` | Streams a tutor explanation for one question. |
 | `/api/generate` | Returns a new question at the same topic and mark tariff. |
+| `/api/chat` | The site-wide assistant behind the **ASK TALAP** panel. |
 
 ## Curriculum architecture
 
@@ -129,7 +130,9 @@ questions carry the original figure from the paper (`public/exams/`).
 
 ## AI tutor
 
-Two surfaces, both in the workspace drawer:
+Three surfaces, on two scopes.
+
+Inside a question, in the workspace drawer:
 
 - **Explain this** — streams a reply that starts from the step your working
   diverged at and quotes the mark scheme wording that earns each mark. Answers
@@ -137,14 +140,23 @@ Two surfaces, both in the workspace drawer:
 - **Give me another** — generates a new question on the same topic, worth the
   same marks, with the same number of reasoning steps.
 
+Everywhere else, in the floating **ASK TALAP** panel (`components/AskTalap.tsx`):
+
+- **Ask Talap** — the site-wide assistant. What you sit this year, what a grade
+  actually needs, how to revise, or straight syllabus teaching. It knows the
+  curriculum architecture above, and it is told to point at the library rather
+  than guess a boundary it is unsure of. The panel hides itself on `/exam/*`,
+  where the question-bound drawer is the right surface.
+
 ### Providers
 
 `lib/server/providers.ts` supports two backends and uses whichever is configured:
 
 | Env var | Backend |
 |---|---|
-| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs |
-| `FREETHEAI_API_KEY` | FreeTheAI, an OpenAI-compatible endpoint fronting Gemini |
+| `FREETHEAI_API_KEY` | FreeTheAI, an OpenAI-compatible endpoint fronting Gemini (`bbl/gemini-3.5-flash`). This is what the deployed site runs on. |
+| `GEMINI_API_KEY` | Accepted as an alias for the above, for deployments where the same key already exists under that name. |
+| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs. Takes precedence when both are set. |
 
 Anthropic uses typed structured outputs. The OpenAI-compatible path has no
 schema binding, so the shape is requested in the prompt and validated with Zod
@@ -153,10 +165,56 @@ tariff, and pins the topic and mark count to the source question — a schema
 guarantees well-formed JSON, not correct arithmetic, and level matching is the
 whole point.
 
+### Deploying on Vercel
+
+The app is a stock Next.js App Router project. `package.json` sits at the
+repository root and `vercel.json` pins the framework preset, so an import needs
+no further build configuration. The one thing to set is the key:
+
+1. **Project → Settings → Environment Variables**
+2. Add `FREETHEAI_API_KEY` (or `GEMINI_API_KEY`) with the key as its value.
+3. Tick **Production**, **Preview** and **Development** so previews are not
+   silently stuck in offline mode.
+4. **Redeploy.** Environment variables are read at request time by the route
+   handlers, but a running deployment does not pick up a new variable until it
+   is redeployed.
+
+Optional overrides, if the endpoint or model ever moves: `FREETHEAI_BASE_URL`
+(default `https://api.freetheai.xyz/v1`) and `FREETHEAI_MODEL` (default
+`bbl/gemini-3.5-flash`).
+
+Never prefix the key with `NEXT_PUBLIC_`. That prefix inlines a value into the
+client bundle, which would publish the key to every visitor. The three API
+routes are `runtime = "nodejs"`, so the credential is only ever read on the
+server.
+
+To check which mode a deployment is in without reading the logs: the tutor
+drawer and the assistant panel both show an `OFFLINE` badge when no key is
+resolving, and `/api/tutor` returns an `X-Tutor-Mode` header.
+
+#### “No Next.js version detected”
+
+Vercel raises this when it cannot find a `package.json` with `next` in it at
+the directory it is building. Two causes, in order of likelihood:
+
+1. **The branch being built genuinely has no `package.json`.** A revert branch
+   that undoes the initial commit is empty, so its preview build fails exactly
+   this way. That is a fact about the branch, not about the app — check what
+   `git ls-tree --name-only <branch>` actually contains before changing any
+   Vercel setting.
+2. **Root Directory is pointing somewhere else.** Project → Settings → Build
+   and Deployment → Root Directory must be empty (the repository root), since
+   that is where `package.json` lives.
+
 ### Running without a key
 
-With no `ANTHROPIC_API_KEY` set, both routes degrade rather than fail:
+With no key set, all three routes degrade rather than fail:
 
+- **Ask Talap** answers from `lib/server/knowledge.ts`, which reads the real
+  boundary tables, the curriculum and the seeded papers — so an offline answer
+  about a grade boundary is the published table, not generated prose. A question
+  it cannot answer from data gets an honest "here is what I can do" rather than
+  a guess.
 - **Explain** returns the question's real mark scheme, staged step by step.
 - **Generate** uses the deterministic generators in `lib/offline-variants.ts`,
   which re-parameterise a real question type and compute the answer
@@ -172,11 +230,12 @@ With no `ANTHROPIC_API_KEY` set, both routes degrade rather than fail:
   question and you get calculus at the same mark tariff, not a Grade 10
   substitute.
 
-To enable the live tutor:
+To enable the live tutor locally:
 
 ```bash
 cp .env.example .env.local
-# then set ANTHROPIC_API_KEY *or* FREETHEAI_API_KEY in .env.local
+# then set FREETHEAI_API_KEY (or ANTHROPIC_API_KEY) in .env.local
+npm run dev
 ```
 
 `.env.local` is gitignored. Never put a real key in `.env.example`, in source,

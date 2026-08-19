@@ -7,14 +7,15 @@ import Anthropic from "@anthropic-ai/sdk";
  *
  *   anthropic  — ANTHROPIC_API_KEY (or ANTHROPIC_AUTH_TOKEN). Uses the
  *                official SDK with claude-opus-5 and adaptive thinking.
- *   freetheai  — FREETHEAI_API_KEY. An OpenAI-compatible endpoint fronting
- *                Gemini, which is what this project was set up with.
+ *   freetheai  — FREETHEAI_API_KEY or GEMINI_API_KEY. An OpenAI-compatible
+ *                endpoint fronting Gemini, which is what this project runs on.
  *
  * With neither key set the routes fall back to offline mode, which answers
  * from the question's own mark scheme rather than failing.
  *
- * Keys are read from the environment on the server only. Never inline a key
- * in source — this file is committed, `.env.local` is not.
+ * Keys are read from the environment on the server only — locally from
+ * `.env.local`, in production from the Vercel project's environment variables.
+ * Never inline a key in source: this file is committed, `.env.local` is not.
  */
 
 export type Provider = "anthropic" | "freetheai" | "offline";
@@ -25,11 +26,19 @@ const FREETHEAI_BASE =
   process.env.FREETHEAI_BASE_URL ?? "https://api.freetheai.xyz/v1";
 const FREETHEAI_MODEL = process.env.FREETHEAI_MODEL ?? "bbl/gemini-3.5-flash";
 
+/**
+ * The FreeTheAI credential. Two names are accepted because the same key is
+ * often already deployed as GEMINI_API_KEY — the endpoint fronts Gemini, so
+ * that is what people call it. FREETHEAI_API_KEY wins if both are set.
+ */
+export const freeTheAiKey = (): string | undefined =>
+  process.env.FREETHEAI_API_KEY || process.env.GEMINI_API_KEY;
+
 export function resolveProvider(): Provider {
   if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) {
     return "anthropic";
   }
-  if (process.env.FREETHEAI_API_KEY) return "freetheai";
+  if (freeTheAiKey()) return "freetheai";
   return "offline";
 }
 
@@ -59,8 +68,8 @@ interface FreeTheAiOptions {
 }
 
 async function callFreeTheAi(options: FreeTheAiOptions, stream: boolean) {
-  const key = process.env.FREETHEAI_API_KEY;
-  if (!key) throw new Error("FREETHEAI_API_KEY is not set");
+  const key = freeTheAiKey();
+  if (!key) throw new Error("FREETHEAI_API_KEY (or GEMINI_API_KEY) is not set");
 
   const response = await fetch(`${FREETHEAI_BASE}/chat/completions`, {
     method: "POST",
