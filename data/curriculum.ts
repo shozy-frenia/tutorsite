@@ -270,7 +270,10 @@ export function examSubjectsFor(options: {
   if (gradeYear === 10) ids.push(secondLanguageFor(parallel));
 
   const allowed = new Set(profileOptionsFor(gradeYear).map((s) => s.id));
-  ids.push(...profileSubjectIds.filter((id) => allowed.has(id)));
+  // Defensive: this is called with data restored from localStorage, which can
+  // predate the field. A missing choice means no profile subject, not a crash.
+  const chosen = Array.isArray(profileSubjectIds) ? profileSubjectIds : [];
+  ids.push(...chosen.filter((id) => allowed.has(id)));
 
   return ids.map(subjectById).filter((s): s is Subject => Boolean(s));
 }

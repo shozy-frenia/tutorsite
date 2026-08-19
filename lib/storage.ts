@@ -74,6 +74,38 @@ const EMPTY: Store = { profile: null, attempts: [], activeDays: [] };
 
 const isBrowser = () => typeof window !== "undefined";
 
+/**
+ * Validate a profile restored from storage.
+ *
+ * The stored shape has changed once already: profiles written before the
+ * parallel and profile-subject rewrite carry neither field, and reading one of
+ * those as if it did took the whole library page down with a TypeError. A
+ * profile that no longer matches the shape the app requires is treated as
+ * absent, so the student is asked to set it up again instead of the page
+ * failing. Attempt history and the streak live under separate keys of the same
+ * record and survive untouched.
+ */
+function validProfile(value: unknown): Profile | null {
+  if (typeof value !== "object" || value === null) return null;
+  const candidate = value as Partial<Profile>;
+
+  const { name, gradeYear, parallel } = candidate;
+  const yearOk = gradeYear === 10 || gradeYear === 11 || gradeYear === 12;
+  const parallelOk = parallel === "kazakh" || parallel === "russian";
+  if (typeof name !== "string" || !name || !yearOk || !parallelOk) return null;
+
+  return {
+    name,
+    gradeYear,
+    parallel,
+    profileSubjectIds: Array.isArray(candidate.profileSubjectIds)
+      ? candidate.profileSubjectIds.filter((id): id is string => typeof id === "string")
+      : [],
+    targetGrade: candidate.targetGrade ?? "A",
+    joinedAt: typeof candidate.joinedAt === "string" ? candidate.joinedAt : todayIso(),
+  };
+}
+
 export function readStore(): Store {
   if (!isBrowser()) return EMPTY;
   try {
@@ -81,7 +113,7 @@ export function readStore(): Store {
     if (!raw) return EMPTY;
     const parsed = JSON.parse(raw) as Partial<Store>;
     return {
-      profile: parsed.profile ?? null,
+      profile: validProfile(parsed.profile),
       attempts: Array.isArray(parsed.attempts) ? parsed.attempts : [],
       activeDays: Array.isArray(parsed.activeDays) ? parsed.activeDays : [],
     };
