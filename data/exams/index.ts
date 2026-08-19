@@ -4,11 +4,13 @@ import { MATHS_10_P1_MARCH } from "./maths-10-p1-march";
 import { MATHS_10_P1_APRIL } from "./maths-10-p1-april";
 import { MATHS_12_P1_CALCULUS } from "./maths-12-p1-calculus";
 import { CHEMISTRY_10_P1_MAY } from "./chemistry-10-p1-may";
+import { CS_10_P2_MAY_2025 } from "./cs-10-p2-may-2025";
 
 export const PAPERS: Paper[] = [
   MATHS_10_P1_MARCH,
   MATHS_10_P1_APRIL,
   CHEMISTRY_10_P1_MAY,
+  CS_10_P2_MAY_2025,
   MATHS_12_P1_CALCULUS,
 ];
 

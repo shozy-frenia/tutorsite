@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import HeroCanvas from "@/components/HeroCanvas";
+import BoundaryExplorer from "@/components/landing/BoundaryExplorer";
+import PhoneShowcase from "@/components/landing/PhoneShowcase";
 import { GRADE_STAGES, examSubjectsFor } from "@/data/curriculum";
-import { BOUNDARIES_BY_YEAR, allBoundarySets } from "@/data/grade-boundaries";
+import { allBoundarySets } from "@/data/grade-boundaries";
 import { PAPERS } from "@/data/exams";
 import { availableMarks } from "@/data/exams";
 
@@ -279,71 +281,10 @@ export default function Home() {
 
       {/* -------------------------------------------------------------- BOUNDARY */}
       <section className="px-5 md:px-10 mt-12 md:mt-14">
-        <div className="brutal">
-          <div
-            className="px-5 py-4 border-b-[3px] flex items-center justify-between flex-wrap gap-3"
-            style={{ borderColor: "var(--color-ink)" }}
-          >
-            <h2 className="t-subheading">The boundaries we grade against</h2>
-            <span className="mark t-micro">GRADE 10 · SUBJECT LEVEL · MINIMUM MARK PER GRADE</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse t-mono" style={{ minWidth: 660 }}>
-              <thead>
-                <tr style={{ background: "var(--color-ink)" }}>
-                  {["SUBJECT", "MAX", "A*", "A", "B", "C", "D", "E", "U"].map((head, i) => (
-                    <th
-                      key={head}
-                      className="t-micro px-3 py-2"
-                      style={{
-                        color: "var(--color-canvas)",
-                        textAlign: i === 0 ? "left" : "right",
-                      }}
-                    >
-                      {head}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {BOUNDARIES_BY_YEAR[10].map((subject, row) => (
-                  <tr
-                    key={subject.id}
-                    style={{
-                      background: row % 2 ? "var(--color-paper)" : "transparent",
-                      borderTop: "1px solid var(--color-ink)",
-                    }}
-                  >
-                    <td className="px-3 py-2 text-[14px]" style={{ fontWeight: 700 }}>
-                      {subject.name}
-                    </td>
-                    <td className="px-3 py-2 text-[14px] text-right">
-                      {subject.subject.maxMark}
-                    </td>
-                    {(["A*", "A", "B", "C", "D", "E", "U"] as const).map((grade) => {
-                      const band = subject.subject.bands.find((b) => b.grade === grade);
-                      return (
-                        <td
-                          key={grade}
-                          className="px-3 py-2 text-[14px] text-right"
-                          style={
-                            grade === "A*"
-                              ? { background: "var(--color-highlighter)", fontWeight: 700 }
-                              : undefined
-                          }
-                        >
-                          {band ? band.min : "—"}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <BoundaryExplorer />
       </section>
+
+      <PhoneShowcase />
 
       {/* ------------------------------------------------------------------ CTA */}
       <section className="px-5 md:px-10 mt-12 md:mt-14">
