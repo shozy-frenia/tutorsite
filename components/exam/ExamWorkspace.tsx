@@ -13,6 +13,7 @@ import {
 import { boundariesFor, type Grade } from "@/data/grade-boundaries";
 import { saveAttempt, type QuestionOutcome } from "@/lib/storage";
 import TutorDrawer from "./TutorDrawer";
+import ExtendedAnswer from "./ExtendedAnswer";
 import GradeBadge from "@/components/GradeBadge";
 
 /**
@@ -322,6 +323,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         <main className="p-4 md:p-8 min-w-0">
           <QuestionSheet
             key={question.id}
+            paperId={paper.id}
             question={question}
             value={answers[question.id] ?? ""}
             onChange={(value) => setAnswer(question.id, value)}
@@ -463,6 +465,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 /* ========================================================== question sheet */
 
 interface SheetProps {
+  paperId: string;
   question: Question;
   value: string;
   onChange: (value: string) => void;
@@ -475,6 +478,7 @@ interface SheetProps {
 }
 
 function QuestionSheet({
+  paperId,
   question,
   value,
   onChange,
@@ -577,6 +581,34 @@ function QuestionSheet({
       </div>
 
       {/* answer zone */}
+      {question.marking === "assessed" ? (
+        <div
+          style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+        >
+          <ExtendedAnswer
+            paperId={paperId}
+            question={question}
+            value={value}
+            onChange={onChange}
+            onMarked={onSelfMark}
+          />
+          <div className="px-5 pb-5">
+            <button
+              onClick={onAskTutor}
+              className="press-swiss t-label"
+              style={{
+                background: "var(--color-highlighter)",
+                border: "2px solid var(--color-ink)",
+                boxShadow: "var(--shadow-swiss)",
+                padding: "10px 18px",
+                cursor: "pointer",
+              }}
+            >
+              ASK THE TUTOR
+            </button>
+          </div>
+        </div>
+      ) : (
       <div
         className="px-5 py-5 flex flex-col gap-3"
         style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
@@ -718,6 +750,7 @@ function QuestionSheet({
 
         <HintBlock hint={question.hint} />
       </div>
+      )}
 
       {/* feedback */}
       {result?.checked && question.marking === "auto" && (

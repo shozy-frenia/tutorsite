@@ -87,6 +87,41 @@ for (const paper of PAPERS) {
     if (!question.answer.trim()) fail(`${question.id}: empty answer`);
     if (!question.hint.trim()) fail(`${question.id}: empty hint`);
 
+    // Extended answers are marked against a rubric rather than an answer key.
+    // The rubric has to be complete and has to add up to the tariff, or the
+    // examiner would be asked to award marks the question does not carry.
+    if (question.marking === "assessed") {
+      if (!question.criteria?.length) {
+        fail(`${question.id}: assessed question has no criteria`);
+      }
+      const criteriaTotal = (question.criteria ?? []).reduce(
+        (sum, c) => sum + c.maxMarks,
+        0
+      );
+      if (criteriaTotal !== question.marks) {
+        fail(
+          `${question.id}: criteria sum to ${criteriaTotal}, question is worth ${question.marks}`
+        );
+      }
+      for (const criterion of question.criteria ?? []) {
+        if (!criterion.bands.length) fail(`${question.id}/${criterion.id}: no bands`);
+        const top = Math.max(...criterion.bands.map((b) => b.max));
+        if (top !== criterion.maxMarks) {
+          fail(
+            `${question.id}/${criterion.id}: top band is ${top}, criterion is worth ${criterion.maxMarks}`
+          );
+        }
+        if (!criterion.bands.some((b) => b.max === 0)) {
+          fail(`${question.id}/${criterion.id}: no zero band`);
+        }
+      }
+      for (const source of question.sources ?? []) {
+        if (!source.content.trim()) fail(`${question.id}: source ${source.ref} is empty`);
+      }
+    } else if (question.criteria?.length) {
+      fail(`${question.id}: has criteria but is not marked as assessed`);
+    }
+
     // The canonical answer must satisfy the marker it will be checked against.
     if (question.marking === "auto") {
       if (!isCorrect(question.answer, question)) {

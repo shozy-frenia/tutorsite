@@ -71,6 +71,43 @@ export const ASSISTANT_SYSTEM = [
   "(x², √3, π, ≤) — no LaTeX, no markdown tables.",
 ].join("\n");
 
+/**
+ * The examiner. Marks an extended written answer against the published rubric
+ * and nothing else.
+ *
+ * The hard part of this prompt is not marking — it is refusing to be generous.
+ * A model asked to grade a student's essay will drift upward unless it is made
+ * to quote the band descriptor it is applying and point at the evidence in the
+ * script. Both are required here, per criterion.
+ */
+export const ASSESSOR_SYSTEM = [
+  "You are an examiner for the Cambridge International Examination sat at Nazarbayev",
+  "Intellectual Schools in Kazakhstan (МЭСК). You mark one extended written answer",
+  "against the published mark scheme you are given.",
+  "",
+  "Rules of marking:",
+  "1. Mark against the band descriptors you are given and nothing else. Do not invent",
+  "   a criterion, and do not exceed a criterion's maximum.",
+  "2. For each criterion, decide which band the answer sits in, then choose a mark",
+  "   inside that band. Quote the phrase from the descriptor that decided it.",
+  "3. Point at the script. Every judgement must cite something the student actually",
+  "   wrote — a phrase, a sentence, a structural move, or a specific absence.",
+  "4. Where the question supplies sources, credit is for using them. Say which sources",
+  "   the answer actually used, which it only mentioned, and which it ignored. A source",
+  "   named but not used as evidence is not use. Count them honestly: the scheme",
+  "   usually requires several.",
+  "5. Do not be generous. A fluent answer that misses the task earns content marks it",
+  "   did not earn only if you let it. An answer below the word count cannot reach the",
+  "   top band for organisation.",
+  "6. Judge language against the language the answer is written in, which is the",
+  "   language the paper requires — Kazakh, Russian or English.",
+  "7. Never rewrite the answer for the student. Say what is missing and what would",
+  "   move it up one band; leave the writing to them.",
+  "",
+  "Tone: an examiner's report. Direct, specific, no praise that is not earned. Write",
+  "your comments in the language the student wrote in.",
+].join("\n");
+
 export const GENERATOR_SYSTEM = [
   "You write practice questions for the Cambridge International Examination sat at",
   "Nazarbayev Intellectual Schools in Kazakhstan (МЭСК), grades 10, 11 and 12.",
@@ -146,3 +183,54 @@ export function generateRequest(question: Question, paperTitle: string): string 
     `Write one new question at exactly this level, worth ${question.marks} marks, on the topic "${question.topic}".`,
   ].join("\n");
 }
+
+/** The user-turn payload for a marking request. */
+export function assessRequest(question: Question, answer: string): string {
+  const parts: string[] = [
+    `Question ${question.number} — ${question.topic}, worth ${question.marks} marks.`,
+    "",
+    `Task: ${question.prompt}`,
+  ];
+
+  if (question.promptKk) parts.push("", `As printed: ${question.promptKk}`);
+
+  if (question.minWords || question.maxWords) {
+    const range = question.maxWords
+      ? `${question.minWords ?? 0}–${question.maxWords} words`
+      : `at least ${question.minWords} words`;
+    parts.push("", `Required length: ${range}. The answer below is ${wordCount(answer)} words.`);
+  }
+
+  if (question.sources?.length) {
+    parts.push("", "SOURCES SUPPLIED WITH THE QUESTION:");
+    for (const source of question.sources) {
+      parts.push(
+        "",
+        `Source ${source.ref} (${source.kind}) — ${source.title}`,
+        source.content,
+        source.attribution ? `[${source.attribution}]` : ""
+      );
+    }
+    parts.push(
+      "",
+      "Credit depends on using these sources as evidence, not on naming them.",
+      "When you report which sources were used, name them by their bare reference exactly as",
+      "printed above."
+    );
+  }
+
+  parts.push("", "MARK SCHEME:");
+  for (const criterion of question.criteria ?? []) {
+    parts.push("", `${criterion.name} — up to ${criterion.maxMarks} marks. ${criterion.focus}`);
+    for (const band of criterion.bands) {
+      parts.push(`  [${band.range}] ${band.descriptor}`);
+    }
+  }
+
+  parts.push("", "THE STUDENT'S ANSWER:", answer.trim(), "", "Mark it.");
+  return parts.join("\n");
+}
+
+/** Words, counted the way an exam counts them. */
+export const wordCount = (text: string): number =>
+  text.trim() ? text.trim().split(/\s+/).length : 0;

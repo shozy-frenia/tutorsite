@@ -15,7 +15,7 @@
  * Only questions whose answer is unambiguous are set to `auto`.
  */
 
-export type MarkingMode = "auto" | "worked";
+export type MarkingMode = "auto" | "worked" | "assessed";
 
 export type AnswerKind = "numeric" | "expression" | "choice";
 
@@ -26,6 +26,54 @@ export interface MarkSchemeStep {
   text: string;
   /** Marks awarded for this step. */
   marks: number;
+}
+
+/**
+ * One row of a banded rubric — how many marks a level of response earns and
+ * what that level looks like. Copied from the published mark scheme, in the
+ * language the scheme is written in.
+ */
+export interface CriterionBand {
+  /** Mark range as the scheme prints it, e.g. "9-10" or "5". */
+  range: string;
+  /** Highest mark inside this band. */
+  max: number;
+  descriptor: string;
+}
+
+/**
+ * A criterion an extended answer is marked against.
+ *
+ * Language papers split content and organisation from range and accuracy of
+ * language; History splits knowledge, analysis and use of sources. The split
+ * is the mark scheme's, not ours — a criterion invented here would produce a
+ * number the real examiner would not recognise.
+ */
+export interface Criterion {
+  id: string;
+  name: string;
+  maxMarks: number;
+  /** What the marker is looking for, in one sentence. */
+  focus: string;
+  bands: CriterionBand[];
+}
+
+/**
+ * Source material a question is answered from: a text extract, a photograph,
+ * or a table of data. History marks explicitly reward using several of them,
+ * so each one is addressable by its printed reference.
+ */
+export interface SourceMaterial {
+  /** Reference as printed, e.g. "A", "B", "Text 1". */
+  ref: string;
+  kind: "text" | "image" | "data";
+  title: string;
+  /** The extract itself, or for an image the caption plus what it shows. */
+  content: string;
+  /** Attribution line as printed on the paper. */
+  attribution?: string;
+  /** Path under /public when the figure itself is available. */
+  image?: string;
 }
 
 export interface Question {
@@ -59,6 +107,21 @@ export interface Question {
   markScheme: MarkSchemeStep[];
   /** One nudge — the single step students usually miss. */
   hint: string;
+
+  /* ---------------------------------------------------- extended answers */
+
+  /**
+   * Rubric for an `assessed` question. Marks across the criteria must sum to
+   * the question's tariff — `npm run check` asserts it.
+   */
+  criteria?: Criterion[];
+  /** Sources the answer must draw on. */
+  sources?: SourceMaterial[];
+  /** Length the paper asks for, in words. */
+  minWords?: number;
+  maxWords?: number;
+  /** Language the answer must be written in, as the paper requires it. */
+  answerLanguage?: "kk" | "ru" | "en";
 }
 
 /**
