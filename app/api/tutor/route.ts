@@ -1,17 +1,23 @@
 import { paperById } from "@/data/exams";
 import {
-  anthropic,
   clamp,
   clientIp,
   describeError,
-  hasApiKey,
   jsonError,
-  MODEL,
   rateLimited,
   validateMessages,
   type ChatMessage,
 } from "@/lib/server/guard";
+import {
+  ANTHROPIC_MODEL,
+  anthropic,
+  freeTheAiStream,
+  providerLabel,
+  resolveProvider,
+  type ChatTurn,
+} from "@/lib/server/providers";
 import { TUTOR_SYSTEM, explainRequest, questionContext } from "@/lib/tutor-prompt";
+import type { Question } from "@/lib/exam-types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,8 +29,9 @@ export const dynamic = "force-dynamic";
  *   { paperId, questionId, studentAnswer }        — an explanation request
  *   { paperId, questionId, messages: [...] }      — a follow-up conversation
  *
- * Without a configured key the route answers offline from the question's own
- * mark scheme, so the workspace still teaches something on a bare checkout.
+ * Uses whichever model provider is configured. With none, it answers offline
+ * from the question's own mark scheme, so the workspace still teaches
+ * something on a bare checkout.
  */
 export async function POST(request: Request) {
   const ip = clientIp(request);
@@ -53,87 +60,57 @@ export async function POST(request: Request) {
     history = body.messages as ChatMessage[];
   }
 
-  if (!hasApiKey()) {
+  const provider = resolveProvider();
+
+  if (provider === "offline") {
     return new Response(offlineExplanation(question, studentAnswer), {
       status: 200,
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
         "X-Tutor-Mode": "offline",
       },
     });
   }
 
-  const messages: ChatMessage[] =
+  const opening = explainRequest(question, studentAnswer);
+
+  const conversation: ChatMessage[] =
     history.length > 0
       ? [
           // Re-establish the question context as the first turn so a follow-up
           // never arrives without it, then replay the conversation.
-          { role: "user", content: `Context for this conversation:\n\n${questionContext(question)}` },
+          {
+            role: "user",
+            content: `Context for this conversation:\n\n${questionContext(question)}`,
+          },
           {
             role: "assistant",
-            content: "Understood — I have the question and its mark scheme. What would you like to work on?",
+            content:
+              "Understood — I have the question and its mark scheme. What would you like to work on?",
           },
           ...history,
         ]
-      : [{ role: "user", content: explainRequest(question, studentAnswer) }];
+      : [{ role: "user", content: opening }];
 
   try {
-    const client = anthropic();
-    const stream = client.messages.stream({
-      model: MODEL,
-      max_tokens: 2_000,
-      // Adaptive thinking with low effort: these are short pedagogical replies,
-      // not long-horizon reasoning, and latency is what the student feels.
-      thinking: { type: "adaptive" },
-      output_config: { effort: "low" },
-      system: [
-        {
-          type: "text",
-          text: TUTOR_SYSTEM,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
-      messages,
-    });
+    const stream =
+      provider === "anthropic"
+        ? await anthropicStream(conversation)
+        : await freeTheAiStream({
+            messages: [
+              { role: "system", content: TUTOR_SYSTEM },
+              ...conversation,
+            ] as ChatTurn[],
+            maxTokens: 1_200,
+            temperature: 0.6,
+          });
 
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          for await (const event of stream) {
-            if (
-              event.type === "content_block_delta" &&
-              event.delta.type === "text_delta"
-            ) {
-              controller.enqueue(encoder.encode(event.delta.text));
-            }
-          }
-          const final = await stream.finalMessage();
-          if (final.stop_reason === "refusal") {
-            controller.enqueue(
-              encoder.encode(
-                "\n\nI can't help with that one. Try rephrasing it as a question about the syllabus."
-              )
-            );
-          }
-        } catch {
-          controller.enqueue(
-            encoder.encode("\n\n[The tutor was interrupted. Please try again.]")
-          );
-        } finally {
-          controller.close();
-        }
-      },
-      cancel() {
-        stream.abort();
-      },
-    });
-
-    return new Response(readable, {
+    return new Response(stream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-store",
-        "X-Tutor-Mode": "live",
+        "X-Tutor-Mode": providerLabel(provider),
       },
     });
   } catch (error) {
@@ -142,16 +119,63 @@ export async function POST(request: Request) {
   }
 }
 
+/** Claude stream, adapted to a plain-text ReadableStream. */
+async function anthropicStream(
+  conversation: ChatMessage[]
+): Promise<ReadableStream<Uint8Array>> {
+  const client = anthropic();
+  const stream = client.messages.stream({
+    model: ANTHROPIC_MODEL,
+    max_tokens: 2_000,
+    // Adaptive thinking at low effort: these are short pedagogical replies,
+    // not long-horizon reasoning, and latency is what the student feels.
+    thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    system: [
+      { type: "text", text: TUTOR_SYSTEM, cache_control: { type: "ephemeral" } },
+    ],
+    messages: conversation,
+  });
+
+  const encoder = new TextEncoder();
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        for await (const event of stream) {
+          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+            controller.enqueue(encoder.encode(event.delta.text));
+          }
+        }
+        const final = await stream.finalMessage();
+        if (final.stop_reason === "refusal") {
+          controller.enqueue(
+            encoder.encode(
+              "\n\nI can't help with that one. Try rephrasing it as a question about the syllabus."
+            )
+          );
+        }
+      } catch {
+        controller.enqueue(
+          encoder.encode("\n\n[The tutor was interrupted. Please try again.]")
+        );
+      } finally {
+        controller.close();
+      }
+    },
+    cancel() {
+      stream.abort();
+    },
+  });
+}
+
 /**
  * Offline explanation: the mark scheme, staged.
  *
  * This is deliberately not a fake AI reply — it is the real mark scheme, which
  * is the thing the tutor would be quoting anyway.
  */
-function offlineExplanation(
-  question: NonNullable<ReturnType<typeof paperById>>["questions"][number],
-  studentAnswer: string
-): string {
+function offlineExplanation(question: Question, studentAnswer: string): string {
   const lines: string[] = [];
 
   lines.push(`Question ${question.number} — ${question.topic} [${question.marks} marks]`);
@@ -168,13 +192,13 @@ function offlineExplanation(
   if (studentAnswer.trim()) {
     lines.push("");
     lines.push(
-      `You wrote: ${studentAnswer.trim()} — compare it against step by step above and find the first line that differs.`
+      `You wrote: ${studentAnswer.trim()} — compare it against the steps above and find the first line that differs.`
     );
   }
 
   lines.push("");
   lines.push(
-    "(Offline mode: set ANTHROPIC_API_KEY to get a tutor that responds to your specific working.)"
+    "(Offline mode: set ANTHROPIC_API_KEY or FREETHEAI_API_KEY to get a tutor that responds to your specific working.)"
   );
 
   return lines.join("\n");

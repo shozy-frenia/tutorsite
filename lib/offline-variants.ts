@@ -825,6 +825,121 @@ const binomialSeries: Generator = (marks, r) => {
   };
 };
 
+/* ------------------------------ Chemistry topics -------------------------- */
+
+const stoichiometry: Generator = (marks, r) => {
+  // Salts whose molar mass is a round number, so concentrations stay clean.
+  const salts = [
+    { formula: "CuSO₄", name: "copper(II) sulfate", mr: 160 },
+    { formula: "NaOH", name: "sodium hydroxide", mr: 40 },
+    { formula: "CaCO₃", name: "calcium carbonate", mr: 100 },
+    { formula: "NaCl", name: "sodium chloride", mr: 58.5 },
+    { formula: "KOH", name: "potassium hydroxide", mr: 56 },
+  ];
+  const salt = pick(salts, r);
+  const moles = pick([0.1, 0.2, 0.25, 0.5], r);
+  const volumeMl = pick([200, 250, 400, 500], r);
+  const mass = Math.round(moles * salt.mr * 100) / 100;
+  const litres = volumeMl / 1000;
+  const concentration = Math.round((moles / litres) * 1000) / 1000;
+
+  return {
+    prompt: `What is the molar concentration of a solution of volume ${volumeMl} ml containing ${mass} g of ${salt.name}, ${salt.formula}?`,
+    topic: "Stoichiometry",
+    marks,
+    answer: `${concentration} mol/l`,
+    markScheme: spreadMarks(
+      [
+        `M(${salt.formula}) = ${salt.mr} g/mol`,
+        `n = ${mass} / ${salt.mr} = ${moles} mol`,
+        `V = ${volumeMl} ml = ${litres} l`,
+        `c = ${moles} / ${litres} = ${concentration} mol/l`,
+      ],
+      marks
+    ),
+    hint: "Convert the volume to litres before dividing — working in millilitres is the usual way this goes wrong by a factor of 1000.",
+  };
+};
+
+const nuclearChemistry: Generator = (marks, r) => {
+  const halfLife = pick([5, 8, 10, 12, 20, 25], r);
+  const steps = between(3, 6, r);
+  const finalMass = pick([0.5, 1.5, 2, 3], r);
+  const startMass = finalMass * 2 ** steps;
+
+  return {
+    prompt: `How long will it take for the mass of a radioactive substance to decrease from ${startMass} grams to ${finalMass} grams if the half-life is ${halfLife} days?`,
+    topic: "Nuclear Chemistry",
+    marks,
+    answer: `${steps * halfLife} days`,
+    markScheme: spreadMarks(
+      [
+        `The mass falls by a factor of ${startMass}/${finalMass} = ${2 ** steps}`,
+        `${2 ** steps} = 2^${steps}, so ${steps} half-lives have passed`,
+        `Time = ${steps} × ${halfLife} = ${steps * halfLife} days`,
+      ],
+      marks
+    ),
+    hint: "Halve repeatedly and count the steps — no logarithms needed. Each halving is one half-life.",
+  };
+};
+
+const kinetics: Generator = (marks, r) => {
+  const coefficient = pick([2, 3, 4], r);
+  const start = pick([10, 15, 20, 25], r);
+  const steps = between(2, 5, r);
+  const end = start + steps * 10;
+  const factor = coefficient ** steps;
+
+  return {
+    prompt: `By how many times will the rate of a chemical reaction increase when the temperature is raised from ${start} °C to ${end} °C, if the temperature coefficient of the reaction is ${coefficient}?`,
+    topic: "Kinetics & Equilibrium",
+    marks,
+    answer: `${factor} times`,
+    markScheme: spreadMarks(
+      [
+        `ΔT = ${end} − ${start} = ${steps * 10} °C`,
+        `Van 't Hoff: the factor is γ^(ΔT/10) = ${coefficient}^${steps}`,
+        `= ${factor}`,
+      ],
+      marks
+    ),
+    hint: "The coefficient applies per 10 °C. Divide the temperature rise by 10 first, then raise the coefficient to that power.",
+  };
+};
+
+const periodicity: Generator = (marks, r) => {
+  // Ion electron counts — always exact, always checkable.
+  const cases = [
+    { symbol: "N", z: 7, mass: 14, charge: -3 },
+    { symbol: "O", z: 8, mass: 16, charge: -2 },
+    { symbol: "Mg", z: 12, mass: 24, charge: 2 },
+    { symbol: "Al", z: 13, mass: 27, charge: 3 },
+    { symbol: "S", z: 16, mass: 32, charge: -2 },
+    { symbol: "Ca", z: 20, mass: 40, charge: 2 },
+  ];
+  const c = pick(cases, r);
+  const electrons = c.z - c.charge;
+  const neutrons = c.mass - c.z;
+  const label = `${c.symbol}${Math.abs(c.charge)}${c.charge > 0 ? "+" : "−"}`;
+
+  return {
+    prompt: `The ion ${label} is formed from the isotope with mass number ${c.mass}. State the number of protons, neutrons and electrons in this ion.`,
+    topic: "Periodicity",
+    marks,
+    answer: `${c.z} protons, ${neutrons} neutrons, ${electrons} electrons`,
+    markScheme: spreadMarks(
+      [
+        `Protons = atomic number = ${c.z}, unchanged by forming an ion`,
+        `Neutrons = ${c.mass} − ${c.z} = ${neutrons}`,
+        `Electrons = ${c.z} ${c.charge > 0 ? "−" : "+"} ${Math.abs(c.charge)} = ${electrons}`,
+      ],
+      marks
+    ),
+    hint: "Protons and neutrons never change when an ion forms — only electrons do. A positive charge means electrons lost, a negative charge means electrons gained.",
+  };
+};
+
 const GENERATORS: Record<string, Generator> = {
   Vectors: vectors,
   "Coordinate Geometry": coordinateGeometry,
@@ -848,6 +963,14 @@ const GENERATORS: Record<string, Generator> = {
   "Vectors 3D": vectors3D,
   "Parametric Equations": parametric,
   "Binomial Series": binomialSeries,
+
+  // Chemistry topics with a determinate, calculable answer. The descriptive
+  // strands (bonding diagrams, organic naming, qualitative analysis) have no
+  // offline generator — those need a model, and say so when asked.
+  Stoichiometry: stoichiometry,
+  "Nuclear Chemistry": nuclearChemistry,
+  "Kinetics & Equilibrium": kinetics,
+  Periodicity: periodicity,
 };
 
 /**

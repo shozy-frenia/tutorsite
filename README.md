@@ -29,27 +29,52 @@ The app runs fully without any API key — see [AI tutor](#ai-tutor) below.
 
 ## Curriculum architecture
 
-- **Grade 10** — core Maths and Sciences. Two transcribed mock papers live here.
-- **Grade 11** — Cambridge English as a Second Language, plus the two compulsory
-  national subjects (History of Kazakhstan, Kazakh / Russian language).
-- **Grade 12** — two profile subjects taken to A-Level standard.
+What a student sits depends on three things: grade year, language parallel, and
+their profile choices.
 
-Defined in `data/curriculum.ts`. Mathematics carries its Grade 10 strands and
-its A-Level strands separately (`topics` and `topicsAdvanced`) so a Grade 10
-view never advertises calculus the student has not met yet.
+| Year | Subjects |
+|---|---|
+| **10** | Mathematics · History of Kazakhstan · Я1 · Я2 · **1 profile** of four |
+| **11** | English · Я2 — two exams, nothing else |
+| **12** | Mathematics · History of Kazakhstan · Я1 · **2 profiles** of five |
+
+The **parallel** decides which language is Я1 and which is Я2: a Kazakh-parallel
+student sits Kazakh as Я1 and Russian as Я2, and vice versa. This is why
+registration asks for it — showing a Kazakh-parallel student the Russian Я1
+papers would be offering an exam they will never sit. Profile options are
+Biology, Chemistry, Physics and Computer Science, with Geography added at
+Grade 12.
+
+`examSubjectsFor({ gradeYear, parallel, profileSubjectIds })` in
+`data/curriculum.ts` is the single source of truth, and the library filters to
+exactly its result. Mathematics carries its Grade 10 strands and its A-Level
+strands separately (`topics` and `topicsAdvanced`) so a Grade 10 view never
+advertises calculus the student has not met yet.
 
 ## Grading
 
 `data/grade-boundaries.ts` carries the published А*–U boundary tables for all
-ten subjects, transcribed verbatim: subject level plus both components. These
-are **not** percentage approximations. A C in Mathematics Paper 1 starts at
-36/80 (45%); a C in Chemistry Paper 1 starts at 44/90 (49%). `npm run check`
-asserts every band is contiguous and that a mark on a band floor earns that
-band while one mark below does not.
+three grade years, transcribed verbatim: subject level plus every component.
+**72 boundary sets in total** — Grade 10 (10 subjects), Grade 11 (3), Grade 12 (9).
 
-A* is awarded at subject level only, so component tables stop at A. When the
-workspace shows a subject-level projection it is flagged as projected, never as
-an awarded grade.
+The years use genuinely different tables, not one table scaled. Grade 10
+Mathematics is out of 160 across two components; Grade 12 Mathematics is out of
+230 across three, plus a combined "Papers 1 & 3" row. Grade 11 examines only
+English and the second language.
+
+Whether A* exists at component level also varies by year: Grade 10 and 11
+component tables stop at A, while Grade 12 component tables carry an A* band.
+The data records whatever the published table shows and the grading code walks
+whatever bands exist, rather than assuming a fixed ladder.
+
+These are **not** percentage approximations. A C in Grade 10 Mathematics Paper 1
+starts at 36/80 (45%); a C in Grade 12 Mathematics Component 2 starts at 39/90
+(43%). `npm run check` asserts every band is contiguous and that a mark on a
+band floor earns that band while one mark below does not.
+
+A* is awarded at subject level only in Grades 10 and 11. When the workspace
+shows a subject-level projection it is flagged as projected, never as an
+awarded grade.
 
 ### Mark scaling
 
@@ -71,11 +96,14 @@ Three papers, and the difference between them matters:
 |---|---|---|
 | Mathematics Paper 1 — 5 March 2021 | 10 | **Transcribed** from the source `.docx` |
 | Mathematics Paper 1 — 16 April 2021 | 10 | **Transcribed** from the source `.docx` |
+| Chemistry Paper 1 — May 2021 | 10 | **Transcribed** from the source PDF |
 | Mathematics Paper 1 — Pure | 12 | **Authored** to A-Level standard |
 
-The two Grade 10 papers are transcribed question by question, with English
-stems, the original Kazakh alongside, worked answers and step-by-step mark
-schemes.
+The Grade 10 papers are transcribed question by question, with English stems,
+the original Kazakh or Russian alongside, worked answers and step-by-step mark
+schemes. Chemistry Paper 1 carries all 25 Part A multiple-choice questions plus
+Part B questions 26–31 (75 of the paper's 90 marks); questions 32–33 depend on
+an apparatus diagram and a rate graph that are not yet extracted.
 
 The Grade 12 paper is **not a past paper** — no Grade 12 paper was supplied, so
 its 15 questions are written to the A-Level pure mathematics standard a profile
@@ -109,10 +137,21 @@ Two surfaces, both in the workspace drawer:
 - **Give me another** — generates a new question on the same topic, worth the
   same marks, with the same number of reasoning steps.
 
-Both use `claude-opus-5` with adaptive thinking. Generation uses structured
-outputs so the question, answer and mark scheme come back typed; the route then
-re-checks that the scheme actually sums to the tariff, because a schema
-guarantees well-formed JSON, not correct arithmetic.
+### Providers
+
+`lib/server/providers.ts` supports two backends and uses whichever is configured:
+
+| Env var | Backend |
+|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs |
+| `FREETHEAI_API_KEY` | FreeTheAI, an OpenAI-compatible endpoint fronting Gemini |
+
+Anthropic uses typed structured outputs. The OpenAI-compatible path has no
+schema binding, so the shape is requested in the prompt and validated with Zod
+on the way back. Either way the route re-checks that the mark scheme sums to the
+tariff, and pins the topic and mark count to the source question — a schema
+guarantees well-formed JSON, not correct arithmetic, and level matching is the
+whole point.
 
 ### Running without a key
 
@@ -137,8 +176,12 @@ To enable the live tutor:
 
 ```bash
 cp .env.example .env.local
-# then set ANTHROPIC_API_KEY in .env.local
+# then set ANTHROPIC_API_KEY *or* FREETHEAI_API_KEY in .env.local
 ```
+
+`.env.local` is gitignored. Never put a real key in `.env.example`, in source,
+or in a commit — rotate any key that has been pasted into a chat, an issue or a
+diff.
 
 ### Security
 

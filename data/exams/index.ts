@@ -3,10 +3,12 @@ import { paperMarkTotal } from "@/lib/exam-types";
 import { MATHS_10_P1_MARCH } from "./maths-10-p1-march";
 import { MATHS_10_P1_APRIL } from "./maths-10-p1-april";
 import { MATHS_12_P1_CALCULUS } from "./maths-12-p1-calculus";
+import { CHEMISTRY_10_P1_MAY } from "./chemistry-10-p1-may";
 
 export const PAPERS: Paper[] = [
   MATHS_10_P1_MARCH,
   MATHS_10_P1_APRIL,
+  CHEMISTRY_10_P1_MAY,
   MATHS_12_P1_CALCULUS,
 ];
 

@@ -27,7 +27,23 @@ import {
   type Profile,
   type Store,
 } from "@/lib/storage";
-import { GRADE_ORDER, boundariesFor, type Grade } from "@/data/grade-boundaries";
+import {
+  GRADE_ORDER,
+  boundariesFor,
+  type Grade,
+  type GradeYear,
+} from "@/data/grade-boundaries";
+import {
+  PARALLEL_LABEL,
+  examSubjectsFor,
+  firstLanguageFor,
+  profileCountFor,
+  profileOptionsFor,
+  secondLanguageFor,
+  stageFor,
+  subjectById,
+  type Parallel,
+} from "@/data/curriculum";
 import { gradeRank, marksToNextGrade } from "@/lib/grading";
 import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
@@ -144,18 +160,43 @@ export default function Dashboard() {
 
 function Register({ onDone }: { onDone: (profile: Profile) => void }) {
   const [name, setName] = useState("");
-  const [gradeYear, setGradeYear] = useState<10 | 11 | 12>(10);
+  const [gradeYear, setGradeYear] = useState<GradeYear>(10);
+  const [parallel, setParallel] = useState<Parallel>("kazakh");
+  const [profileIds, setProfileIds] = useState<string[]>([]);
   const [targetGrade, setTargetGrade] = useState<Grade>("A");
+
+  const profileOptions = profileOptionsFor(gradeYear);
+  const needed = profileCountFor(gradeYear);
+
+  // Changing year changes how many profiles are allowed, and Grade 11 has
+  // none at all — drop anything that no longer applies rather than carrying
+  // a stale choice into the saved profile.
+  useEffect(() => {
+    const allowed = new Set(profileOptionsFor(gradeYear).map((s) => s.id));
+    setProfileIds((prev) => prev.filter((id) => allowed.has(id)).slice(0, profileCountFor(gradeYear)));
+  }, [gradeYear]);
+
+  const toggleProfile = (id: string) => {
+    setProfileIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (needed === 1) return [id];
+      if (prev.length >= needed) return [...prev.slice(1), id];
+      return [...prev, id];
+    });
+  };
+
+  const subjects = examSubjectsFor({ gradeYear, parallel, profileSubjectIds: profileIds });
+  const ready = name.trim().length > 0 && profileIds.length === needed;
 
   return (
     <section className="px-5 md:px-10">
-      <div className="swiss max-w-[640px] rise">
+      <div className="swiss max-w-[720px] rise">
         <div className="px-6 py-5" style={{ borderBottom: "2px solid var(--color-ink)" }}>
           <span className="mark t-micro">DEMO REGISTRATION</span>
           <h1 className="t-subheading mt-3">Set up your tracker</h1>
           <p className="text-[16px] mt-2 m-0" style={{ lineHeight: 1.35 }}>
-            No email, no password. This stays on your device — it exists so the dashboard
-            has a name and a target to measure against.
+            No email, no password. This stays on your device. We ask for your parallel and
+            profile subjects so you only ever see papers for exams you will actually sit.
           </p>
         </div>
 
@@ -163,10 +204,12 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           className="px-6 py-5 flex flex-col gap-5"
           onSubmit={(event) => {
             event.preventDefault();
-            if (!name.trim()) return;
+            if (!ready) return;
             onDone({
               name: name.trim().slice(0, 40),
               gradeYear,
+              parallel,
+              profileSubjectIds: profileIds,
               targetGrade,
               joinedAt: new Date().toISOString(),
             });
@@ -214,7 +257,75 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                 </button>
               ))}
             </div>
+            <span className="t-micro block mt-2" style={{ opacity: 0.55 }}>
+              {stageFor(gradeYear)?.compulsory}
+            </span>
           </fieldset>
+
+          <fieldset className="border-0 p-0 m-0">
+            <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
+              PARALLEL — LANGUAGE OF INSTRUCTION
+            </legend>
+            <div className="flex gap-2">
+              {(["kazakh", "russian"] as Parallel[]).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setParallel(value)}
+                  className="press-swiss grow py-3 px-4 text-left"
+                  style={{
+                    border: "2px solid var(--color-ink)",
+                    background:
+                      parallel === value ? "var(--color-highlighter)" : "var(--color-sheet)",
+                    boxShadow: parallel === value ? "var(--shadow-swiss)" : "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span className="t-label block">{PARALLEL_LABEL[value]}</span>
+                  <span className="t-micro block mt-1" style={{ opacity: 0.6 }}>
+                    Я1 {subjectById(firstLanguageFor(value))?.name.split(" (")[0]} · Я2{" "}
+                    {subjectById(secondLanguageFor(value))?.name.split(" (")[0]}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          {needed > 0 && (
+            <fieldset className="border-0 p-0 m-0">
+              <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
+                PROFILE {needed === 1 ? "SUBJECT" : "SUBJECTS"} — PICK {needed}
+              </legend>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {profileOptions.map((subject) => {
+                  const picked = profileIds.includes(subject.id);
+                  return (
+                    <button
+                      key={subject.id}
+                      type="button"
+                      onClick={() => toggleProfile(subject.id)}
+                      className="press-swiss py-3 px-4 text-left flex items-center gap-3"
+                      style={{
+                        border: "2px solid var(--color-ink)",
+                        background: picked ? "var(--color-acid-lime)" : "var(--color-sheet)",
+                        boxShadow: picked ? "var(--shadow-swiss)" : "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span style={{ fontSize: 20 }}>{subject.glyph}</span>
+                      <span className="text-[16px]">{subject.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="t-micro block mt-2" style={{ opacity: 0.55 }}>
+                {profileIds.length} OF {needed} CHOSEN
+                {needed === 2 && profileIds.length === 2
+                  ? " — PICKING A THIRD REPLACES THE OLDEST"
+                  : ""}
+              </span>
+            </fieldset>
+          )}
 
           <fieldset className="border-0 p-0 m-0">
             <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
@@ -244,16 +355,44 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
             </div>
           </fieldset>
 
+          {/* Live preview of what this student will actually sit */}
+          <div
+            className="p-4"
+            style={{ border: "2px solid var(--color-ink)", background: "var(--color-study)" }}
+          >
+            <span className="t-micro" style={{ opacity: 0.6 }}>
+              YOU WILL SIT
+            </span>
+            {subjects.length === 0 ? (
+              <p className="text-[15px] m-0 mt-2" style={{ opacity: 0.6 }}>
+                Pick your {needed === 1 ? "profile subject" : "profile subjects"} to see the list.
+              </p>
+            ) : (
+              <ul className="flex flex-wrap gap-2 mt-2 list-none p-0">
+                {subjects.map((subject) => (
+                  <li
+                    key={subject.id}
+                    className="t-micro px-2 py-1"
+                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
+                  >
+                    {subject.glyph} {subject.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <button
             type="submit"
+            disabled={!ready}
             className="press-swiss t-label self-start"
             style={{
-              background: "var(--color-ink)",
-              color: "var(--color-canvas)",
+              background: ready ? "var(--color-ink)" : "var(--color-paper)",
+              color: ready ? "var(--color-canvas)" : "var(--color-ink)",
               border: "2px solid var(--color-ink)",
               boxShadow: "var(--shadow-swiss)",
               padding: "12px 22px",
-              cursor: "pointer",
+              cursor: ready ? "pointer" : "not-allowed",
             }}
           >
             START TRACKING →
@@ -310,7 +449,9 @@ function Loaded({
   const latest = attempts[0];
   const best = attempts.reduce((a, b) => (gradeRank(b.grade) > gradeRank(a.grade) ? b : a));
 
-  const component = boundariesFor(latest.subjectId)?.components[latest.componentIndex];
+  const component = boundariesFor(latest.subjectId, latest.gradeYear)?.components[
+    latest.componentIndex
+  ];
   const next = component ? marksToNextGrade(latest.scaledMark, component) : null;
 
   // Oldest first, so the trend line reads left to right.

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import PaperFilter from "@/components/library/PaperFilter";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
-import { GRADE_STAGES, SUBJECTS, subjectById } from "@/data/curriculum";
+import { GRADE_STAGES, examSubjectsFor, profileOptionsFor, subjectById } from "@/data/curriculum";
 import { boundariesFor } from "@/data/grade-boundaries";
 
 export const metadata = {
@@ -17,7 +18,7 @@ export const metadata = {
  * the full product is visible without pretending the content is there.
  */
 export default function Library() {
-  const seededSubjects = new Set(PAPERS.map((p) => p.subjectId));
+  const seededSubjects = new Set(PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`));
 
   return (
     <main>
@@ -31,17 +32,28 @@ export default function Library() {
           <span className="t-label pb-2">↳ {PAPERS.length} READY TO SIT</span>
         </div>
 
+        <PaperFilter
+          available={PAPERS.map((p) => ({ gradeYear: p.gradeYear, subjectId: p.subjectId }))}
+        />
+
         <div className="grid lg:grid-cols-2 gap-5">
           {[...PAPERS]
             .sort((a, b) => a.gradeYear - b.gradeYear)
             .map((paper) => {
             const subject = subjectById(paper.subjectId);
-            const component = boundariesFor(paper.subjectId)?.components[paper.componentIndex];
+            const component = boundariesFor(paper.subjectId, paper.gradeYear)?.components[
+              paper.componentIndex
+            ];
             const marks = availableMarks(paper);
             const topics = paperTopics(paper);
 
             return (
-              <article key={paper.id} className="brutal flex flex-col">
+              <article
+                key={paper.id}
+                className="brutal flex flex-col paper-card"
+                data-subject={paper.subjectId}
+                data-year={paper.gradeYear}
+              >
                 <div
                   className="px-5 py-4 border-b-[3px] flex items-start justify-between gap-4"
                   style={{ borderColor: "var(--color-ink)", background: "var(--color-highlighter)" }}
@@ -174,13 +186,24 @@ export default function Library() {
           {GRADE_STAGES.map((stage) => (
             <div key={stage.year} className="swiss-flat p-5">
               <span className="mark t-micro">GRADE {stage.year}</span>
-              <ul className="mt-3 list-none p-0 flex flex-col gap-2">
-                {stage.subjectIds.map((id) => {
-                  const subject = SUBJECTS.find((s) => s.id === id);
-                  if (!subject) return null;
-                  const ready = seededSubjects.has(id) && stage.year === 10;
+              <span className="t-micro block mt-3" style={{ opacity: 0.55 }}>
+                {stage.compulsory}
+              </span>
+              <ul className="mt-2 list-none p-0 flex flex-col gap-2">
+                {[
+                  ...examSubjectsFor({
+                    gradeYear: stage.year,
+                    parallel: "kazakh",
+                    profileSubjectIds: [],
+                  }),
+                  ...profileOptionsFor(stage.year),
+                ].map((subject) => {
+                  const ready = seededSubjects.has(`${stage.year}:${subject.id}`);
                   return (
-                    <li key={id} className="flex items-center justify-between gap-3 text-[15px]">
+                    <li
+                      key={subject.id}
+                      className="flex items-center justify-between gap-3 text-[15px]"
+                    >
                       <span>
                         {subject.glyph} {subject.name}
                       </span>

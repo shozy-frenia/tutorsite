@@ -333,3 +333,17 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--color-ink);
 }
+
+/* --------------------------------------------------------------------------
+   Library filtering.
+
+   PaperFilter emits a scoped <style> block naming exactly the cards a given
+   student should see, so the paper list itself stays server-rendered. This
+   rule is the "hide everything" half; the generated block re-shows the
+   matching cards. Without a filter attribute nothing is hidden, so the
+   library degrades to showing every paper.
+   -------------------------------------------------------------------------- */
+
+html[data-filter-year] .paper-card {
+  display: none;
+}

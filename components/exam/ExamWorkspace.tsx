@@ -75,11 +75,20 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
   );
 
   const scaled = useMemo(
-    () => scaleToComponent(rawMark, availableMarks, paper.subjectId, paper.componentIndex),
-    [rawMark, availableMarks, paper.subjectId, paper.componentIndex]
+    () =>
+      scaleToComponent(
+        rawMark,
+        availableMarks,
+        paper.subjectId,
+        paper.componentIndex,
+        paper.gradeYear
+      ),
+    [rawMark, availableMarks, paper.subjectId, paper.componentIndex, paper.gradeYear]
   );
 
-  const component = boundariesFor(paper.subjectId)?.components[paper.componentIndex];
+  const component = boundariesFor(paper.subjectId, paper.gradeYear)?.components[
+    paper.componentIndex
+  ];
 
   const grade: Grade = useMemo(() => {
     if (!component || !scaled) return "U";
@@ -140,7 +149,8 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
       rawMark,
       availableMarks,
       paper.subjectId,
-      paper.componentIndex
+      paper.componentIndex,
+      paper.gradeYear
     );
 
     saveAttempt({
@@ -149,6 +159,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
       paperTitle: `${paper.title} · ${paper.sitting}`,
       subjectId: paper.subjectId,
       componentIndex: paper.componentIndex,
+      gradeYear: paper.gradeYear,
       finishedAt: new Date().toISOString(),
       rawMark,
       availableMarks,
@@ -906,7 +917,9 @@ function Results({
       .sort((a, b) => a.percent - b.percent);
   }, [paper.questions, results]);
 
-  const component = boundariesFor(paper.subjectId)?.components[paper.componentIndex];
+  const component = boundariesFor(paper.subjectId, paper.gradeYear)?.components[
+    paper.componentIndex
+  ];
   const next = component ? marksToNextGrade(scaledMark, component) : null;
 
   return (
