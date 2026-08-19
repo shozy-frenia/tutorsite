@@ -60,7 +60,7 @@ three grade years, transcribed verbatim: subject level plus every component.
 
 The years use genuinely different tables, not one table scaled. Grade 10
 Mathematics is out of 160 across two components; Grade 12 Mathematics is out of
-230 across three, plus a combined "Papers 1 & 3" row. Grade 11 examines only
+230 across three, plus a combined "Components 1 & 3" row. Grade 11 examines only
 English and the second language.
 
 Whether A* exists at component level also varies by year: Grade 10 and 11
@@ -68,10 +68,22 @@ component tables stop at A, while Grade 12 component tables carry an A* band.
 The data records whatever the published table shows and the grading code walks
 whatever bands exist, rather than assuming a fixed ladder.
 
-These are **not** percentage approximations. A C in Grade 10 Mathematics Paper 1
-starts at 36/80 (45%); a C in Grade 12 Mathematics Component 2 starts at 39/90
+These are **not** percentage approximations. A C in Grade 10 Mathematics
+Component 1 starts at 36/80 (45%); a C in Grade 12 Mathematics Component 2 starts at 39/90
 (43%). `npm run check` asserts every band is contiguous and that a mark on a
 band floor earns that band while one mark below does not.
+
+Components carry the label the published table uses — `Component 1`,
+`Component 2`, and Grade 12 Mathematics' combined `Components 1 & 3` — so a
+paper is always named with the component it is graded on. The library card for
+Computer Science Component 2 reads `GRADED ON COMPONENT 2 / 60`, not the
+subject's 150.
+
+The landing page carries `BoundaryExplorer`, which switches the whole table
+between Grade 10, 11 and 12 and between subject level and component level. That
+switch is the fastest way to see that the years are not one table rescaled:
+Grade 10 has 10 subjects across 20 components, Grade 11 has 3 across 6, Grade 12
+has 9 across 24.
 
 A* is awarded at subject level only in Grades 10 and 11. When the workspace
 shows a subject-level projection it is flagged as projected, never as an
@@ -91,13 +103,14 @@ in the workspace so the number is never silently massaged.
 
 ## Mock papers
 
-Three papers, and the difference between them matters:
+Five papers, and the difference between them matters:
 
 | Paper | Grade | Provenance |
 |---|---|---|
 | Mathematics Paper 1 — 5 March 2021 | 10 | **Transcribed** from the source `.docx` |
 | Mathematics Paper 1 — 16 April 2021 | 10 | **Transcribed** from the source `.docx` |
 | Chemistry Paper 1 — May 2021 | 10 | **Transcribed** from the source PDF |
+| Computer Science Component 2 — May 2025 | 10 | **Transcribed** from the source PDF |
 | Mathematics Paper 1 — Pure | 12 | **Authored** to A-Level standard |
 
 The Grade 10 papers are transcribed question by question, with English stems,
@@ -105,6 +118,14 @@ the original Kazakh or Russian alongside, worked answers and step-by-step mark
 schemes. Chemistry Paper 1 carries all 25 Part A multiple-choice questions plus
 Part B questions 26–31 (75 of the paper's 90 marks); questions 32–33 depend on
 an apparatus diagram and a rate graph that are not yet extracted.
+
+Computer Science Component 2 (10CSCI/02) carries 16 of its 18 questions, 53 of
+60 marks, all built on the paper's single scenario — the delivery company
+«Алтын» and its twenty warehouses. Question 3(c) needs the printed
+internet-provider tariff tables and 6(h) the printed C++ listing to trace;
+neither is in the document's text layer, and inventing those numbers would mean
+inventing exam content. Every question on this paper is self-marked: it awards
+marks for justification and for code no string comparison can check.
 
 The Grade 12 paper is **not a past paper** — no Grade 12 paper was supplied, so
 its 15 questions are written to the A-Level pure mathematics standard a profile

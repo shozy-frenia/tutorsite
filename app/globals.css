@@ -347,3 +347,25 @@ body {
 html[data-filter-year] .paper-card {
   display: none;
 }
+
+/* Tilted phone on the landing page. Flattens on small screens, where a
+   rotated 300px device stops being readable, and for reduced-motion users. */
+.phone-tilt {
+  transform: rotateY(-17deg) rotateX(6deg) rotateZ(-2deg);
+  transform-style: preserve-3d;
+  transition: transform 400ms ease;
+}
+.phone-tilt:hover {
+  transform: rotateY(-8deg) rotateX(3deg) rotateZ(-1deg);
+}
+@media (max-width: 767px) {
+  .phone-tilt,
+  .phone-tilt:hover {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-tilt {
+    transition: none;
+  }
+}

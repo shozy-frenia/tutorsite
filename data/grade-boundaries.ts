@@ -77,7 +77,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 80,
         bands: bands([
           ["A", 56, 80],
@@ -89,7 +89,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 80,
         bands: bands([
           ["A", 58, 80],
@@ -120,7 +120,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 54,
         bands: bands([
           ["A", 32, 54],
@@ -132,7 +132,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 96,
         bands: bands([
           ["A", 55, 96],
@@ -163,7 +163,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 50,
         bands: bands([
           ["A", 32, 50],
@@ -175,7 +175,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 50,
         bands: bands([
           ["A", 31, 50],
@@ -206,7 +206,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 40,
         bands: bands([
           ["A", 33, 40],
@@ -218,7 +218,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 20,
         bands: bands([
           ["A", 16, 20],
@@ -249,7 +249,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 50,
         bands: bands([
           ["A", 27, 50],
@@ -261,7 +261,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 50,
         bands: bands([
           ["A", 26, 50],
@@ -292,7 +292,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 40,
         bands: bands([
           ["A", 33, 40],
@@ -304,7 +304,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 20,
         bands: bands([
           ["A", 14, 20],
@@ -335,7 +335,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 90,
         bands: bands([
           ["A", 56, 90],
@@ -347,7 +347,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 26, 40],
@@ -378,7 +378,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 90,
         bands: bands([
           ["A", 58, 90],
@@ -390,7 +390,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 24, 40],
@@ -421,7 +421,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 90,
         bands: bands([
           ["A", 60, 90],
@@ -433,7 +433,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 25, 40],
@@ -464,7 +464,7 @@ const GRADE_10: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 90,
         bands: bands([
           ["A", 57, 90],
@@ -476,7 +476,7 @@ const GRADE_10: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 60,
         bands: bands([
           ["A", 39, 60],
@@ -514,7 +514,7 @@ const GRADE_11: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 50,
         bands: bands([
           ["A", 40, 50],
@@ -526,7 +526,7 @@ const GRADE_11: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 28, 40],
@@ -557,7 +557,7 @@ const GRADE_11: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 60,
         bands: bands([
           ["A", 44, 60],
@@ -569,7 +569,7 @@ const GRADE_11: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 27, 40],
@@ -600,7 +600,7 @@ const GRADE_11: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 60,
         bands: bands([
           ["A", 42, 60],
@@ -612,7 +612,7 @@ const GRADE_11: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A", 26, 40],
@@ -651,7 +651,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 60,
         bands: bands([
           ["A*", 52, 60],
@@ -664,7 +664,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 90,
         bands: bands([
           ["A*", 72, 90],
@@ -677,7 +677,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 3",
+        name: "Component 3",
         maxMark: 80,
         bands: bands([
           ["A*", 70, 80],
@@ -691,7 +691,7 @@ const GRADE_12: SubjectBoundaries[] = [
       },
       {
         // The published table carries this combined row for Papers 1 + 3.
-        name: "Papers 1 & 3",
+        name: "Components 1 & 3",
         maxMark: 140,
         bands: bands([
           ["A*", 122, 140],
@@ -723,7 +723,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 60,
         bands: bands([
           ["A*", 42, 60],
@@ -736,7 +736,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 40,
         bands: bands([
           ["A*", 38, 40],
@@ -768,7 +768,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 50,
         bands: bands([
           ["A*", 37, 50],
@@ -781,7 +781,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 50,
         bands: bands([
           ["A*", 37, 50],
@@ -813,7 +813,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 50,
         bands: bands([
           ["A*", 30, 50],
@@ -826,7 +826,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 50,
         bands: bands([
           ["A*", 30, 50],
@@ -858,7 +858,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 40,
         bands: bands([
           ["A*", 28, 40],
@@ -871,7 +871,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 100,
         bands: bands([
           ["A*", 60, 100],
@@ -884,7 +884,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 3",
+        name: "Component 3",
         maxMark: 30,
         bands: bands([
           ["A*", 22, 30],
@@ -916,7 +916,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 40,
         bands: bands([
           ["A*", 28, 40],
@@ -929,7 +929,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 100,
         bands: bands([
           ["A*", 61, 100],
@@ -942,7 +942,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 3",
+        name: "Component 3",
         maxMark: 30,
         bands: bands([
           ["A*", 19, 30],
@@ -974,7 +974,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 40,
         bands: bands([
           ["A*", 28, 40],
@@ -987,7 +987,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 100,
         bands: bands([
           ["A*", 63, 100],
@@ -1000,7 +1000,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 3",
+        name: "Component 3",
         maxMark: 30,
         bands: bands([
           ["A*", 20, 30],
@@ -1032,7 +1032,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 70,
         bands: bands([
           ["A*", 48, 70],
@@ -1045,7 +1045,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 70,
         bands: bands([
           ["A*", 49, 70],
@@ -1058,7 +1058,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 3",
+        name: "Component 3",
         maxMark: 60,
         bands: bands([
           ["A*", 45, 60],
@@ -1090,7 +1090,7 @@ const GRADE_12: SubjectBoundaries[] = [
     },
     components: [
       {
-        name: "Paper 1",
+        name: "Component 1",
         maxMark: 70,
         bands: bands([
           ["A*", 54, 70],
@@ -1103,7 +1103,7 @@ const GRADE_12: SubjectBoundaries[] = [
         ]),
       },
       {
-        name: "Paper 2",
+        name: "Component 2",
         maxMark: 60,
         bands: bands([
           ["A*", 42, 60],
