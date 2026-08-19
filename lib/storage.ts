@@ -1,6 +1,7 @@
 "use client";
 
-import type { Grade } from "@/data/grade-boundaries";
+import type { Grade, GradeYear } from "@/data/grade-boundaries";
+import type { Parallel } from "@/data/curriculum";
 
 /**
  * Local persistence for the demo.
@@ -15,7 +16,17 @@ const KEY = "talap.v1";
 
 export interface Profile {
   name: string;
-  gradeYear: 10 | 11 | 12;
+  gradeYear: GradeYear;
+  /**
+   * Language parallel. Decides which language is Я1 and which is Я2, so it
+   * decides which language papers this student will ever sit.
+   */
+  parallel: Parallel;
+  /**
+   * Chosen profile subjects: one at Grade 10, two at Grade 12, none at
+   * Grade 11. Mock papers are filtered to these.
+   */
+  profileSubjectIds: string[];
   targetGrade: Grade;
   /** ISO date the profile was created. */
   joinedAt: string;
@@ -38,6 +49,8 @@ export interface Attempt {
   paperTitle: string;
   subjectId: string;
   componentIndex: number;
+  /** Grade year the paper belongs to — boundary tables differ by year. */
+  gradeYear: GradeYear;
   /** ISO timestamp the attempt was submitted. */
   finishedAt: string;
   rawMark: number;

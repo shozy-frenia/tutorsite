@@ -15,7 +15,7 @@
  * normaliser cannot match, which would silently mark correct students wrong.
  */
 
-import { SUBJECT_BOUNDARIES } from "../data/grade-boundaries";
+import { allBoundarySets } from "../data/grade-boundaries";
 import { PAPERS } from "../data/exams";
 import { paperMarkTotal, isCorrect } from "../lib/exam-types";
 import { validateBoundarySet, gradeForMark } from "../lib/grading";
@@ -30,29 +30,38 @@ const pass = (message: string) => console.log(`  ✓ ${message}`);
 
 console.log("\nGRADE BOUNDARIES");
 let sets = 0;
-for (const subject of SUBJECT_BOUNDARIES) {
+const perYear = new Map<number, number>();
+for (const { gradeYear, subject } of allBoundarySets()) {
+  perYear.set(gradeYear, (perYear.get(gradeYear) ?? 0) + 1);
   for (const [label, set] of [
-    [`${subject.name} subject`, subject.subject] as const,
-    ...subject.components.map((c) => [`${subject.name} ${c.name}`, c] as const),
+    [`G${gradeYear} ${subject.name} subject`, subject.subject] as const,
+    ...subject.components.map(
+      (c) => [`G${gradeYear} ${subject.name} ${c.name}`, c] as const
+    ),
   ]) {
     sets++;
     const errors = validateBoundarySet(set);
     if (errors.length) fail(`${label}: ${errors.join("; ")}`);
   }
-}
-pass(`${sets} boundary sets contiguous and complete`);
 
-// A mark on a band floor must earn that band; one below must not.
-for (const subject of SUBJECT_BOUNDARIES) {
+  // A mark on a band floor must earn that band; one below must not.
   for (const band of subject.subject.bands) {
     if (gradeForMark(band.min, subject.subject) !== band.grade) {
-      fail(`${subject.name}: ${band.min} does not award ${band.grade}`);
+      fail(`G${gradeYear} ${subject.name}: ${band.min} does not award ${band.grade}`);
     }
     if (band.min > 0 && gradeForMark(band.min - 1, subject.subject) === band.grade) {
-      fail(`${subject.name}: ${band.min - 1} still awards ${band.grade}`);
+      fail(`G${gradeYear} ${subject.name}: ${band.min - 1} still awards ${band.grade}`);
     }
   }
 }
+pass(
+  `${sets} boundary sets contiguous and complete (` +
+    [...perYear.entries()]
+      .sort()
+      .map(([y, n]) => `G${y}: ${n} subjects`)
+      .join(", ") +
+    ")"
+);
 pass("band floors award the expected grade, one mark below does not");
 
 console.log("\nPAPERS");

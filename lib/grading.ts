@@ -2,6 +2,7 @@ import {
   type Band,
   type BoundarySet,
   type Grade,
+  type GradeYear,
   GRADE_ORDER,
   boundariesFor,
 } from "@/data/grade-boundaries";
@@ -59,8 +60,13 @@ export function percentOf(mark: number, set: BoundarySet): number {
  * Grade a single component (paper) of a subject.
  * `componentIndex` is 0-based: 0 = Paper 1, 1 = Paper 2.
  */
-export function gradeComponent(subjectId: string, componentIndex: number, mark: number) {
-  const subject = boundariesFor(subjectId);
+export function gradeComponent(
+  subjectId: string,
+  componentIndex: number,
+  mark: number,
+  gradeYear: GradeYear
+) {
+  const subject = boundariesFor(subjectId, gradeYear);
   const component = subject?.components[componentIndex];
   if (!subject || !component) return null;
 
@@ -88,9 +94,10 @@ export function gradeComponent(subjectId: string, componentIndex: number, mark: 
 export function projectSubjectGrade(
   subjectId: string,
   componentIndex: number,
-  mark: number
+  mark: number,
+  gradeYear: GradeYear
 ): { grade: Grade; projectedTotal: number; maxMark: number; projected: true } | null {
-  const subject = boundariesFor(subjectId);
+  const subject = boundariesFor(subjectId, gradeYear);
   const component = subject?.components[componentIndex];
   if (!subject || !component) return null;
 
@@ -116,9 +123,10 @@ export function scaleToComponent(
   rawMark: number,
   availableMarks: number,
   subjectId: string,
-  componentIndex: number
+  componentIndex: number,
+  gradeYear: GradeYear
 ): { scaledMark: number; componentMax: number } | null {
-  const component = boundariesFor(subjectId)?.components[componentIndex];
+  const component = boundariesFor(subjectId, gradeYear)?.components[componentIndex];
   if (!component) return null;
   if (availableMarks <= 0) return { scaledMark: 0, componentMax: component.maxMark };
 

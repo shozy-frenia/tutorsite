@@ -1,14 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 /**
- * Shared hardening for the AI routes.
+ * Shared hardening for the AI routes: rate limiting, input validation and
+ * error mapping. Provider selection and model clients live in providers.ts.
  *
- * The API key never leaves the server: the browser posts here, this module
- * adds the credential. Everything below is the minimum an MVP should ship
- * with — see the caveats at the bottom for what production still needs.
+ * The API key never leaves the server: the browser posts here, the provider
+ * layer adds the credential. Everything below is the minimum an MVP should
+ * ship with — see the caveats at the bottom for what production still needs.
  */
-
-export const MODEL = "claude-opus-5";
 
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 12;
@@ -67,21 +66,13 @@ export function validateMessages(value: unknown): string | null {
 export const clamp = (value: unknown, max: number): string =>
   typeof value === "string" ? value.slice(0, max) : "";
 
-/** Is a credential configured? Routes degrade to offline mode when not. */
-export const hasApiKey = (): boolean =>
-  Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-
-/**
- * Build a client. The SDK resolves the credential from the environment, so
- * nothing here reads or logs the key itself.
- */
-export const anthropic = (): Anthropic =>
-  new Anthropic({ maxRetries: 2, timeout: 60_000 });
-
 /** Map SDK errors onto a status + safe message. Never leaks upstream detail. */
 export function describeError(error: unknown): { status: number; message: string } {
   if (error instanceof Anthropic.AuthenticationError) {
-    return { status: 503, message: "The tutor is not configured. Set ANTHROPIC_API_KEY." };
+    return {
+      status: 503,
+      message: "The tutor is not configured. Set ANTHROPIC_API_KEY or FREETHEAI_API_KEY.",
+    };
   }
   if (error instanceof Anthropic.RateLimitError) {
     return { status: 429, message: "The tutor is busy right now. Try again in a moment." };
@@ -94,6 +85,21 @@ export function describeError(error: unknown): { status: number; message: string
   }
   if (error instanceof Anthropic.APIError) {
     return { status: 502, message: "The tutor failed to answer. Try again." };
+  }
+
+  // Errors raised by the OpenAI-compatible provider carry a plain status.
+  const status = (error as { status?: number } | null)?.status;
+  if (typeof status === "number") {
+    if (status === 401 || status === 403) {
+      return { status: 503, message: "The tutor is not configured correctly." };
+    }
+    if (status === 429) {
+      return { status: 429, message: "The tutor is busy right now. Try again in a moment." };
+    }
+    return { status: 502, message: "The tutor failed to answer. Try again." };
+  }
+  if ((error as { name?: string } | null)?.name === "TimeoutError") {
+    return { status: 504, message: "The tutor took too long. Try again." };
   }
   return { status: 500, message: "Something went wrong." };
 }

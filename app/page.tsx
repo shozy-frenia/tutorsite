@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import HeroCanvas from "@/components/HeroCanvas";
-import { GRADE_STAGES, subjectById } from "@/data/curriculum";
-import { SUBJECT_BOUNDARIES } from "@/data/grade-boundaries";
+import { GRADE_STAGES, examSubjectsFor } from "@/data/curriculum";
+import { BOUNDARIES_BY_YEAR, allBoundarySets } from "@/data/grade-boundaries";
 import { PAPERS } from "@/data/exams";
 import { availableMarks } from "@/data/exams";
 
@@ -149,7 +149,7 @@ export default function Home() {
                     `${PAPERS.length} FULL MOCK PAPERS`,
                     `${totalQuestions} QUESTIONS`,
                     `${totalMarks} MARKS`,
-                    `${SUBJECT_BOUNDARIES.length} OFFICIAL BOUNDARY TABLES`,
+                    `${allBoundarySets().length} OFFICIAL BOUNDARY TABLES`,
                     "NO CALCULATOR",
                     "90 MINUTES",
                     "A* TO U",
@@ -242,19 +242,27 @@ export default function Home() {
                 </p>
 
                 <ul className="mt-auto pt-3 flex flex-wrap gap-2 list-none p-0">
-                  {stage.subjectIds.map((id) => {
-                    const subject = subjectById(id);
-                    if (!subject) return null;
-                    return (
-                      <li
-                        key={id}
-                        className="t-micro px-2 py-1"
-                        style={{ border: "2px solid var(--color-ink)" }}
-                      >
-                        {subject.glyph} {subject.name}
-                      </li>
-                    );
-                  })}
+                  {examSubjectsFor({
+                    gradeYear: stage.year,
+                    parallel: "kazakh",
+                    profileSubjectIds: [],
+                  }).map((subject) => (
+                    <li
+                      key={subject.id}
+                      className="t-micro px-2 py-1"
+                      style={{ border: "2px solid var(--color-ink)" }}
+                    >
+                      {subject.glyph} {subject.name}
+                    </li>
+                  ))}
+                  {stage.year !== 11 && (
+                    <li
+                      className="t-micro px-2 py-1"
+                      style={{ background: "var(--color-highlighter)", border: "2px solid var(--color-ink)" }}
+                    >
+                      + {stage.year === 12 ? "2 PROFILES" : "1 PROFILE"}
+                    </li>
+                  )}
                 </ul>
               </div>
 
@@ -277,7 +285,7 @@ export default function Home() {
             style={{ borderColor: "var(--color-ink)" }}
           >
             <h2 className="t-subheading">The boundaries we grade against</h2>
-            <span className="mark t-micro">SUBJECT LEVEL · MINIMUM MARK PER GRADE</span>
+            <span className="mark t-micro">GRADE 10 · SUBJECT LEVEL · MINIMUM MARK PER GRADE</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -299,7 +307,7 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {SUBJECT_BOUNDARIES.map((subject, row) => (
+                {BOUNDARIES_BY_YEAR[10].map((subject, row) => (
                   <tr
                     key={subject.id}
                     style={{
