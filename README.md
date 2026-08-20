@@ -104,7 +104,7 @@ in the workspace so the number is never silently massaged.
 
 ## Mock papers
 
-Ten papers, and the difference between them matters:
+Eleven papers, and the difference between them matters:
 
 | Paper | Grade | Provenance |
 |---|---|---|
@@ -114,6 +114,7 @@ Ten papers, and the difference between them matters:
 | Computer Science Component 2 — May 2025 | 10 | **Transcribed** from the source PDF |
 | Mathematics Component 2 — May 2024 | 10 | **Transcribed** from the source PDF — **calculator paper** |
 | Physics Component 1 | 10 | **Transcribed** from the sample paper |
+| Biology Component 1 — May 2022 | 10 | **Transcribed** from the source PDF |
 | History of Kazakhstan Component 1 | 10 | **Transcribed** from the published test specification |
 | Kazakh Я1 Component 1 | 10 | **Transcribed** from the sample paper |
 | Russian Я1 Component 2 — 2025 | 10 | **Transcribed** from the graded-answers collection |
@@ -210,6 +211,40 @@ like:
   clamped, and the total is computed here rather than taken from the model.
   `npm run check` asserts the criteria sum to the tariff and that every
   criterion has a zero band and a top band equal to its maximum.
+
+### Two shapes of scheme
+
+Real mark schemes come in two shapes, and a criterion carries whichever its
+paper actually uses:
+
+- **Bands** — a level of response, and a mark chosen inside it. The language
+  papers and History work this way.
+- **Points** — a list of creditworthy statements, each worth a stated mark,
+  awarded if the answer contains that idea. The sciences work this way, and
+  Biology Component 1's Part B is marked entirely like this.
+
+Encoding a science scheme as bands, or an essay scheme as points, would produce
+a number the real examiner would not recognise. `npm run check` asserts that
+every criterion has exactly one of the two, that bands reach the criterion's
+maximum and include a zero, and that points sum to it.
+
+Point marking accepts the idea in the student's own words but not something
+merely adjacent to it, and reports the tally. Marked live against the
+configured provider on Biology 26(a)(ii), worth two marks:
+
+| Answer | Mark |
+|---|---|
+| "Oligodendrocytes form the myelin sheath around axons in the CNS." | **1 / 2** — the second point, what myelin does to conduction speed, is absent |
+| The same plus insulation, the nodes of Ranvier and saltatory conduction | **2 / 2** |
+
+On 30(c)(i), worth three, an answer that adds the reagent, heats it and names
+the brick-red precipitate but never says how the juice was obtained scores
+**2 / 3**, with the missing stage named.
+
+How much writing is enough to be markable depends on the shape: a point-marked
+science answer can be complete in one sentence — "the carboxyl group and the
+amino group" earns its mark — while an essay marked against bands cannot be
+judged from a fragment. The route and the button use the same threshold.
 
 ### Source use, counted
 
