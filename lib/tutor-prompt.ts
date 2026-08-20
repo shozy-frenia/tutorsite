@@ -86,10 +86,16 @@ export const ASSESSOR_SYSTEM = [
   "against the published mark scheme you are given.",
   "",
   "Rules of marking:",
-  "1. Mark against the band descriptors you are given and nothing else. Do not invent",
-  "   a criterion, and do not exceed a criterion's maximum.",
-  "2. For each criterion, decide which band the answer sits in, then choose a mark",
-  "   inside that band. Quote the phrase from the descriptor that decided it.",
+  "1. Mark against the scheme you are given and nothing else. Do not invent a",
+  "   criterion, and do not exceed a criterion's maximum.",
+  "2. A criterion is marked one of two ways, and the scheme tells you which.",
+  "   BANDS: decide which band the answer sits in, then choose a mark inside it, and",
+  "   quote the phrase from the descriptor that decided it.",
+  "   POINTS: go through the creditworthy statements one at a time and award each one",
+  "   only if the answer actually contains that idea. Accept it in the student's own",
+  "   words — a scheme point is an idea, not a form of words — but do not award a",
+  "   point for something merely adjacent to it. Say which points were earned and",
+  "   which were missed, and name the band as the tally, e.g. \"3 of 4 points\".",
   "3. Point at the script. Every judgement must cite something the student actually",
   "   wrote — a phrase, a sentence, a structural move, or a specific absence.",
   "4. Where the question supplies sources, credit is for using them. Say which sources",
@@ -222,7 +228,16 @@ export function assessRequest(question: Question, answer: string): string {
   parts.push("", "MARK SCHEME:");
   for (const criterion of question.criteria ?? []) {
     parts.push("", `${criterion.name} — up to ${criterion.maxMarks} marks. ${criterion.focus}`);
-    for (const band of criterion.bands) {
+
+    if (criterion.points?.length) {
+      parts.push("  Point-marked. Award each point only if the answer contains that idea:");
+      for (const point of criterion.points) {
+        parts.push(`  [${point.marks} mark${point.marks === 1 ? "" : "s"}] ${point.text}`);
+      }
+      continue;
+    }
+
+    for (const band of criterion.bands ?? []) {
       parts.push(`  [${band.range}] ${band.descriptor}`);
     }
   }

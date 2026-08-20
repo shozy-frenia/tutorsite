@@ -59,11 +59,16 @@ export default function ExtendedAnswer({
   const [error, setError] = useState<string | null>(null);
 
   const count = words(value);
+  // Point-marked science answers can be complete in one sentence; essays
+  // marked against bands cannot. Keep the button's threshold matched to the
+  // one the route actually applies.
+  const pointMarked = (question.criteria ?? []).every((c) => c.points?.length);
+  const floor = pointMarked ? 3 : 20;
   const short = question.minWords ? count < question.minWords : false;
   const long = question.maxWords ? count > question.maxWords : false;
 
   async function mark() {
-    if (marking || count < 20) return;
+    if (marking || count < floor) return;
     setMarking(true);
     setError(null);
     setAssessment(null);
@@ -162,22 +167,22 @@ export default function ExtendedAnswer({
       <div className="flex flex-wrap gap-2 items-center">
         <button
           onClick={() => void mark()}
-          disabled={marking || count < 20}
+          disabled={marking || count < floor}
           className="press-swiss t-label"
           style={{
-            background: count >= 20 ? "var(--color-ink)" : "var(--color-paper)",
-            color: count >= 20 ? "var(--color-canvas)" : "var(--color-ink)",
+            background: count >= floor ? "var(--color-ink)" : "var(--color-paper)",
+            color: count >= floor ? "var(--color-canvas)" : "var(--color-ink)",
             border: "2px solid var(--color-ink)",
             boxShadow: "var(--shadow-swiss)",
             padding: "10px 18px",
-            cursor: marking ? "wait" : count >= 20 ? "pointer" : "not-allowed",
+            cursor: marking ? "wait" : count >= floor ? "pointer" : "not-allowed",
           }}
         >
           {marking ? "EXAMINER IS READING…" : "MARK MY ANSWER"}
         </button>
-        {count < 20 && (
+        {count < floor && (
           <span className="t-micro" style={{ opacity: 0.55 }}>
-            AT LEAST 20 WORDS BEFORE IT CAN BE MARKED
+            AT LEAST {floor} WORDS BEFORE IT CAN BE MARKED
           </span>
         )}
       </div>

@@ -44,10 +44,14 @@ export interface CriterionBand {
 /**
  * A criterion an extended answer is marked against.
  *
- * Language papers split content and organisation from range and accuracy of
- * language; History splits knowledge, analysis and use of sources. The split
- * is the mark scheme's, not ours — a criterion invented here would produce a
- * number the real examiner would not recognise.
+ * Two shapes, because real mark schemes come in two shapes. Language papers
+ * and History use *bands*: a level of response, and a mark chosen inside it.
+ * The sciences use *points*: a list of creditworthy statements, one mark each,
+ * awarded if the answer contains them. Encoding a science scheme as bands, or
+ * an essay scheme as points, would produce a number the real examiner would
+ * not recognise — so a criterion carries whichever its paper actually uses.
+ *
+ * Exactly one of `bands` and `points` is present; `npm run check` enforces it.
  */
 export interface Criterion {
   id: string;
@@ -55,7 +59,10 @@ export interface Criterion {
   maxMarks: number;
   /** What the marker is looking for, in one sentence. */
   focus: string;
-  bands: CriterionBand[];
+  /** Level-of-response marking: pick a band, then a mark inside it. */
+  bands?: CriterionBand[];
+  /** Point marking: each creditworthy statement and what it is worth. */
+  points?: MarkSchemeStep[];
 }
 
 /**

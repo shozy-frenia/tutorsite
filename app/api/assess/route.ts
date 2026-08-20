@@ -76,8 +76,20 @@ export async function POST(request: Request) {
   }
 
   const answer = clamp(body.answer, MAX_ANSWER_CHARS);
-  if (wordCount(answer) < 20) {
-    return jsonError("Write a fuller answer before asking for it to be marked.", 400);
+
+  // How much writing is enough to be markable depends on the question. A
+  // point-marked science answer can earn full marks in one sentence — "the
+  // carboxyl group and the amino group" is a complete answer — while an essay
+  // marked against bands cannot be judged from a fragment.
+  const pointMarked = question.criteria.every((criterion) => criterion.points?.length);
+  const floor = pointMarked ? 3 : 20;
+  if (wordCount(answer) < floor) {
+    return jsonError(
+      pointMarked
+        ? "Write an answer before asking for it to be marked."
+        : "Write a fuller answer before asking for it to be marked.",
+      400
+    );
   }
 
   const provider = resolveProvider();
@@ -243,9 +255,15 @@ function selfMarkGuide(question: Question, answer: string) {
     marked: false,
     band: "",
     reason: criterion.focus,
-    evidence: criterion.bands
-      .map((band) => `[${band.range}] ${band.descriptor}`)
-      .join("\n"),
+    // Whichever shape the criterion carries, show the student what they are
+    // marking themselves against.
+    evidence: criterion.points?.length
+      ? criterion.points
+          .map((point) => `[${point.marks}] ${point.text}`)
+          .join("\n")
+      : (criterion.bands ?? [])
+          .map((band) => `[${band.range}] ${band.descriptor}`)
+          .join("\n"),
     next: "",
   }));
 

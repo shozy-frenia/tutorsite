@@ -107,15 +107,35 @@ for (const paper of PAPERS) {
         );
       }
       for (const criterion of question.criteria ?? []) {
-        if (!criterion.bands.length) fail(`${question.id}/${criterion.id}: no bands`);
-        const top = Math.max(...criterion.bands.map((b) => b.max));
-        if (top !== criterion.maxMarks) {
+        const banded = Boolean(criterion.bands?.length);
+        const pointed = Boolean(criterion.points?.length);
+
+        if (banded === pointed) {
           fail(
-            `${question.id}/${criterion.id}: top band is ${top}, criterion is worth ${criterion.maxMarks}`
+            `${question.id}/${criterion.id}: needs exactly one of bands or points, has ${banded ? "both" : "neither"}`
           );
         }
-        if (!criterion.bands.some((b) => b.max === 0)) {
-          fail(`${question.id}/${criterion.id}: no zero band`);
+
+        if (banded) {
+          const bands = criterion.bands ?? [];
+          const top = Math.max(...bands.map((b) => b.max));
+          if (top !== criterion.maxMarks) {
+            fail(
+              `${question.id}/${criterion.id}: top band is ${top}, criterion is worth ${criterion.maxMarks}`
+            );
+          }
+          if (!bands.some((b) => b.max === 0)) {
+            fail(`${question.id}/${criterion.id}: no zero band`);
+          }
+        }
+
+        if (pointed) {
+          const total = (criterion.points ?? []).reduce((sum, p) => sum + p.marks, 0);
+          if (total !== criterion.maxMarks) {
+            fail(
+              `${question.id}/${criterion.id}: points sum to ${total}, criterion is worth ${criterion.maxMarks}`
+            );
+          }
         }
       }
       for (const source of question.sources ?? []) {
