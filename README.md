@@ -104,7 +104,7 @@ in the workspace so the number is never silently massaged.
 
 ## Mock papers
 
-Eight papers, and the difference between them matters:
+Ten papers, and the difference between them matters:
 
 | Paper | Grade | Provenance |
 |---|---|---|
@@ -112,6 +112,8 @@ Eight papers, and the difference between them matters:
 | Mathematics Paper 1 — 16 April 2021 | 10 | **Transcribed** from the source `.docx` |
 | Chemistry Paper 1 — May 2021 | 10 | **Transcribed** from the source PDF |
 | Computer Science Component 2 — May 2025 | 10 | **Transcribed** from the source PDF |
+| Mathematics Component 2 — May 2024 | 10 | **Transcribed** from the source PDF — **calculator paper** |
+| Physics Component 1 | 10 | **Transcribed** from the sample paper |
 | History of Kazakhstan Component 1 | 10 | **Transcribed** from the published test specification |
 | Kazakh Я1 Component 1 | 10 | **Transcribed** from the sample paper |
 | Russian Я1 Component 2 — 2025 | 10 | **Transcribed** from the graded-answers collection |
@@ -156,6 +158,32 @@ Questions are marked one of three ways, mirroring how the real paper is graded:
 
 Only questions whose answer is unambiguous are set to `auto`. Diagram-dependent
 questions carry the original figure from the paper (`public/exams/`).
+
+## The calculator
+
+Some papers permit a calculator and some do not, and the difference is on the
+paper itself: Mathematics **Component 1** is non-calculator, **Component 2**
+lists a calculator among its additional materials. `Paper.calculator` records
+which, and the workspace shows an on-screen scientific calculator only on the
+papers that allow one — offering it on a non-calculator paper would train the
+wrong habit.
+
+It takes a whole expression rather than one keypress at a time, because that is
+how the paper is actually sat: `acos(11/sqrt(143))` is one keying, not nine. It
+handles the implicit multiplication people write (`2π`, `3(4+1)`), unary minus
+that binds correctly (`2*-3` is −6, `-3^2` is −9), a DEG/RAD switch, and an
+`Ans` key.
+
+`lib/calculator.ts` is a hand-written tokeniser and shunting-yard parser, not
+`eval`. `eval` on a string the page collected would execute whatever was typed;
+a calculator is not worth an arbitrary-code-execution hole. `npm run check`
+evaluates eleven expressions — including the arithmetic of the 2024 Component 2
+paper — and asserts that malformed input is rejected rather than quietly
+returning a number.
+
+The 2024 rubric asks for inexact answers to 3 significant figures and angles to
+0.1°, so the panel shows the 3 s.f. rounding beside the full value rather than
+leaving a candidate to copy sixteen digits the mark scheme does not want.
 
 ## Marking extended answers
 

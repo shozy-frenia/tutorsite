@@ -10,6 +10,8 @@
  *   2. Every mark scheme sums to its question's mark tariff.
  *   3. Every auto-marked question's own answer key marks itself correct.
  *   4. Every offline variant generator produces a scheme that sums correctly.
+ *   5. Every assessed question's criteria sum to its tariff and carry bands.
+ *   6. The calculator evaluates the arithmetic its papers actually need.
  *
  * Check 3 is the important one: it catches an answer written in a form the
  * normaliser cannot match, which would silently mark correct students wrong.
@@ -20,6 +22,7 @@ import { PAPERS } from "../data/exams";
 import { paperMarkTotal, isCorrect } from "../lib/exam-types";
 import { validateBoundarySet, gradeForMark } from "../lib/grading";
 import { variantFor } from "../lib/offline-variants";
+import { evaluate } from "../lib/calculator";
 
 let failures = 0;
 const fail = (message: string) => {
@@ -166,6 +169,38 @@ for (const paper of PAPERS) {
   }
 }
 pass(`${topicsSeen.size} topics generate valid same-tariff variants`);
+
+
+/* ------------------------------------------------------------ calculator */
+
+console.log("\nCALCULATOR");
+{
+  const cases: Array<[string, number, "deg" | "rad"]> = [
+    ["2+3*4", 14, "deg"],
+    ["2^3^2", 512, "deg"],
+    ["-3^2", -9, "deg"],
+    ["2*-3", -6, "deg"],
+    ["3(4+1)", 15, "deg"],
+    ["sin(30)", 0.5, "deg"],
+    ["sin(pi/6)", 0.5, "rad"],
+    ["atan(1)", 45, "deg"],
+    // The arithmetic of the papers that permit a calculator.
+    ["4pi/9*180/pi", 80, "deg"],
+    ["5*4/3.2", 6.25, "deg"],
+    ["acos(11/sqrt(143))", 23.093469, "deg"],
+  ];
+  for (const [expression, want, mode] of cases) {
+    const got = evaluate(expression, mode);
+    if (got.value === null || Math.abs(got.value - want) > 1e-5) {
+      fail(`calculator: ${expression} [${mode}] gave ${got.value ?? got.error}, expected ${want}`);
+    }
+  }
+  // A malformed expression must fail rather than quietly return a number.
+  for (const bad of ["2+", "(1+2", "1+2)", "foo(2)"]) {
+    if (evaluate(bad).value !== null) fail(`calculator: "${bad}" should not evaluate`);
+  }
+  console.log(`  \u2713 ${cases.length} expressions evaluate correctly, malformed input rejected`);
+}
 
 console.log(
   failures === 0
