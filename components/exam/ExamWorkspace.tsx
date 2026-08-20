@@ -14,6 +14,7 @@ import { boundariesFor, type Grade } from "@/data/grade-boundaries";
 import { saveAttempt, type QuestionOutcome } from "@/lib/storage";
 import TutorDrawer from "./TutorDrawer";
 import ExtendedAnswer from "./ExtendedAnswer";
+import CalculatorPanel from "./CalculatorPanel";
 import GradeBadge from "@/components/GradeBadge";
 
 /**
@@ -447,6 +448,14 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
           >
             ASK THE AI TUTOR
           </button>
+
+          {/* The paper says whether a calculator is allowed; offering one on a
+              non-calculator paper would train the wrong habit. */}
+          {paper.calculator && (
+            <div className="mt-3">
+              <CalculatorPanel />
+            </div>
+          )}
         </aside>
       </div>
 

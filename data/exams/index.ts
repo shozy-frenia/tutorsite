@@ -8,6 +8,8 @@ import { CS_10_P2_MAY_2025 } from "./cs-10-p2-may-2025";
 import { HISTORY_10_2025 } from "./history-10-2025";
 import { KAZAKH_L1_10_P1 } from "./kazakh-l1-10-p1";
 import { RUSSIAN_L1_10_P2 } from "./russian-l1-10-p2";
+import { MATHS_10_P2_MAY_2024 } from "./maths-10-p2-may-2024";
+import { PHYSICS_10_P1_2018 } from "./physics-10-p1-2018";
 
 export const PAPERS: Paper[] = [
   MATHS_10_P1_MARCH,
@@ -17,6 +19,8 @@ export const PAPERS: Paper[] = [
   HISTORY_10_2025,
   KAZAKH_L1_10_P1,
   RUSSIAN_L1_10_P2,
+  MATHS_10_P2_MAY_2024,
+  PHYSICS_10_P1_2018,
   MATHS_12_P1_CALCULUS,
 ];
 
