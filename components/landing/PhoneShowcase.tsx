@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandMark from "@/components/BrandMark";
 
 /**
  * Tilted phone showing the tutor mid-conversation.
@@ -133,7 +134,7 @@ export default function PhoneShowcase() {
                       borderBottom: "2px solid var(--color-ink)",
                     }}
                   >
-                    <span className="t-label">TALAP®</span>
+                    <BrandMark height={16} />
                     <span className="t-micro" style={{ opacity: 0.55 }}>
                       GRADE 10 · KZ
                     </span>

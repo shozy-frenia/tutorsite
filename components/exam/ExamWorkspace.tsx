@@ -16,6 +16,7 @@ import TutorDrawer from "./TutorDrawer";
 import ExtendedAnswer from "./ExtendedAnswer";
 import CalculatorPanel from "./CalculatorPanel";
 import GradeBadge from "@/components/GradeBadge";
+import BrandMark from "@/components/BrandMark";
 
 /**
  * The test sheet — Swiss bento register.
@@ -213,6 +214,9 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
+          {/* The square only — not a link. A route home sitting under the
+              cursor mid-paper is a trap, and EXIT already offers the way out. */}
+          <BrandMark height={20} iconOnly className="shrink-0" />
           <Link href="/library" className="t-label no-underline" style={{ color: "inherit" }}>
             ↳ EXIT
           </Link>
