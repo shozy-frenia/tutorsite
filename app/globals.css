@@ -366,6 +366,28 @@ html[data-filter-year] .paper-card {
   }
 }
 
+/* --------------------------------------------------------------------------
+   PointerLift — the hard offset shadow swings away from the cursor, so a
+   hovered card reads as leaning toward the pointer. --sx / --sy are written
+   per-instance by the component and fall back to the system's own resting
+   offset, which is what the card shows before it is ever touched.
+
+   Declared after .brutal / .swiss deliberately: same specificity, later in the
+   cascade, so it takes over box-shadow from whichever frame class the card
+   also carries.
+   -------------------------------------------------------------------------- */
+.pointer-lift {
+  position: relative;
+  box-shadow: var(--sx, 5px) var(--sy, 5px) 0 var(--color-ink);
+  transition: box-shadow 140ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pointer-lift {
+    transition: none;
+  }
+}
+
 /* Subject ribbon text riding the wave path in SubjectRibbon. */
 .ribbon-text {
   font-family: var(--font-sans);

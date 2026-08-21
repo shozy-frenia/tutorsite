@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import { gsap } from "gsap";
 
 interface MaskedRevealProps {
@@ -58,20 +58,24 @@ export default function MaskedReveal({ text, as = "h2", className = "", style }:
   return (
     <Tag ref={rootRef} className={className} style={style}>
       {words.map((word, i) => (
-        <span
-          key={`${word}-${i}`}
-          style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}
-        >
-          <span
-            ref={(el) => {
-              wordRefs.current[i] = el;
-            }}
-            style={{ display: "inline-block" }}
-          >
-            {word}
-            {i < words.length - 1 ? " " : ""}
+        // The separating space is a real text node BETWEEN the clipping
+        // spans, never inside one. Put it inside and React serialises it as
+        // &nbsp; — a trailing space within an inline-block would otherwise
+        // collapse — which costs the heading its line-break opportunities and
+        // puts non-breaking spaces into anything copied off the page.
+        <Fragment key={`${word}-${i}`}>
+          <span style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}>
+            <span
+              ref={(el) => {
+                wordRefs.current[i] = el;
+              }}
+              style={{ display: "inline-block" }}
+            >
+              {word}
+            </span>
           </span>
-        </span>
+          {i < words.length - 1 ? " " : null}
+        </Fragment>
       ))}
     </Tag>
   );
