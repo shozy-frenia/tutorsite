@@ -6,10 +6,11 @@ import PhoneShowcase from "@/components/landing/PhoneShowcase";
 import RevealButton from "@/components/motion/RevealButton";
 import SubjectRibbon from "@/components/motion/SubjectRibbon";
 import MaskedReveal from "@/components/motion/MaskedReveal";
-import { GRADE_STAGES, examSubjectsFor } from "@/data/curriculum";
+import PointerLift from "@/components/motion/PointerLift";
+import PaperCoverflow from "@/components/motion/PaperCoverflow";
+import { GRADE_STAGES, examSubjectsFor, subjectById } from "@/data/curriculum";
 import { allBoundarySets } from "@/data/grade-boundaries";
-import { PAPERS } from "@/data/exams";
-import { availableMarks } from "@/data/exams";
+import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
 
 /**
  * Landing page — neo-brutalist register.
@@ -74,6 +75,31 @@ const FEATURES = [
 export default function Home() {
   const totalQuestions = PAPERS.reduce((sum, p) => sum + p.questions.length, 0);
   const totalMarks = PAPERS.reduce((sum, p) => sum + availableMarks(p), 0);
+
+  // Flattened for the coverflow, which is a client component and so can only
+  // be handed plain serialisable values — not whole Paper objects with their
+  // question banks attached.
+  const coverflowPapers = [...PAPERS]
+    .sort((a, b) => a.gradeYear - b.gradeYear)
+    .map((paper) => {
+      const subject = subjectById(paper.subjectId);
+      return {
+        id: paper.id,
+        title: paper.title,
+        subject: subject?.name ?? paper.subjectId,
+        glyph: subject?.glyph ?? "",
+        gradeYear: paper.gradeYear,
+        sitting: paper.sitting,
+        questions: paper.questions.length,
+        marks: availableMarks(paper),
+        minutes: paper.durationMinutes,
+        calculator: Boolean(paper.calculator),
+        pastPaper: paper.provenance === "transcribed",
+        // Enough to show what the paper covers without spilling off a card
+        // that is only 320px wide.
+        topics: paperTopics(paper).slice(0, 5),
+      };
+    });
 
   return (
     <main>
@@ -180,17 +206,18 @@ export default function Home() {
       {/* ------------------------------------------------------------- FEATURES */}
       <section className="px-5 md:px-10 mt-12 md:mt-14">
         <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <h2 className="t-heading" style={{ maxWidth: "16ch" }}>
-            What it actually does
-          </h2>
+          <MaskedReveal as="h2" className="t-heading" style={{ maxWidth: "16ch" }} text="What it actually does" />
           <span className="t-label pb-2">↳ FOUR THINGS, DONE PROPERLY</span>
         </div>
 
         <div className="grid md:grid-cols-6 gap-5">
           {FEATURES.map((feature) => (
-            <article
+            <PointerLift
+              as="article"
               key={feature.badge}
-              className={`brutal press p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
+              // No `.press` here: PointerLift owns box-shadow, and press's
+              // hover rule would outrank it and freeze the swing.
+              className={`brutal p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
               style={
                 feature.accent
                   ? { background: "var(--color-highlighter)" }
@@ -210,7 +237,7 @@ export default function Home() {
               <p className="text-[16px]" style={{ lineHeight: 1.3 }}>
                 {feature.body}
               </p>
-            </article>
+            </PointerLift>
           ))}
         </div>
       </section>
@@ -220,12 +247,30 @@ export default function Home() {
         <SubjectRibbon items={SUBJECT_RIBBON} />
       </section>
 
+      {/* ------------------------------------------------------------ COVERFLOW */}
+      <section className="px-5 md:px-10 mt-10 md:mt-12">
+        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
+          <MaskedReveal
+            as="h2"
+            className="t-heading"
+            style={{ maxWidth: "15ch" }}
+            text="Every paper we have, right now"
+          />
+          <span className="t-label pb-2">↳ CLICK A CARD · ARROW KEYS WORK</span>
+        </div>
+
+        <PaperCoverflow papers={coverflowPapers} />
+      </section>
+
       {/* ---------------------------------------------------------------- GRADES */}
       <section className="px-5 md:px-10 mt-10 md:mt-12">
         <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <h2 className="t-heading" style={{ maxWidth: "14ch" }}>
-            Three years, three different exams
-          </h2>
+          <MaskedReveal
+            as="h2"
+            className="t-heading"
+            style={{ maxWidth: "14ch" }}
+            text="Three years, three different exams"
+          />
           <span className="t-label pb-2">↳ THE ARCHITECTURE</span>
         </div>
 

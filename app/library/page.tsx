@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import PaperFilter from "@/components/library/PaperFilter";
+import MaskedReveal from "@/components/motion/MaskedReveal";
+import PointerLift from "@/components/motion/PointerLift";
+import StaggerIn from "@/components/motion/StaggerIn";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
 import { GRADE_STAGES, examSubjectsFor, profileOptionsFor, subjectById } from "@/data/curriculum";
 import { boundariesFor } from "@/data/grade-boundaries";
@@ -26,9 +29,7 @@ export default function Library() {
 
       <section className="px-5 md:px-10">
         <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <h1 className="t-heading" style={{ maxWidth: "12ch" }}>
-            Mock papers
-          </h1>
+          <MaskedReveal as="h1" className="t-heading" style={{ maxWidth: "12ch" }} text="Mock papers" />
           <span className="t-label pb-2">↳ {PAPERS.length} READY TO SIT</span>
         </div>
 
@@ -36,7 +37,7 @@ export default function Library() {
           available={PAPERS.map((p) => ({ gradeYear: p.gradeYear, subjectId: p.subjectId }))}
         />
 
-        <div className="grid lg:grid-cols-2 gap-5">
+        <StaggerIn className="grid lg:grid-cols-2 gap-5">
           {[...PAPERS]
             .sort((a, b) => a.gradeYear - b.gradeYear)
             .map((paper) => {
@@ -48,7 +49,8 @@ export default function Library() {
             const topics = paperTopics(paper);
 
             return (
-              <article
+              <PointerLift
+                as="article"
                 key={paper.id}
                 className="brutal flex flex-col paper-card"
                 data-subject={paper.subjectId}
@@ -167,18 +169,21 @@ export default function Library() {
                     Sit this paper →
                   </Link>
                 </div>
-              </article>
+              </PointerLift>
             );
           })}
-        </div>
+        </StaggerIn>
       </section>
 
       {/* Curriculum coverage — what exists and what does not */}
       <section className="px-5 md:px-10 mt-12">
         <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <h2 className="t-heading-sm" style={{ maxWidth: "16ch" }}>
-            The rest of the curriculum
-          </h2>
+          <MaskedReveal
+            as="h2"
+            className="t-heading-sm"
+            style={{ maxWidth: "16ch" }}
+            text="The rest of the curriculum"
+          />
           <span className="t-label pb-2">↳ NOT YET SEEDED</span>
         </div>
 
