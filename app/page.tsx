@@ -3,6 +3,9 @@ import Nav from "@/components/Nav";
 import HeroCanvas from "@/components/HeroCanvas";
 import BoundaryExplorer from "@/components/landing/BoundaryExplorer";
 import PhoneShowcase from "@/components/landing/PhoneShowcase";
+import RevealButton from "@/components/motion/RevealButton";
+import SubjectRibbon from "@/components/motion/SubjectRibbon";
+import MaskedReveal from "@/components/motion/MaskedReveal";
 import { GRADE_STAGES, examSubjectsFor } from "@/data/curriculum";
 import { allBoundarySets } from "@/data/grade-boundaries";
 import { PAPERS } from "@/data/exams";
@@ -16,6 +19,23 @@ import { availableMarks } from "@/data/exams";
  * ruled frame rather than bleeding off the page, so the printed-poster
  * structure survives the addition of a canvas.
  */
+
+// Short, decorative labels for the SubjectRibbon — not the official subject
+// names (those stay exact on the Grade 10/11/12 cards below, where they carry
+// real meaning). The ribbon is aria-hidden and unit length has to stay well
+// under the wave path's length or the loop overlaps into unreadable text.
+const SUBJECT_RIBBON = [
+  "MATHEMATICS",
+  "PHYSICS",
+  "CHEMISTRY",
+  "BIOLOGY",
+  "COMPUTER SCIENCE",
+  "HISTORY",
+  "ENGLISH",
+  "KAZAKH",
+  "RUSSIAN",
+  "GEOGRAPHY",
+];
 
 const FEATURES = [
   {
@@ -87,38 +107,24 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <Link
+                <RevealButton
                   href="/library"
-                  className="no-underline press"
-                  style={{
-                    background: "var(--color-highlighter)",
-                    border: "3px solid var(--color-ink)",
-                    boxShadow: "var(--shadow-brutal)",
-                    padding: "14px 26px",
-                    fontWeight: 700,
-                    fontSize: "18px",
-                    letterSpacing: "-0.02em",
-                    color: "var(--color-ink)",
-                  }}
+                  fill="var(--color-highlighter)"
+                  textColor="var(--color-ink)"
+                  hoverFill="var(--color-ink)"
+                  hoverTextColor="var(--color-canvas)"
                 >
                   Sit a mock exam →
-                </Link>
-                <Link
+                </RevealButton>
+                <RevealButton
                   href="/dashboard"
-                  className="no-underline press"
-                  style={{
-                    background: "var(--color-canvas)",
-                    border: "3px solid var(--color-ink)",
-                    boxShadow: "var(--shadow-brutal)",
-                    padding: "14px 26px",
-                    fontWeight: 700,
-                    fontSize: "18px",
-                    letterSpacing: "-0.02em",
-                    color: "var(--color-ink)",
-                  }}
+                  fill="var(--color-canvas)"
+                  textColor="var(--color-ink)"
+                  hoverFill="var(--color-ink)"
+                  hoverTextColor="var(--color-canvas)"
                 >
                   See the dashboard
-                </Link>
+                </RevealButton>
               </div>
             </div>
 
@@ -209,8 +215,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ------------------------------------------------------------- SUBJECTS */}
+      <section className="px-5 md:px-10 mt-10 md:mt-12" aria-hidden="true">
+        <SubjectRibbon items={SUBJECT_RIBBON} />
+      </section>
+
       {/* ---------------------------------------------------------------- GRADES */}
-      <section className="px-5 md:px-10 mt-12 md:mt-14">
+      <section className="px-5 md:px-10 mt-10 md:mt-12">
         <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
           <h2 className="t-heading" style={{ maxWidth: "14ch" }}>
             Three years, three different exams
@@ -292,29 +303,29 @@ export default function Home() {
           className="brutal p-6 md:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8"
           style={{ background: "var(--color-ink)", boxShadow: "var(--shadow-brutal-lg)" }}
         >
-          <h2 className="t-heading" style={{ color: "var(--color-canvas)", maxWidth: "13ch" }}>
-            Start with one paper
-          </h2>
+          <MaskedReveal
+            as="h2"
+            className="t-heading"
+            style={{ color: "var(--color-canvas)", maxWidth: "13ch" }}
+            text="Start with one paper"
+          />
           <div className="flex flex-col gap-4">
             <p style={{ color: "var(--color-canvas)", maxWidth: "40ch" }}>
               90 minutes, 18 questions, no calculator. You will know your grade the second
               you submit.
             </p>
-            <Link
+            <RevealButton
               href="/library"
-              className="no-underline press self-start"
-              style={{
-                background: "var(--color-highlighter)",
-                border: "3px solid var(--color-canvas)",
-                boxShadow: "5px 5px 0 var(--color-canvas)",
-                padding: "14px 26px",
-                fontWeight: 700,
-                fontSize: "18px",
-                color: "var(--color-ink)",
-              }}
+              className="self-start"
+              fill="var(--color-highlighter)"
+              textColor="var(--color-ink)"
+              hoverFill="var(--color-canvas)"
+              hoverTextColor="var(--color-ink)"
+              border="3px solid var(--color-canvas)"
+              shadow="5px 5px 0 var(--color-canvas)"
             >
               Choose a mock →
-            </Link>
+            </RevealButton>
           </div>
         </div>
       </section>
