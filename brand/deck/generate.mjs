@@ -20,7 +20,7 @@
  *
  * Every figure is quoted, not invented. The boundary numbers on slide 02 come
  * from data/grade-boundaries.ts (Grade 10 Mathematics Component 1: C = 36–45
- * of 80; Chemistry Component 1: C = 44–51 of 90). See README.md for the two
+ * of 80; Chemistry Component 1: C = 45–52 of 90). See README.md for the two
  * traction figures the author still has to confirm.
  */
 import fs from "node:fs";
@@ -115,8 +115,8 @@ const slides = [
       </div>
       <div class="panel">
         <span class="panel-cap">Химия · Компонент 1</span>
-        <div class="fig"><b>44</b><span>из 90</span></div>
-        <div class="panel-foot"><span class="grade">= C</span><span class="pct">49 %</span></div>
+        <div class="fig"><b>45</b><span>из 90</span></div>
+        <div class="panel-foot"><span class="grade">= C</span><span class="pct">50 %</span></div>
       </div>
       <p class="kicker">Одна и та же оценка.<br>Разный процент.<br><em>Ученик считает
         в процентах и промахивается мимо своей реальной оценки.</em></p>

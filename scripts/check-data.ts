@@ -7,6 +7,7 @@
  * grade honestly:
  *
  *   1. Every boundary set is contiguous and spans 0..maxMark.
+ *   1b. Every paper points at a component that exists in the boundary table.
  *   2. Every mark scheme sums to its question's mark tariff.
  *   3. Every auto-marked question's own answer key marks itself correct.
  *   4. Every offline variant generator produces a scheme that sums correctly.
@@ -17,7 +18,7 @@
  * normaliser cannot match, which would silently mark correct students wrong.
  */
 
-import { allBoundarySets } from "../data/grade-boundaries";
+import { allBoundarySets, boundariesFor } from "../data/grade-boundaries";
 import { PAPERS } from "../data/exams";
 import { paperMarkTotal, isCorrect } from "../lib/exam-types";
 import { validateBoundarySet, gradeForMark } from "../lib/grading";
@@ -66,6 +67,22 @@ pass(
     ")"
 );
 pass("band floors award the expected grade, one mark below does not");
+
+// A paper whose componentIndex has no matching component grades to null and
+// silently shows the student nothing — the failure mode that let the Grade 10
+// table drift out of sync with the published one unnoticed.
+for (const paper of PAPERS) {
+  const subject = boundariesFor(paper.subjectId, paper.gradeYear);
+  if (!subject) {
+    fail(`${paper.id}: no boundary table for subject "${paper.subjectId}" in G${paper.gradeYear}`);
+  } else if (!subject.components[paper.componentIndex]) {
+    fail(
+      `${paper.id}: componentIndex ${paper.componentIndex} but G${paper.gradeYear} ` +
+        `${subject.name} publishes ${subject.components.length} component(s)`
+    );
+  }
+}
+if (!failures) pass(`${PAPERS.length} papers resolve to a published component`);
 
 console.log("\nPAPERS");
 for (const paper of PAPERS) {

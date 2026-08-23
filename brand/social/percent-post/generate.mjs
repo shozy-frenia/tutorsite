@@ -52,9 +52,9 @@ const face = (w) =>
 const SHORT = {
   "Математика": "Математика",
   "История Казахстана": "История Казахстана",
-  "Казахский язык Я1": "Қазақ тілі Я1",
+  "Казахский язык и литература Я1": "Қазақ тілі Я1",
   "Казахский язык и литература Я2": "Қазақ тілі Я2",
-  "Русский язык Я1": "Русский Я1",
+  "Русский язык и литература Я1": "Русский Я1",
   "Русский язык и литература Я2": "Русский Я2",
   "Физика": "Физика",
   "Биология": "Биология",
@@ -97,9 +97,19 @@ const atPercent = SUBJECTS.map((s) => {
 const spread = [...new Set(atPercent.map((r) => r.grade))].sort(
   (a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
 
-/* Four subjects that between them cover the whole spread of grades at 46 %. */
-const showcase = spread.map((g) => atPercent.find((r) => r.grade === g))
-  .sort((a, b) => ORDER.indexOf(b.grade) - ORDER.indexOf(a.grade));
+/* Every grade 46 % can land on, best first, with how many subjects sit there
+   and the two that name it most recognisably. */
+const showcase = [...spread]
+  .sort((a, b) => ORDER.indexOf(b) - ORDER.indexOf(a))
+  .map((grade) => {
+    const rows = atPercent.filter((r) => r.grade === grade);
+    return { grade, count: rows.length, examples: rows.slice(0, 2) };
+  });
+
+const plural = (n, one, few, many) => {
+  const t = n % 100 > 10 && n % 100 < 20 ? 0 : n % 10;
+  return `${n} ${t === 1 ? one : t >= 2 && t <= 4 ? few : many}`;
+};
 
 /* ------------------------------------------------------------------ markup */
 
@@ -143,7 +153,10 @@ const slides = [
       <div class="grades">${showcase.map((r) => `
         <div class="grow">
           <span class="g">${r.grade}</span>
-          <span class="gs"><b>${r.name}</b><span>${r.mark} из ${r.max}</span></span>
+          <span class="gs">
+            <b>${plural(r.count, "предмет", "предмета", "предметов")}</b>
+            <span>${r.examples.map((e) => `${e.name} — ${e.mark} из ${e.max}`).join(" · ")}</span>
+          </span>
         </div>`).join("")}
       </div>
     </div>
@@ -239,12 +252,12 @@ body{background:#777;font-family:Inter,sans-serif;-webkit-font-smoothing:antiali
 
 /* 02 — one percentage, several grades */
 .grades{margin-top:56px;display:flex;flex-direction:column}
-.grow{display:flex;align-items:center;gap:34px;padding:26px 0;border-bottom:2px solid var(--line-d)}
+.grow{display:flex;align-items:center;gap:34px;padding:34px 0;border-bottom:2px solid var(--line-d)}
 .grow:first-child{border-top:2px solid var(--line-d)}
 .g{flex:none;width:104px;height:104px;display:grid;place-items:center;
   background:var(--hl);color:var(--ink);font-size:52px;font-weight:900;letter-spacing:-.04em}
 .gs b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em}
-.gs span{display:block;margin-top:8px;font-size:24px;font-weight:500;color:var(--t3)}
+.gs span{display:block;margin-top:10px;font-size:23px;line-height:1.35;font-weight:500;color:var(--t3)}
 
 /* 03 / 04 — ranked bar rows. Every row is labelled, so no gridlines and no axis. */
 .chart{margin-top:56px;display:flex;flex-direction:column;gap:34px}

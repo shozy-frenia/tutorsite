@@ -49,7 +49,7 @@ const FEATURES = [
   {
     badge: "OFFICIAL SCALE",
     title: "The actual boundary table",
-    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 44/90. We use the published tables, never a flat percentage.",
+    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 45/90. We use the published tables, never a flat percentage.",
     span: "md:col-span-3",
   },
   {

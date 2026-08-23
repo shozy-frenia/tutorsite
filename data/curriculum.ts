@@ -167,7 +167,7 @@ export const SUBJECTS: Subject[] = [
       "Qualitative Analysis",
     ],
     glyph: "⌬",
-    blurb: "Profile subject. The steepest Grade 10 table on the sheet — a C starts at 49%.",
+    blurb: "Profile subject. The steepest profile paper on the sheet — a C on Component 1 starts at 50%.",
   },
   {
     id: "biology",
