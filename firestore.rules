@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// One document per student, readable and writable only by that student.
+//
+// The web config in NEXT_PUBLIC_FIREBASE_* is public by design — these rules,
+// not the config, are what keep one student's attempts out of another's hands.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /students/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    // Nothing else is reachable from the client.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

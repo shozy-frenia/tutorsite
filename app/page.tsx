@@ -49,7 +49,7 @@ const FEATURES = [
   {
     badge: "OFFICIAL SCALE",
     title: "The actual boundary table",
-    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 44/90. We use the published tables, never a flat percentage.",
+    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 45/90. We use the published tables, never a flat percentage.",
     span: "md:col-span-3",
   },
   {
@@ -161,7 +161,7 @@ export default function Home() {
             >
               <HeroCanvas />
               <div className="absolute left-4 top-4 pointer-events-none">
-                <span className="mark t-micro">DRAG · HOVER · CLICK</span>
+                <span className="mark-quiet t-micro">DRAG · HOVER · CLICK</span>
               </div>
               <div className="absolute right-4 bottom-4 pointer-events-none t-micro text-right">
                 THE GRADE LADDER
@@ -220,16 +220,17 @@ export default function Home() {
               className={`brutal p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
               style={
                 feature.accent
-                  ? { background: "var(--color-highlighter)" }
+                  ? { background: "var(--color-highlighter-wash)" }
                   : undefined
               }
             >
               <span
-                className="t-micro self-start px-2 py-1"
-                style={{
-                  background: feature.accent ? "var(--color-ink)" : "var(--color-highlighter)",
-                  color: feature.accent ? "var(--color-canvas)" : "var(--color-ink)",
-                }}
+                className={`t-micro self-start px-2 py-1 ${feature.accent ? "" : "mark-quiet"}`}
+                style={
+                  feature.accent
+                    ? { background: "var(--color-highlighter)", color: "var(--color-ink)" }
+                    : undefined
+                }
               >
                 {feature.badge}
               </span>
@@ -294,7 +295,7 @@ export default function Home() {
 
               <div className="p-5 flex flex-col gap-3 grow">
                 <h3 className="t-subheading">{stage.title}</h3>
-                <span className="mark t-micro self-start">{stage.standard}</span>
+                <span className="mark-quiet t-micro self-start">{stage.standard}</span>
                 <p className="text-[16px]" style={{ lineHeight: 1.3 }}>
                   {stage.summary}
                 </p>
@@ -316,7 +317,7 @@ export default function Home() {
                   {stage.year !== 11 && (
                     <li
                       className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-highlighter)", border: "2px solid var(--color-ink)" }}
+                      style={{ background: "var(--color-highlighter-wash)", border: "2px solid var(--color-ink)" }}
                     >
                       + {stage.year === 12 ? "2 PROFILES" : "1 PROFILE"}
                     </li>

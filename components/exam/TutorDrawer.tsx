@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Question } from "@/lib/exam-types";
 import type { GeneratedQuestion } from "@/lib/offline-variants";
 
+/** How long the tutor may think before we say so, and before we stop waiting. */
+const SLOW_AFTER_MS = 9_000;
+const GIVE_UP_AFTER_MS = 40_000;
+
 /**
  * Slide-over AI tutor panel.
  *
@@ -43,6 +47,15 @@ export default function TutorDrawer({
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [streaming, setStreaming] = useState(false);
+  /**
+   * Five of twenty-six pilot testers reported the tutor "answered slowly or
+   * not at all". It already streams; what it lacked was any sign of life while
+   * the upstream thought, and any end to the wait if it never did. Two
+   * watchdogs on time-to-first-token: one says it is still working, the other
+   * gives up and offers a retry instead of a spinner that never resolves.
+   */
+  const [slow, setSlow] = useState(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"live" | "offline" | null>(null);
 
@@ -80,7 +93,19 @@ export default function TutorDrawer({
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streaming]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  const clearWatchdogs = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setSlow(false);
+  };
+
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      timersRef.current.forEach(clearTimeout);
+    },
+    []
+  );
 
   async function ask(followUp?: string) {
     if (!question || streaming) return;
@@ -95,6 +120,18 @@ export default function TutorDrawer({
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    clearWatchdogs();
+    timersRef.current.push(setTimeout(() => setSlow(true), SLOW_AFTER_MS));
+    timersRef.current.push(
+      setTimeout(() => {
+        controller.abort();
+        setError(
+          "Репетитор не ответил за 40 секунд. Нажмите «Спросить репетитора» ещё раз — " +
+            "объяснение и разбор по схеме никуда не денутся."
+        );
+      }, GIVE_UP_AFTER_MS)
+    );
 
     try {
       const response = await fetch("/api/tutor", {
@@ -132,6 +169,7 @@ export default function TutorDrawer({
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (assembled === "") clearWatchdogs(); // first token: it is alive
         assembled += decoder.decode(value, { stream: true });
         setMessages([...history, { role: "assistant", content: assembled }]);
       }
@@ -140,6 +178,7 @@ export default function TutorDrawer({
         setError("Could not reach the tutor. Check your connection.");
       }
     } finally {
+      clearWatchdogs();
       setStreaming(false);
     }
   }
@@ -320,7 +359,14 @@ export default function TutorDrawer({
               ))}
 
               {streaming && messages.length === 0 && (
-                <span className="t-micro blink">TUTOR IS THINKING…</span>
+                <div className="flex flex-col gap-1">
+                  <span className="t-micro blink">TUTOR IS THINKING…</span>
+                  {slow && (
+                    <span className="t-micro" style={{ opacity: 0.6, textTransform: "none" }}>
+                      Первый ответ занимает больше обычного. Ещё несколько секунд.
+                    </span>
+                  )}
+                </div>
               )}
 
               {error && (

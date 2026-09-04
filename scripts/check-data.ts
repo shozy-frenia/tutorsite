@@ -7,19 +7,23 @@
  * grade honestly:
  *
  *   1. Every boundary set is contiguous and spans 0..maxMark.
+ *   1b. Every paper points at a component that exists in the boundary table.
  *   2. Every mark scheme sums to its question's mark tariff.
  *   3. Every auto-marked question's own answer key marks itself correct.
  *   4. Every offline variant generator produces a scheme that sums correctly.
  *   5. Every assessed question's criteria sum to its tariff and carry bands.
  *   6. The calculator evaluates the arithmetic its papers actually need.
+ *   7. Answer matching accepts a re-ordered sum and rejects a changed one.
+ *   8. Cloud sync merges two devices without dropping either one's attempts.
  *
  * Check 3 is the important one: it catches an answer written in a form the
  * normaliser cannot match, which would silently mark correct students wrong.
  */
 
-import { allBoundarySets } from "../data/grade-boundaries";
+import { allBoundarySets, boundariesFor } from "../data/grade-boundaries";
 import { PAPERS } from "../data/exams";
 import { paperMarkTotal, isCorrect } from "../lib/exam-types";
+import { mergeStores, type Attempt, type Store } from "../lib/storage";
 import { validateBoundarySet, gradeForMark } from "../lib/grading";
 import { variantFor } from "../lib/offline-variants";
 import { evaluate } from "../lib/calculator";
@@ -66,6 +70,22 @@ pass(
     ")"
 );
 pass("band floors award the expected grade, one mark below does not");
+
+// A paper whose componentIndex has no matching component grades to null and
+// silently shows the student nothing — the failure mode that let the Grade 10
+// table drift out of sync with the published one unnoticed.
+for (const paper of PAPERS) {
+  const subject = boundariesFor(paper.subjectId, paper.gradeYear);
+  if (!subject) {
+    fail(`${paper.id}: no boundary table for subject "${paper.subjectId}" in G${paper.gradeYear}`);
+  } else if (!subject.components[paper.componentIndex]) {
+    fail(
+      `${paper.id}: componentIndex ${paper.componentIndex} but G${paper.gradeYear} ` +
+        `${subject.name} publishes ${subject.components.length} component(s)`
+    );
+  }
+}
+if (!failures) pass(`${PAPERS.length} papers resolve to a published component`);
 
 console.log("\nPAPERS");
 for (const paper of PAPERS) {
@@ -164,6 +184,73 @@ for (const paper of PAPERS) {
     }
   }
   pass(`${paper.questions.length} questions: schemes sum, answers self-match`);
+}
+
+console.log("\nANSWER MATCHING");
+{
+  // Three pilot testers lost marks writing a correct sum in the other order.
+  // The rejections matter as much as the acceptances: a looser matcher that
+  // marks a wrong answer right is worse than the bug it replaces.
+  const probe = (answer: string, answerKind: "exact" | "numeric") =>
+    ({ id: "probe", number: 1, prompt: "", marks: 1, marking: "auto",
+       answer, answerKind, scheme: [] }) as unknown as Parameters<typeof isCorrect>[1];
+
+  const cases: Array<[string, string, boolean, "exact" | "numeric"]> = [
+    ["2x-6", "-6+2x", true, "exact"],
+    ["3a+2b-c", "-c+2b+3a", true, "exact"],
+    ["x=2,x=3", "x=3,x=2", true, "exact"],
+    ["2x-6", "6-2x", false, "exact"],
+    ["a-b", "b-a", false, "exact"],
+    ["2x-6", "2x-5", false, "exact"],
+    ["2,3", "3", false, "exact"],
+    ["1e-5", "5-1e", false, "numeric"],
+    ["16", "16.0", true, "numeric"],
+  ];
+  let wrong = 0;
+  for (const [answer, submitted, want, kind] of cases) {
+    if (isCorrect(submitted, probe(answer, kind)) !== want) {
+      fail(`answer matching: key "${answer}" vs "${submitted}" should be ${want}`);
+      wrong++;
+    }
+  }
+  if (!wrong) pass(`${cases.length} answer-order cases accept and reject correctly`);
+}
+
+console.log("\nCLOUD SYNC MERGE");
+{
+  // The one bug here that a student would never forgive is a merge that drops
+  // work, so both directions are asserted rather than eyeballed.
+  const attempt = (id: string, finishedAt: string) =>
+    ({ id, paperId: "p", paperTitle: "P", subjectId: "mathematics", componentIndex: 0,
+       gradeYear: 10, finishedAt, rawMark: 1, availableMarks: 1, scaledMark: 1,
+       componentMax: 80, grade: "C", durationSeconds: 1, outcomes: [] }) as Attempt;
+
+  const local: Store = {
+    profile: null,
+    attempts: [attempt("phone-1", "2026-08-02T10:00:00Z")],
+    activeDays: ["2026-08-02"],
+    updatedAt: "2026-08-02T10:00:00Z",
+  };
+  const remote: Store = {
+    profile: null,
+    attempts: [attempt("laptop-1", "2026-08-01T10:00:00Z")],
+    activeDays: ["2026-08-01"],
+    updatedAt: "2026-08-01T10:00:00Z",
+  };
+
+  const merged = mergeStores(local, remote);
+  const ids = merged.attempts.map((a) => a.id);
+  if (ids.length !== 2 || !ids.includes("phone-1") || !ids.includes("laptop-1")) {
+    fail(`sync merge dropped an attempt: got [${ids.join(", ")}]`);
+  } else if (ids[0] !== "phone-1") {
+    fail(`sync merge should sort newest first, got [${ids.join(", ")}]`);
+  } else if (merged.activeDays.join(",") !== "2026-08-01,2026-08-02") {
+    fail(`sync merge lost an active day: ${merged.activeDays.join(", ")}`);
+  } else if (mergeStores(local, local).attempts.length !== 1) {
+    fail("sync merge duplicated an attempt already on both sides");
+  } else {
+    pass("sync merge keeps both devices' attempts, dedupes by id, newest first");
+  }
 }
 
 console.log("\nOFFLINE VARIANT GENERATORS");

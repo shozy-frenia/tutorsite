@@ -41,7 +41,7 @@ export default function PhoneShowcase() {
           style={{ borderColor: "var(--color-ink)" }}
         >
           <h2 className="t-subheading">It answers in the language you asked in</h2>
-          <span className="mark t-micro">KAZAKH · RUSSIAN · ENGLISH</span>
+          <span className="mark-quiet t-micro">KAZAKH · RUSSIAN · ENGLISH</span>
         </div>
 
         <div
