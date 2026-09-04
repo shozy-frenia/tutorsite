@@ -190,7 +190,7 @@ export default function Library() {
         <div className="grid md:grid-cols-3 gap-5">
           {GRADE_STAGES.map((stage) => (
             <div key={stage.year} className="swiss-flat p-5">
-              <span className="mark t-micro">GRADE {stage.year}</span>
+              <span className="mark-quiet t-micro">GRADE {stage.year}</span>
               <span className="t-micro block mt-3" style={{ opacity: 0.55 }}>
                 {stage.compulsory}
               </span>

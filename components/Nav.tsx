@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
+import AccountButton from "@/components/AccountButton";
 
 /**
  * Identity bar. DESIGN.md originally specified a text-only wordmark here; the
@@ -39,6 +40,9 @@ export default function Nav({ variant = "canvas" }: { variant?: "canvas" | "stud
         <Link href="/library" className="pill pill-filled press no-underline">
           START A MOCK
         </Link>
+        {/* Renders nothing until Firebase is configured, so the bar is
+            unchanged on a checkout with no environment. */}
+        <AccountButton />
       </nav>
     </header>
   );

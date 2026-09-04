@@ -392,7 +392,9 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 
             <div className="flex items-end gap-2">
               <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
-                {rawMark}
+                <span key={rawMark} className="tick">
+                  {rawMark}
+                </span>
               </span>
               <span className="t-label pb-1">/ {availableMarks}</span>
             </div>
@@ -404,7 +406,9 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
                     ON THE {component.name.toUpperCase()} SCALE
                   </span>
                   <span className="t-subheading t-mono">
-                    {scaled.scaledMark}
+                    <span key={scaled.scaledMark} className="tick">
+                      {scaled.scaledMark}
+                    </span>
                     <span className="t-label"> / {component.maxMark}</span>
                   </span>
                 </div>
@@ -443,8 +447,10 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             onClick={() => setDrawerOpen(true)}
             className="press-swiss w-full mt-3 t-label"
             style={{
-              background: "var(--color-highlighter)",
+              background: "var(--color-sheet)",
               border: "2px solid var(--color-ink)",
+              borderLeftWidth: 6,
+              borderLeftColor: "var(--color-highlighter)",
               boxShadow: "var(--shadow-swiss)",
               padding: "12px",
               cursor: "pointer",
@@ -610,8 +616,10 @@ function QuestionSheet({
               onClick={onAskTutor}
               className="press-swiss t-label"
               style={{
-                background: "var(--color-highlighter)",
+                background: "var(--color-sheet)",
                 border: "2px solid var(--color-ink)",
+                borderLeftWidth: 6,
+                borderLeftColor: "var(--color-highlighter)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
                 cursor: "pointer",
@@ -716,8 +724,9 @@ function QuestionSheet({
               disabled={!value.trim()}
               className="press-swiss t-label"
               style={{
-                background: value.trim() ? "var(--color-ink)" : "var(--color-paper)",
-                color: value.trim() ? "var(--color-canvas)" : "var(--color-ink)",
+                background: value.trim() ? "var(--color-highlighter)" : "var(--color-paper)",
+                color: "var(--color-ink)",
+                opacity: value.trim() ? 1 : 0.55,
                 border: "2px solid var(--color-ink)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
@@ -749,8 +758,10 @@ function QuestionSheet({
             onClick={onAskTutor}
             className="press-swiss t-label"
             style={{
-              background: "var(--color-highlighter)",
+              background: "var(--color-sheet)",
               border: "2px solid var(--color-ink)",
+              borderLeftWidth: 6,
+              borderLeftColor: "var(--color-highlighter)",
               boxShadow: "var(--shadow-swiss)",
               padding: "10px 18px",
               cursor: "pointer",
@@ -915,7 +926,12 @@ function HintBlock({ hint }: { hint: string }) {
       ) : (
         <div
           className="p-3 rise"
-          style={{ border: "2px solid var(--color-ink)", background: "var(--color-highlighter)" }}
+          style={{
+            border: "2px solid var(--color-ink)",
+            borderLeftWidth: 6,
+            borderLeftColor: "var(--color-highlighter)",
+            background: "var(--color-highlighter-wash)",
+          }}
         >
           <span className="t-micro block mb-1">HINT</span>
           <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>

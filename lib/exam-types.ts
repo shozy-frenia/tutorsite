@@ -185,6 +185,56 @@ export function normaliseAnswer(raw: string): string {
     .replace(/,$/, "");
 }
 
+/**
+ * Scientific notation hides a "+"/"-" that is not a term separator: splitting
+ * "1e-5" on signs would produce "1e" and "5". Expressions like that are left
+ * to exact matching.
+ */
+const SCIENTIFIC = /\d(?:e)[-+]?\d/;
+
+/**
+ * A normalised sum, split into signed terms and sorted: "2x-6" and "-6+2x"
+ * both become ["+2x", "-6"].
+ *
+ * Addition commutes, so a student who writes the terms in the other order has
+ * given the same answer — three pilot testers lost marks to exactly this.
+ * Sorting cannot make a wrong answer match a right one: "a-b" sorts to
+ * ["+a","-b"] and "b-a" to ["+b","-a"], which still differ.
+ *
+ * Returns null unless the expression really is a plain sum of two or more
+ * terms, so anything with an "=" or a comma falls through to exact matching.
+ */
+function additiveTerms(expr: string): string | null {
+  if (SCIENTIFIC.test(expr)) return null;
+  if (!/^[-+]?[a-z0-9.^/]+(?:[-+][a-z0-9.^/]+)+$/.test(expr)) return null;
+
+  const terms: string[] = [];
+  let sign = "+";
+  let buf = "";
+  for (const ch of expr) {
+    if (ch === "+" || ch === "-") {
+      if (buf) terms.push(sign + buf);
+      buf = "";
+      sign = ch;
+    } else {
+      buf += ch;
+    }
+  }
+  if (buf) terms.push(sign + buf);
+  return terms.length > 1 ? terms.sort().join("") : null;
+}
+
+/**
+ * A comma-separated answer as an order-independent set: "x=2,x=3" and
+ * "x=3,x=2" are the same pair of roots. Only applied when both sides carry the
+ * same number of parts, so a short list never matches a longer one.
+ */
+function commaSet(expr: string): string | null {
+  if (!expr.includes(",")) return null;
+  const parts = expr.split(",").filter(Boolean);
+  return parts.length > 1 ? parts.sort().join(",") : null;
+}
+
 /** Does a submitted answer match the key (or any accepted variant)? */
 export function isCorrect(submitted: string, question: Question): boolean {
   if (!submitted.trim()) return false;
@@ -202,5 +252,13 @@ export function isCorrect(submitted: string, question: Question): boolean {
       });
     }
   }
+
+  // Same answer, written in another order. Both sides go through the same
+  // rewrite, and it only fires when both actually take that shape.
+  for (const rewrite of [additiveTerms, commaSet]) {
+    const mine = rewrite(candidate);
+    if (mine !== null && keys.some((k) => rewrite(k) === mine)) return true;
+  }
+
   return false;
 }

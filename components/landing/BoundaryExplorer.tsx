@@ -65,7 +65,7 @@ export default function BoundaryExplorer() {
         style={{ borderColor: "var(--color-ink)" }}
       >
         <h2 className="t-subheading">The boundaries we grade against</h2>
-        <span className="mark t-micro">MINIMUM MARK PER GRADE</span>
+        <span className="mark-quiet t-micro">MINIMUM MARK PER GRADE</span>
       </div>
 
       {/* Year switch */}
