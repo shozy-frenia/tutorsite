@@ -8,17 +8,24 @@ import SubjectRibbon from "@/components/motion/SubjectRibbon";
 import MaskedReveal from "@/components/motion/MaskedReveal";
 import PointerLift from "@/components/motion/PointerLift";
 import PaperCoverflow from "@/components/motion/PaperCoverflow";
+import HeroIntro from "@/components/motion/HeroIntro";
+import StaggerIn from "@/components/motion/StaggerIn";
+import CountUp from "@/components/motion/CountUp";
 import { GRADE_STAGES, examSubjectsFor, subjectById } from "@/data/curriculum";
 import { allBoundarySets } from "@/data/grade-boundaries";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
 
 /**
- * Landing page — neo-brutalist register.
+ * Landing page — neo-brutalist register, after the pilot.
  *
- * Heavy 3px borders, hard offset shadows, oversized display type and the
- * highlighter yellow doing all the labelling work. The 3D hero sits inside a
- * ruled frame rather than bleeding off the page, so the printed-poster
- * structure survives the addition of a canvas.
+ * Hard offset shadows, oversized display type and a ruled frame around the 3D
+ * hero rather than a full bleed, so the printed-poster structure survives the
+ * canvas. Two things changed when twenty-six testers scored the look 3.15/5
+ * against 3.77 for usability: the highlighter stopped being the page's
+ * labelling system (it now marks the headline and the one button that
+ * matters), and the page grew an entrance — HeroIntro on load, StaggerIn and
+ * CountUp on scroll. It had four scroll effects and still read as a still
+ * image, because nothing moved in the seconds anyone actually watches.
  */
 
 // Short, decorative labels for the SubjectRibbon — not the official subject
@@ -56,19 +63,19 @@ const FEATURES = [
     badge: "AI POWERED",
     title: "A tutor that reads your working",
     body: "It starts from the step you missed, quotes the mark scheme wording, and answers in Kazakh, Russian or English — whichever you wrote in.",
-    span: "md:col-span-2",
+    span: "md:col-span-3",
   },
   {
     badge: "INFINITE DRILL",
     title: "Same topic, same tariff, new numbers",
     body: "Ask for another question at this level and get one: same syllabus strand, same mark count, same number of reasoning steps.",
-    span: "md:col-span-2",
+    span: "md:col-span-3",
   },
   {
     badge: "TRACKED",
     title: "Every attempt, plotted",
     body: "Mastery by topic, grade projection from U to A*, and the streak counter that makes you open it tomorrow.",
-    span: "md:col-span-2",
+    span: "md:col-span-3",
   },
 ];
 
@@ -106,101 +113,145 @@ export default function Home() {
       <Nav />
 
       {/* ---------------------------------------------------------------- HERO */}
-      <section className="px-5 md:px-10">
-        <div className="brutal" style={{ boxShadow: "var(--shadow-brutal-lg)" }}>
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="p-5 md:p-8 flex flex-col justify-between gap-8">
-              <div>
-                <span className="mark t-label">МЭСК · NIS · CAMBRIDGE</span>
-                <h1 className="t-display mt-5">
-                  Ace Cambridge
-                  <br />
-                  exams without
-                  <br />
-                  the <span className="mark">burnout</span>
-                </h1>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-5">
-                <p style={{ maxWidth: "46ch" }}>
-                  Mock papers taken from the real thing, marked against the real boundary
-                  table, with a tutor that explains the one step you actually got wrong.
-                </p>
-                <p style={{ maxWidth: "46ch" }}>
-                  Built for students sitting the Cambridge International Examination at
-                  Nazarbayev Intellectual Schools. Grades 10, 11 and 12.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <RevealButton
-                  href="/library"
-                  fill="var(--color-highlighter)"
-                  textColor="var(--color-ink)"
-                  hoverFill="var(--color-ink)"
-                  hoverTextColor="var(--color-canvas)"
-                >
-                  Sit a mock exam →
-                </RevealButton>
-                <RevealButton
-                  href="/dashboard"
-                  fill="var(--color-canvas)"
-                  textColor="var(--color-ink)"
-                  hoverFill="var(--color-ink)"
-                  hoverTextColor="var(--color-canvas)"
-                >
-                  See the dashboard
-                </RevealButton>
-              </div>
-            </div>
-
-            {/* 3D canvas, framed rather than full-bleed */}
-            <div
-              className="relative min-h-[380px] lg:min-h-[560px] border-t-[3px] lg:border-t-0 lg:border-l-[3px]"
-              style={{ borderColor: "var(--color-ink)" }}
-            >
-              <HeroCanvas />
-              <div className="absolute left-4 top-4 pointer-events-none">
-                <span className="mark-quiet t-micro">DRAG · HOVER · CLICK</span>
-              </div>
-              <div className="absolute right-4 bottom-4 pointer-events-none t-micro text-right">
-                THE GRADE LADDER
-                <br />
-                A* DOWN TO U
-              </div>
-            </div>
-          </div>
-
-          {/* Ticker strip */}
-          <div
-            className="border-t-[3px] overflow-hidden"
-            style={{ borderColor: "var(--color-ink)", background: "var(--color-ink)" }}
-          >
-            <div className="flex whitespace-nowrap marquee-track">
-              {[0, 1].map((copy) => (
-                <div key={copy} className="flex shrink-0">
-                  {[
-                    `${PAPERS.length} FULL MOCK PAPERS`,
-                    `${totalQuestions} QUESTIONS`,
-                    `${totalMarks} MARKS`,
-                    `${allBoundarySets().length} OFFICIAL BOUNDARY TABLES`,
-                    "NO CALCULATOR",
-                    "90 MINUTES",
-                    "A* TO U",
-                  ].map((item) => (
-                    <span
-                      key={`${copy}-${item}`}
-                      className="t-label px-6 py-3"
-                      style={{ color: "var(--color-canvas)" }}
-                    >
-                      {item} <span style={{ color: "var(--color-highlighter)" }}>✦</span>
+      <HeroIntro>
+        <section className="px-5 md:px-10">
+          <div className="brutal" style={{ boxShadow: "var(--shadow-brutal-lg)" }}>
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="p-5 md:p-8 flex flex-col justify-between gap-8">
+                <div>
+                  {/* Demoted from a filled block: this is the fourth-most
+                      important thing in the hero and was wearing the loudest
+                      colour on the page. */}
+                  <span className="mark-quiet t-label enter-rise" data-enter="eyebrow">
+                    МЭСК · NIS · CAMBRIDGE
+                  </span>
+                  {/* Each line is its own clipping band so the headline can ride
+                      up out of the page rather than fading in flat. */}
+                  <h1 className="t-display mt-5">
+                    <span className="line-mask">
+                      <span>Ace Cambridge</span>
                     </span>
-                  ))}
+                    <span className="line-mask">
+                      <span>exams without</span>
+                    </span>
+                    <span className="line-mask">
+                      <span>
+                        the <span className="mark">burnout</span>
+                      </span>
+                    </span>
+                  </h1>
                 </div>
-              ))}
+
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <p className="enter-rise" data-enter="lede" style={{ maxWidth: "46ch" }}>
+                    Mock papers taken from the real thing, marked against the real boundary
+                    table, with a tutor that explains the one step you actually got wrong.
+                  </p>
+                  <p className="enter-rise" data-enter="lede" style={{ maxWidth: "46ch" }}>
+                    Built for students sitting the Cambridge International Examination at
+                    Nazarbayev Intellectual Schools. Grades 10, 11 and 12.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <RevealButton
+                    href="/library"
+                    className="enter-rise"
+                    data-enter="cta"
+                    fill="var(--color-highlighter)"
+                    textColor="var(--color-ink)"
+                    hoverFill="var(--color-ink)"
+                    hoverTextColor="var(--color-canvas)"
+                  >
+                    Sit a mock exam →
+                  </RevealButton>
+                  <RevealButton
+                    href="/dashboard"
+                    className="enter-rise"
+                    data-enter="cta"
+                    fill="var(--color-canvas)"
+                    textColor="var(--color-ink)"
+                    hoverFill="var(--color-ink)"
+                    hoverTextColor="var(--color-canvas)"
+                  >
+                    See the dashboard
+                  </RevealButton>
+                </div>
+              </div>
+
+              {/* 3D canvas, framed rather than full-bleed. Wipes up on arrival —
+                  a shutter rather than a fade, which is what a system built out
+                  of hard edges should do. */}
+              <div
+                className="relative min-h-[380px] lg:min-h-[560px] border-t-2 lg:border-t-0 lg:border-l-2 enter-wipe"
+                data-enter="panel"
+                style={{ borderColor: "var(--color-rule)" }}
+              >
+                <HeroCanvas />
+                <div className="absolute left-4 top-4 pointer-events-none">
+                  <span className="mark-quiet t-micro">DRAG · HOVER · CLICK</span>
+                </div>
+                <div className="absolute right-4 bottom-4 pointer-events-none t-micro text-right">
+                  THE GRADE LADDER
+                  <br />
+                  A* DOWN TO U
+                </div>
+              </div>
+            </div>
+
+            {/* Ticker strip. The counts moved out to the stat band below, where
+                they can be read; a marquee is the wrong place for a number. */}
+            <div
+              className="border-t-2 overflow-hidden enter-rise"
+              data-enter="ticker"
+              style={{ borderColor: "var(--color-rule)", background: "var(--color-ink)" }}
+            >
+              <div className="flex whitespace-nowrap marquee-track">
+                {[0, 1].map((copy) => (
+                  <div key={copy} className="flex shrink-0">
+                    {[
+                      "REAL NIS PAST PAPERS",
+                      "OFFICIAL BOUNDARY TABLES",
+                      "MARKED LIKE THE EXAM",
+                      "NO CALCULATOR",
+                      "90 MINUTES",
+                      "A* TO U",
+                      "ҚАЗАҚША · РУССКИЙ · ENGLISH",
+                    ].map((item) => (
+                      <span
+                        key={`${copy}-${item}`}
+                        className="t-label px-6 py-3"
+                        style={{ color: "var(--color-canvas)" }}
+                      >
+                        {item} <span style={{ color: "var(--color-highlighter)" }}>✦</span>
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+      </HeroIntro>
+
+      {/* ----------------------------------------------------------- STAT BAND */}
+      <section className="px-5 md:px-10 mt-10 md:mt-12">
+        <StaggerIn className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            { figure: PAPERS.length, label: "FULL MOCK PAPERS", note: "Transcribed from the real sittings" },
+            { figure: totalQuestions, label: "QUESTIONS", note: "Each with the mark scheme that earns it" },
+            { figure: totalMarks, label: "MARKS AVAILABLE", note: "Scored the way the examiner scores" },
+            { figure: allBoundarySets().length, label: "BOUNDARY TABLES", note: "Published МЭСК grades, not percentages" },
+          ].map((stat) => (
+            <div key={stat.label} className="brutal p-5 flex flex-col gap-1">
+              <CountUp to={stat.figure} className="t-heading-sm" />
+              <span className="t-label">{stat.label}</span>
+              <span className="t-micro mt-1" style={{ opacity: 0.6, letterSpacing: 0 }}>
+                {stat.note}
+              </span>
+            </div>
+          ))}
+        </StaggerIn>
       </section>
 
       {/* ------------------------------------------------------------- FEATURES */}
@@ -210,7 +261,7 @@ export default function Home() {
           <span className="t-label pb-2">↳ FOUR THINGS, DONE PROPERLY</span>
         </div>
 
-        <div className="grid md:grid-cols-6 gap-5">
+        <StaggerIn className="grid md:grid-cols-6 gap-5">
           {FEATURES.map((feature) => (
             <PointerLift
               as="article"
@@ -240,7 +291,7 @@ export default function Home() {
               </p>
             </PointerLift>
           ))}
-        </div>
+        </StaggerIn>
       </section>
 
       {/* ------------------------------------------------------------- SUBJECTS */}
@@ -275,12 +326,12 @@ export default function Home() {
           <span className="t-label pb-2">↳ THE ARCHITECTURE</span>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
+        <StaggerIn className="grid lg:grid-cols-3 gap-5">
           {GRADE_STAGES.map((stage) => (
             <article key={stage.year} className="brutal flex flex-col">
               <div
-                className="flex items-baseline justify-between px-5 py-4 border-b-[3px]"
-                style={{ borderColor: "var(--color-ink)", background: "var(--color-ink)" }}
+                className="flex items-baseline justify-between px-5 py-4 border-b-2"
+                style={{ borderColor: "var(--color-rule)", background: "var(--color-ink)" }}
               >
                 <span
                   className="t-heading-sm"
@@ -309,7 +360,7 @@ export default function Home() {
                     <li
                       key={subject.id}
                       className="t-micro px-2 py-1"
-                      style={{ border: "2px solid var(--color-ink)" }}
+                      style={{ border: "2px solid var(--color-rule)" }}
                     >
                       {subject.glyph} {subject.name}
                     </li>
@@ -317,7 +368,7 @@ export default function Home() {
                   {stage.year !== 11 && (
                     <li
                       className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-highlighter-wash)", border: "2px solid var(--color-ink)" }}
+                      style={{ background: "var(--color-highlighter-wash)", border: "2px solid var(--color-rule)" }}
                     >
                       + {stage.year === 12 ? "2 PROFILES" : "1 PROFILE"}
                     </li>
@@ -326,14 +377,14 @@ export default function Home() {
               </div>
 
               <div
-                className="px-5 py-3 border-t-[3px] t-label"
-                style={{ borderColor: "var(--color-ink)", background: "var(--color-paper)" }}
+                className="px-5 py-3 border-t-2 t-label"
+                style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
               >
                 {stage.load}
               </div>
             </article>
           ))}
-        </div>
+        </StaggerIn>
       </section>
 
       {/* -------------------------------------------------------------- BOUNDARY */}
@@ -367,8 +418,8 @@ export default function Home() {
               textColor="var(--color-ink)"
               hoverFill="var(--color-canvas)"
               hoverTextColor="var(--color-ink)"
-              border="3px solid var(--color-canvas)"
-              shadow="5px 5px 0 var(--color-canvas)"
+              border="2px solid var(--color-canvas)"
+              shadow="4px 4px 0 var(--color-canvas)"
             >
               Choose a mock →
             </RevealButton>

@@ -75,7 +75,7 @@ export default function PaperFilter({
           className="no-underline press-swiss t-label shrink-0"
           style={{
             background: "var(--color-highlighter)",
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             boxShadow: "var(--shadow-swiss)",
             padding: "8px 14px",
             color: "var(--color-ink)",
@@ -127,7 +127,7 @@ export default function PaperFilter({
             <li
               key={subject.id}
               className="t-micro px-2 py-1"
-              style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
+              style={{ background: "var(--color-sheet)", border: "1px solid var(--color-rule)" }}
             >
               {subject.glyph} {subject.name}
             </li>
@@ -140,7 +140,7 @@ export default function PaperFilter({
           className="press-swiss t-label shrink-0"
           style={{
             background: "var(--color-sheet)",
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             boxShadow: "var(--shadow-swiss)",
             padding: "8px 14px",
             cursor: "pointer",

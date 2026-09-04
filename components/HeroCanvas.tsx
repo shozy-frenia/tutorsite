@@ -29,8 +29,8 @@ function LadderFallback() {
           style={{
             width: 46,
             height: 46,
-            border: "3px solid var(--color-ink)",
-            background: i === 0 ? "var(--color-acid-lime)" : "var(--color-highlighter)",
+            border: "2px solid var(--color-rule)",
+            background: i === 0 ? "var(--color-acid-lime)" : "var(--color-paper)",
             fontWeight: 700,
             transform: `translateY(${i * 7}px)`,
           }}
@@ -53,7 +53,7 @@ export default function HeroCanvas() {
         <div
           className="absolute left-4 bottom-4 px-3 py-2 rise"
           style={{
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             background: "var(--color-canvas)",
             boxShadow: "var(--shadow-brutal-sm)",
           }}

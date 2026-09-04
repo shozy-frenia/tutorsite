@@ -277,11 +277,11 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[auto_1fr_270px] gap-0">
+      <div className="grid lg:grid-cols-[auto_minmax(0,880px)_300px] gap-0 lg:justify-center">
         {/* -------------------------------------------------------- rail */}
         <nav
           className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-visible lg:sticky lg:top-[60px] lg:self-start"
-          style={{ borderRight: "1px solid var(--color-ink)" }}
+          style={{ borderRight: "1px solid var(--color-rule)" }}
           aria-label="Question navigation"
         >
           {paper.questions.map((q, i) => {
@@ -312,8 +312,8 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
                   width: 38,
                   height: 38,
                   background,
-                  border: `2px solid var(--color-ink)`,
-                  boxShadow: active ? "3px 3px 0 var(--color-ink)" : "none",
+                  border: `2px solid var(--color-rule)`,
+                  boxShadow: active ? "3px 3px 0 var(--color-rule)" : "none",
                   transform: active ? "translate(-1px,-1px)" : "none",
                   cursor: "pointer",
                 }}
@@ -340,14 +340,17 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             onAskTutor={() => setDrawerOpen(true)}
           />
 
-          <div className="flex items-center justify-between gap-3 mt-6">
+          <div
+            className="flex items-center justify-between gap-3 mt-6"
+            style={{ maxWidth: 820 }}
+          >
             <button
               onClick={() => setIndex((i) => Math.max(i - 1, 0))}
               disabled={index === 0}
               className="press-swiss t-label"
               style={{
                 background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
                 opacity: index === 0 ? 0.4 : 1,
@@ -367,7 +370,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               className="press-swiss t-label"
               style={{
                 background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
                 opacity: index === paper.questions.length - 1 ? 0.4 : 1,
@@ -383,7 +386,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         {/* ------------------------------------------------------- score */}
         <aside
           className="p-4 lg:sticky lg:top-[60px] lg:self-start"
-          style={{ borderLeft: "1px solid var(--color-ink)" }}
+          style={{ borderLeft: "1px solid var(--color-rule)" }}
         >
           <div className="swiss p-4 flex flex-col gap-3">
             <span className="t-micro" style={{ opacity: 0.6 }}>
@@ -401,7 +404,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 
             {scaled && component && (
               <>
-                <div className="pt-3" style={{ borderTop: "1px solid var(--color-ink)" }}>
+                <div className="pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
                   <span className="t-micro block" style={{ opacity: 0.6 }}>
                     ON THE {component.name.toUpperCase()} SCALE
                   </span>
@@ -431,7 +434,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               </>
             )}
 
-            <div className="pt-3 flex flex-col gap-1" style={{ borderTop: "1px solid var(--color-ink)" }}>
+            <div className="pt-3 flex flex-col gap-1" style={{ borderTop: "1px solid var(--color-rule)" }}>
               <Stat label="ANSWERED" value={`${answeredCount} / ${paper.questions.length}`} />
               <Stat label="MARKED" value={`${checkedCount} / ${paper.questions.length}`} />
               <Stat label="ELAPSED" value={formatClock(elapsed)} />
@@ -448,7 +451,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             className="press-swiss w-full mt-3 t-label"
             style={{
               background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               borderLeftWidth: 6,
               borderLeftColor: "var(--color-highlighter)",
               boxShadow: "var(--shadow-swiss)",
@@ -525,7 +528,7 @@ function QuestionSheet({
       {/* header */}
       <div
         className="flex items-start justify-between gap-4 px-5 py-4"
-        style={{ borderBottom: "2px solid var(--color-ink)" }}
+        style={{ borderBottom: "2px solid var(--color-rule)" }}
       >
         <div className="flex items-baseline gap-3">
           <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
@@ -540,7 +543,7 @@ function QuestionSheet({
         </div>
         <span
           className="t-label px-2 py-1 shrink-0"
-          style={{ border: "2px solid var(--color-ink)" }}
+          style={{ border: "2px solid var(--color-rule)" }}
         >
           [{question.marks}]
         </span>
@@ -570,7 +573,7 @@ function QuestionSheet({
           <figure className="m-0">
             <div
               className="inline-block p-3"
-              style={{ border: "1px solid var(--color-ink)", background: "var(--color-sheet)" }}
+              style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
             >
               <Image
                 src={question.figure}
@@ -602,7 +605,7 @@ function QuestionSheet({
       {/* answer zone */}
       {question.marking === "assessed" ? (
         <div
-          style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+          style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-study)" }}
         >
           <ExtendedAnswer
             paperId={paperId}
@@ -617,7 +620,7 @@ function QuestionSheet({
               className="press-swiss t-label"
               style={{
                 background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 borderLeftWidth: 6,
                 borderLeftColor: "var(--color-highlighter)",
                 boxShadow: "var(--shadow-swiss)",
@@ -632,7 +635,7 @@ function QuestionSheet({
       ) : (
       <div
         className="px-5 py-5 flex flex-col gap-3"
-        style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+        style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-study)" }}
       >
         {question.marking === "auto" && question.answerKind === "choice" ? (
           <fieldset className="border-0 p-0 m-0 flex flex-col gap-2">
@@ -646,7 +649,7 @@ function QuestionSheet({
                   key={option}
                   className="press-swiss flex items-center gap-3 px-4 py-3 cursor-pointer"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "2px solid var(--color-rule)",
                     background: selected ? "var(--color-highlighter)" : "var(--color-sheet)",
                     boxShadow: selected ? "var(--shadow-swiss)" : "none",
                   }}
@@ -665,7 +668,7 @@ function QuestionSheet({
                     style={{
                       width: 16,
                       height: 16,
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       background: selected ? "var(--color-ink)" : "transparent",
                       flexShrink: 0,
                     }}
@@ -688,7 +691,7 @@ function QuestionSheet({
               placeholder="Type your answer…"
               className="px-4 py-3 text-[18px] t-mono"
               style={{
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 background: "var(--color-sheet)",
                 boxShadow: "var(--shadow-swiss)",
               }}
@@ -707,7 +710,7 @@ function QuestionSheet({
               placeholder="Set out your working, one step per line…"
               className="px-4 py-3 text-[16px]"
               style={{
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 background: "var(--color-sheet)",
                 boxShadow: "var(--shadow-swiss)",
                 resize: "vertical",
@@ -727,7 +730,7 @@ function QuestionSheet({
                 background: value.trim() ? "var(--color-highlighter)" : "var(--color-paper)",
                 color: "var(--color-ink)",
                 opacity: value.trim() ? 1 : 0.55,
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
                 cursor: value.trim() ? "pointer" : "not-allowed",
@@ -744,7 +747,7 @@ function QuestionSheet({
               style={{
                 background: "var(--color-ink)",
                 color: "var(--color-canvas)",
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 boxShadow: "var(--shadow-swiss)",
                 padding: "10px 18px",
                 cursor: "pointer",
@@ -759,7 +762,7 @@ function QuestionSheet({
             className="press-swiss t-label"
             style={{
               background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               borderLeftWidth: 6,
               borderLeftColor: "var(--color-highlighter)",
               boxShadow: "var(--shadow-swiss)",
@@ -781,7 +784,7 @@ function QuestionSheet({
         <div
           className="px-5 py-4 rise"
           style={{
-            borderTop: "2px solid var(--color-ink)",
+            borderTop: "2px solid var(--color-rule)",
             background: correct
               ? "var(--color-acid-lime)"
               : wrong
@@ -806,7 +809,7 @@ function QuestionSheet({
       {revealed && (
         <div
           className="px-5 py-4"
-          style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-sheet)" }}
+          style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
         >
           <span className="t-micro" style={{ opacity: 0.6 }}>
             MARK SCHEME
@@ -820,7 +823,7 @@ function QuestionSheet({
                   <label
                     className="flex items-start gap-3 px-3 py-2 cursor-pointer press-swiss"
                     style={{
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       background: steps[i] ? "var(--color-acid-lime)" : "var(--color-sheet)",
                     }}
                   >
@@ -838,7 +841,7 @@ function QuestionSheet({
                       aria-hidden
                       className="t-micro shrink-0 px-1.5 py-0.5"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "2px solid var(--color-rule)",
                         background: steps[i] ? "var(--color-ink)" : "transparent",
                         color: steps[i] ? "var(--color-canvas)" : "var(--color-ink)",
                         minWidth: 24,
@@ -852,7 +855,7 @@ function QuestionSheet({
                     </span>
                   </label>
                 ) : (
-                  <div className="flex items-start gap-3 px-3 py-2" style={{ border: "1px solid var(--color-ink)" }}>
+                  <div className="flex items-start gap-3 px-3 py-2" style={{ border: "1px solid var(--color-rule)" }}>
                     <span
                       className="t-micro shrink-0 px-1.5 py-0.5"
                       style={{ background: "var(--color-highlighter)", minWidth: 24, textAlign: "center" }}
@@ -879,7 +882,7 @@ function QuestionSheet({
           </p>
 
           {question.marking === "worked" && (
-            <div className="flex items-center justify-between gap-3 mt-4 pt-3" style={{ borderTop: "1px solid var(--color-ink)" }}>
+            <div className="flex items-center justify-between gap-3 mt-4 pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
               <span className="t-label">
                 SELF-MARK: {selfAwarded} / {question.marks}
               </span>
@@ -889,7 +892,7 @@ function QuestionSheet({
                 style={{
                   background: result?.checked ? "var(--color-acid-lime)" : "var(--color-ink)",
                   color: result?.checked ? "var(--color-ink)" : "var(--color-canvas)",
-                  border: "2px solid var(--color-ink)",
+                  border: "2px solid var(--color-rule)",
                   boxShadow: "var(--shadow-swiss)",
                   padding: "9px 16px",
                   cursor: "pointer",
@@ -927,7 +930,7 @@ function HintBlock({ hint }: { hint: string }) {
         <div
           className="p-3 rise"
           style={{
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             borderLeftWidth: 6,
             borderLeftColor: "var(--color-highlighter)",
             background: "var(--color-highlighter-wash)",
@@ -1030,7 +1033,7 @@ function Results({
 
         {/* topic breakdown */}
         <div className="swiss mt-4">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Where the marks went</h2>
           </div>
           <ul className="list-none p-0 m-0">
@@ -1038,12 +1041,12 @@ function Results({
               <li
                 key={row.topic}
                 className="px-5 py-3 flex items-center gap-4"
-                style={{ borderTop: "1px solid var(--color-ink)" }}
+                style={{ borderTop: "1px solid var(--color-rule)" }}
               >
                 <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
                 <div
                   className="hidden sm:block shrink-0"
-                  style={{ width: 180, height: 14, border: "2px solid var(--color-ink)" }}
+                  style={{ width: 180, height: 14, border: "2px solid var(--color-rule)" }}
                 >
                   <div
                     style={{
@@ -1068,7 +1071,7 @@ function Results({
 
         {/* question list */}
         <div className="swiss mt-4">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Question by question</h2>
           </div>
           <ul className="list-none p-0 m-0">
@@ -1079,12 +1082,12 @@ function Results({
                 <li
                   key={q.id}
                   className="px-5 py-3 flex items-start gap-3"
-                  style={{ borderTop: "1px solid var(--color-ink)" }}
+                  style={{ borderTop: "1px solid var(--color-rule)" }}
                 >
                   <span
                     className="t-label shrink-0 px-2 py-1"
                     style={{
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       background:
                         awarded === q.marks
                           ? "var(--color-acid-lime)"
@@ -1118,7 +1121,7 @@ function Results({
             className="no-underline press-swiss t-label"
             style={{
               background: "var(--color-highlighter)",
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               boxShadow: "var(--shadow-swiss)",
               padding: "12px 20px",
               color: "var(--color-ink)",
@@ -1131,7 +1134,7 @@ function Results({
             className="no-underline press-swiss t-label"
             style={{
               background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               boxShadow: "var(--shadow-swiss)",
               padding: "12px 20px",
               color: "var(--color-ink)",

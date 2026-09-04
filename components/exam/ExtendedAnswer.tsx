@@ -155,7 +155,7 @@ export default function ExtendedAnswer({
           placeholder="Write your answer here…"
           className="px-4 py-3 text-[16px]"
           style={{
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             background: "var(--color-sheet)",
             boxShadow: "var(--shadow-swiss)",
             resize: "vertical",
@@ -172,7 +172,7 @@ export default function ExtendedAnswer({
           style={{
             background: count >= floor ? "var(--color-ink)" : "var(--color-paper)",
             color: count >= floor ? "var(--color-canvas)" : "var(--color-ink)",
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             boxShadow: "var(--shadow-swiss)",
             padding: "10px 18px",
             cursor: marking ? "wait" : count >= floor ? "pointer" : "not-allowed",
@@ -190,7 +190,7 @@ export default function ExtendedAnswer({
       {error && (
         <div
           className="p-3 t-label"
-          style={{ border: "2px solid var(--color-ink)", background: "var(--color-signal-red)" }}
+          style={{ border: "2px solid var(--color-rule)", background: "var(--color-signal-red)" }}
         >
           {error}
         </div>
@@ -201,7 +201,7 @@ export default function ExtendedAnswer({
         <div className="rise flex flex-col gap-3">
           <div
             className="flex items-center justify-between gap-3 flex-wrap px-4 py-3"
-            style={{ border: "3px solid var(--color-ink)", background: "var(--color-highlighter)" }}
+            style={{ border: "3px solid var(--color-rule)", background: "var(--color-highlighter)" }}
           >
             <span className="t-label">
               {assessment.mode === "offline" ? "SELF-MARK GUIDE" : "EXAMINER'S MARK"}
@@ -228,7 +228,7 @@ export default function ExtendedAnswer({
                     key={source.ref}
                     className="t-micro px-2 py-1"
                     style={{
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       background: used ? "var(--color-acid-lime)" : "transparent",
                       opacity: used ? 1 : 0.5,
                     }}
@@ -265,7 +265,7 @@ export default function ExtendedAnswer({
                       key={i}
                       className="grow"
                       style={{
-                        border: "1px solid var(--color-ink)",
+                        border: "1px solid var(--color-rule)",
                         borderLeftWidth: i === 0 ? 1 : 0,
                         background:
                           i < criterion.awarded ? "var(--color-ink)" : "transparent",
@@ -283,7 +283,7 @@ export default function ExtendedAnswer({
                 <p
                   className="text-[14px] mt-2 m-0 px-3 py-2 whitespace-pre-wrap"
                   style={{
-                    borderLeft: "3px solid var(--color-ink)",
+                    borderLeft: "3px solid var(--color-rule)",
                     background: "var(--color-study)",
                     lineHeight: 1.4,
                   }}
@@ -309,7 +309,7 @@ export default function ExtendedAnswer({
           {assessment.summary && (
             <p
               className="text-[15px] p-4 m-0"
-              style={{ border: "2px solid var(--color-ink)", lineHeight: 1.45 }}
+              style={{ border: "2px solid var(--color-rule)", lineHeight: 1.45 }}
             >
               {assessment.summary}
             </p>

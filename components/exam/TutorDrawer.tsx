@@ -234,7 +234,7 @@ export default function TutorDrawer({
         style={{
           width: "min(520px, 100vw)",
           background: "var(--color-sheet)",
-          borderLeft: "3px solid var(--color-ink)",
+          borderLeft: "3px solid var(--color-rule)",
         }}
         role="dialog"
         aria-label="AI tutor"
@@ -242,7 +242,7 @@ export default function TutorDrawer({
         {/* Header */}
         <div
           className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-          style={{ borderBottom: "2px solid var(--color-ink)", background: "var(--color-ink)" }}
+          style={{ borderBottom: "2px solid var(--color-rule)", background: "var(--color-ink)" }}
         >
           <div className="flex items-center gap-2">
             <span className="mark t-micro">AI TUTOR</span>
@@ -271,7 +271,7 @@ export default function TutorDrawer({
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "2px solid var(--color-rule)" }}>
           {(["explain", "practise"] as Tab[]).map((value) => (
             <button
               key={value}
@@ -280,7 +280,7 @@ export default function TutorDrawer({
               style={{
                 background: tab === value ? "var(--color-highlighter)" : "var(--color-sheet)",
                 border: 0,
-                borderRight: value === "explain" ? "2px solid var(--color-ink)" : undefined,
+                borderRight: value === "explain" ? "2px solid var(--color-rule)" : undefined,
                 cursor: "pointer",
                 color: "var(--color-ink)",
               }}
@@ -293,7 +293,7 @@ export default function TutorDrawer({
         {/* Question context strip */}
         <div
           className="px-4 py-3 shrink-0"
-          style={{ borderBottom: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+          style={{ borderBottom: "1px solid var(--color-rule)", background: "var(--color-study)" }}
         >
           <span className="t-micro" style={{ opacity: 0.65 }}>
             Q{question.number} · {question.topic} · {question.marks} MARK
@@ -319,7 +319,7 @@ export default function TutorDrawer({
                     className="press-swiss mt-3"
                     style={{
                       background: "var(--color-highlighter)",
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       boxShadow: "var(--shadow-swiss)",
                       padding: "10px 16px",
                       fontWeight: 700,
@@ -336,7 +336,7 @@ export default function TutorDrawer({
                   key={i}
                   className="p-3"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "2px solid var(--color-rule)",
                     background:
                       message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
                     alignSelf: message.role === "user" ? "flex-end" : "flex-start",
@@ -372,7 +372,7 @@ export default function TutorDrawer({
               {error && (
                 <div
                   className="p-3 t-label"
-                  style={{ border: "2px solid var(--color-ink)", background: "var(--color-signal-red)" }}
+                  style={{ border: "2px solid var(--color-rule)", background: "var(--color-signal-red)" }}
                 >
                   {error}
                 </div>
@@ -382,7 +382,7 @@ export default function TutorDrawer({
             {/* Composer */}
             <form
               className="shrink-0 p-3 flex gap-2"
-              style={{ borderTop: "2px solid var(--color-ink)" }}
+              style={{ borderTop: "2px solid var(--color-rule)" }}
               onSubmit={(event) => {
                 event.preventDefault();
                 const text = draft.trim();
@@ -397,7 +397,7 @@ export default function TutorDrawer({
                 maxLength={600}
                 placeholder="Ask a follow-up…"
                 className="grow px-3 py-2 text-[15px]"
-                style={{ border: "2px solid var(--color-ink)", background: "var(--color-sheet)" }}
+                style={{ border: "2px solid var(--color-rule)", background: "var(--color-sheet)" }}
               />
               <button
                 type="submit"
@@ -406,7 +406,7 @@ export default function TutorDrawer({
                 style={{
                   background: streaming ? "var(--color-paper)" : "var(--color-ink)",
                   color: "var(--color-canvas)",
-                  border: "2px solid var(--color-ink)",
+                  border: "2px solid var(--color-rule)",
                   cursor: streaming ? "wait" : "pointer",
                 }}
               >
@@ -428,7 +428,7 @@ export default function TutorDrawer({
                 className="press-swiss mt-3"
                 style={{
                   background: "var(--color-highlighter)",
-                  border: "2px solid var(--color-ink)",
+                  border: "2px solid var(--color-rule)",
                   boxShadow: "var(--shadow-swiss)",
                   padding: "10px 16px",
                   fontWeight: 700,
@@ -442,7 +442,7 @@ export default function TutorDrawer({
             {variantWarning && (
               <div
                 className="p-3 text-[14px]"
-                style={{ border: "2px solid var(--color-ink)", background: "var(--color-highlighter)" }}
+                style={{ border: "2px solid var(--color-rule)", background: "var(--color-highlighter)" }}
               >
                 {variantWarning}
               </div>
@@ -460,7 +460,7 @@ export default function TutorDrawer({
 
                 <details
                   className="mt-3 pt-3"
-                  style={{ borderTop: "1px solid var(--color-ink)" }}
+                  style={{ borderTop: "1px solid var(--color-rule)" }}
                 >
                   <summary className="t-label cursor-pointer">↳ HINT</summary>
                   <p className="text-[15px] mt-2" style={{ lineHeight: 1.35 }}>
@@ -474,7 +474,7 @@ export default function TutorDrawer({
                     className="press-swiss mt-3 t-label"
                     style={{
                       background: "var(--color-sheet)",
-                      border: "2px solid var(--color-ink)",
+                      border: "2px solid var(--color-rule)",
                       boxShadow: "var(--shadow-swiss)",
                       padding: "8px 14px",
                       cursor: "pointer",
@@ -483,7 +483,7 @@ export default function TutorDrawer({
                     REVEAL MARK SCHEME
                   </button>
                 ) : (
-                  <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--color-ink)" }}>
+                  <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
                     <span className="t-micro" style={{ opacity: 0.6 }}>
                       MARK SCHEME
                     </span>
@@ -517,7 +517,7 @@ export default function TutorDrawer({
             {error && (
               <div
                 className="p-3 t-label"
-                style={{ border: "2px solid var(--color-ink)", background: "var(--color-signal-red)" }}
+                style={{ border: "2px solid var(--color-rule)", background: "var(--color-signal-red)" }}
               >
                 {error}
               </div>

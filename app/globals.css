@@ -37,7 +37,12 @@
      ours without shouting. Never for text — it fails contrast as ink. */
   --color-highlighter-wash: #fffbdd;
   --color-ink: #151515;
-  --color-canvas: #f5f3ee;
+  /* Rules are not text. Every frame on this site was drawing at full ink and
+     the page read as a stack of black boxes; at 2px a warm charcoal still
+     prints hard but stops out-shouting the words inside it. Text keeps the
+     full ink — contrast is not what was wrong. */
+  --color-rule: #37332c;
+  --color-canvas: #f6f4ef;
   --color-pure-black: #000000;
   --color-paper: #e7e4dc;
 
@@ -58,8 +63,8 @@
   --text-body: 18px;
   --text-subheading: 30px;
   --text-heading-sm: 54px;
-  --text-heading: 84px;
-  --text-display: 108px;
+  --text-heading: 78px;
+  --text-display: 96px;
 
   /* Spacing — 4px base unit */
   --spacing-4: 4px;
@@ -84,17 +89,17 @@
      after the pilot: the structure still reads as printed, it just stops
      shouting over the content it frames. */
   --border-brutal: 2px;
-  --shadow-brutal: 4px 4px 0 var(--color-ink);
-  --shadow-brutal-sm: 2px 2px 0 var(--color-ink);
-  --shadow-brutal-lg: 6px 6px 0 var(--color-ink);
+  --shadow-brutal: 4px 4px 0 var(--color-rule);
+  --shadow-brutal-sm: 2px 2px 0 var(--color-rule);
+  --shadow-brutal-lg: 6px 6px 0 var(--color-rule);
 
   /* Swiss structure tokens (workspace) */
   --border-swiss: 2px;
-  --shadow-swiss: 3px 3px 0 var(--color-ink);
+  --shadow-swiss: 3px 3px 0 var(--color-rule);
 }
 
 * {
-  border-color: var(--color-ink);
+  border-color: var(--color-rule);
 }
 
 html {
@@ -200,20 +205,20 @@ body {
 
 /* Neo-brutalist frame: heavy border + hard offset shadow */
 .brutal {
-  border: var(--border-brutal) solid var(--color-ink);
+  border: var(--border-brutal) solid var(--color-rule);
   box-shadow: var(--shadow-brutal);
   background: var(--color-canvas);
 }
 
 .brutal-sm {
-  border: var(--border-brutal) solid var(--color-ink);
+  border: var(--border-brutal) solid var(--color-rule);
   box-shadow: var(--shadow-brutal-sm);
   background: var(--color-canvas);
 }
 
 /* Swiss frame: hairline-to-2px rule, minimal offset — the border IS the card */
 .swiss {
-  border: var(--border-swiss) solid var(--color-ink);
+  border: var(--border-swiss) solid var(--color-rule);
   box-shadow: var(--shadow-swiss);
   background: var(--color-sheet);
 }
@@ -235,7 +240,7 @@ body {
 
 .press:active {
   transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--color-ink);
+  box-shadow: 0 0 0 var(--color-rule);
 }
 
 .press-swiss {
@@ -244,12 +249,12 @@ body {
 
 .press-swiss:hover {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--color-ink);
+  box-shadow: 1px 1px 0 var(--color-rule);
 }
 
 .press-swiss:active {
   transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--color-ink);
+  box-shadow: 0 0 0 var(--color-rule);
 }
 
 /* Pill — the single rounded element in the system (DESIGN.md) */
@@ -260,7 +265,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  border: 2px solid var(--color-ink);
+  border: 2px solid var(--color-rule);
   background: transparent;
   color: var(--color-ink);
   display: inline-flex;
@@ -275,7 +280,7 @@ body {
 
 /* Ruled grid: hairline dividers between cells, no gaps */
 .ruled > * + * {
-  border-top: 1px solid var(--color-ink);
+  border-top: 1px solid var(--color-rule);
 }
 
 /* --------------------------------------------------------------------------
@@ -374,6 +379,75 @@ body {
   display: inline-block;
 }
 
+/* ---------------------------------------------------------------------------
+   Arrival.
+
+   The page had no entrance at all: every element was simply present at first
+   paint, which is why a site with a WebGL hero and four scroll effects still
+   read as static — nothing happens in the two seconds anyone actually looks
+   at. These are the primitives the hero timeline drives (see HeroIntro).
+
+   Each one hides its element up front, so anything wearing `.enter` MUST be
+   inside a component that will animate it, or it stays invisible. The gate is
+   `html.js-motion`, set by HeroIntro before paint: with JS off, or before the
+   script runs, nothing is hidden and the page renders exactly as it does now.
+   --------------------------------------------------------------------------- */
+
+html.js-motion .enter {
+  opacity: 0;
+}
+
+html.js-motion .enter-rise {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* A line of type riding up out of its own overflow band — same idea as
+   MaskedReveal, but declared in CSS so the hero's first line is already
+   masked at first paint rather than after hydration. */
+.line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+html.js-motion .line-mask > * {
+  display: block;
+  transform: translateY(105%);
+}
+
+/* Wipe: the framed canvas panel arrives as a shutter rather than a fade, which
+   suits a system built out of hard edges. */
+html.js-motion .enter-wipe {
+  clip-path: inset(0 0 100% 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js-motion .enter,
+  html.js-motion .enter-rise,
+  html.js-motion .line-mask > *,
+  html.js-motion .enter-wipe {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+/* Scroll position, as a highlighter rule drawn across the top of the window.
+   Yellow doing its actual job — marking where you are — rather than filling a
+   panel. Width is written by ScrollProgress on scroll. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left center;
+  background: var(--color-highlighter);
+  z-index: 60;
+  pointer-events: none;
+}
+
 @keyframes drawer-in {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
@@ -464,7 +538,7 @@ html[data-filter-year] .paper-card {
    -------------------------------------------------------------------------- */
 .pointer-lift {
   position: relative;
-  box-shadow: var(--sx, 5px) var(--sy, 5px) 0 var(--color-ink);
+  box-shadow: var(--sx, 5px) var(--sy, 5px) 0 var(--color-rule);
   transition: box-shadow 140ms ease-out;
 }
 

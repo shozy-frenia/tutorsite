@@ -123,7 +123,7 @@ export default function AskTalap() {
           right: "20px",
           bottom: "20px",
           background: "var(--color-highlighter)",
-          border: "3px solid var(--color-ink)",
+          border: "3px solid var(--color-rule)",
           boxShadow: "var(--shadow-brutal-sm)",
           color: "var(--color-ink)",
           padding: "12px 18px",
@@ -146,13 +146,13 @@ export default function AskTalap() {
         width: "min(400px, calc(100vw - 40px))",
         height: "min(560px, calc(100vh - 40px))",
         background: "var(--color-sheet)",
-        border: "3px solid var(--color-ink)",
+        border: "3px solid var(--color-rule)",
         boxShadow: "var(--shadow-brutal)",
       }}
     >
       <div
         className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-        style={{ background: "var(--color-ink)", borderBottom: "3px solid var(--color-ink)" }}
+        style={{ background: "var(--color-ink)", borderBottom: "3px solid var(--color-rule)" }}
       >
         <div className="flex items-center gap-2">
           <span className="mark t-micro">ASK TALAP</span>
@@ -192,7 +192,7 @@ export default function AskTalap() {
             key={i}
             className="p-3"
             style={{
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               background:
                 message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
               alignSelf: message.role === "user" ? "flex-end" : "flex-start",
@@ -218,7 +218,7 @@ export default function AskTalap() {
                 onClick={() => void ask(chip)}
                 className="t-micro press-swiss text-left"
                 style={{
-                  border: "2px solid var(--color-ink)",
+                  border: "2px solid var(--color-rule)",
                   background: "var(--color-study)",
                   padding: "6px 10px",
                   cursor: "pointer",
@@ -235,7 +235,7 @@ export default function AskTalap() {
 
       <form
         className="shrink-0 p-3 flex gap-2"
-        style={{ borderTop: "2px solid var(--color-ink)" }}
+        style={{ borderTop: "2px solid var(--color-rule)" }}
         onSubmit={(event) => {
           event.preventDefault();
           const text = draft.trim();
@@ -251,7 +251,7 @@ export default function AskTalap() {
           maxLength={600}
           placeholder="Ask about the exam…"
           className="grow px-3 py-2 text-[14px]"
-          style={{ border: "2px solid var(--color-ink)", background: "var(--color-sheet)" }}
+          style={{ border: "2px solid var(--color-rule)", background: "var(--color-sheet)" }}
         />
         <button
           type="submit"
@@ -260,7 +260,7 @@ export default function AskTalap() {
           style={{
             background: busy ? "var(--color-paper)" : "var(--color-ink)",
             color: "var(--color-canvas)",
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             cursor: busy ? "wait" : "pointer",
           }}
         >

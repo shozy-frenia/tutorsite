@@ -57,8 +57,8 @@ export default function Library() {
                 data-year={paper.gradeYear}
               >
                 <div
-                  className="px-5 py-4 border-b-[3px] flex items-start justify-between gap-4"
-                  style={{ borderColor: "var(--color-ink)", background: "var(--color-highlighter)" }}
+                  className="px-5 py-4 border-b-2 flex items-start justify-between gap-4"
+                  style={{ borderColor: "var(--color-rule)", background: "var(--color-highlighter)" }}
                 >
                   <div>
                     <span className="t-micro">
@@ -77,7 +77,7 @@ export default function Library() {
                     <span
                       className="t-micro px-2 py-1"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "2px solid var(--color-rule)",
                         background:
                           paper.provenance === "transcribed"
                             ? "var(--color-acid-lime)"
@@ -91,7 +91,7 @@ export default function Library() {
 
                 <p
                   className="px-5 py-3 text-[14px] m-0"
-                  style={{ borderBottom: "1px solid var(--color-ink)", lineHeight: 1.35 }}
+                  style={{ borderBottom: "1px solid var(--color-rule)", lineHeight: 1.35 }}
                 >
                   {paper.provenanceNote}
                 </p>
@@ -106,7 +106,7 @@ export default function Library() {
                       key={stat.label}
                       className="px-5 py-4"
                       style={{
-                        borderRight: i < 2 ? "1px solid var(--color-ink)" : undefined,
+                        borderRight: i < 2 ? "1px solid var(--color-rule)" : undefined,
                       }}
                     >
                       <dt className="t-micro" style={{ opacity: 0.6 }}>
@@ -119,7 +119,7 @@ export default function Library() {
 
                 <div
                   className="px-5 py-4 border-t"
-                  style={{ borderColor: "var(--color-ink)" }}
+                  style={{ borderColor: "var(--color-rule)" }}
                 >
                   <span className="t-micro" style={{ opacity: 0.6 }}>
                     TOPICS
@@ -129,7 +129,7 @@ export default function Library() {
                       <li
                         key={topic}
                         className="t-micro px-2 py-1"
-                        style={{ border: "1px solid var(--color-ink)" }}
+                        style={{ border: "1px solid var(--color-rule)" }}
                       >
                         {topic}
                       </li>
@@ -140,7 +140,7 @@ export default function Library() {
                 {component && (
                   <div
                     className="px-5 py-3 border-t t-micro flex flex-wrap gap-x-4 gap-y-1"
-                    style={{ borderColor: "var(--color-ink)", background: "var(--color-paper)" }}
+                    style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
                   >
                     <span style={{ opacity: 0.6 }}>GRADED ON {component.name.toUpperCase()} / {component.maxMark}:</span>
                     {component.bands
@@ -160,7 +160,7 @@ export default function Library() {
                     style={{
                       background: "var(--color-ink)",
                       color: "var(--color-canvas)",
-                      border: "3px solid var(--color-ink)",
+                      border: "3px solid var(--color-rule)",
                       boxShadow: "var(--shadow-brutal-sm)",
                       padding: "12px 22px",
                       fontWeight: 700,
@@ -216,8 +216,8 @@ export default function Library() {
                         className="t-micro px-2 py-0.5 shrink-0"
                         style={
                           ready
-                            ? { background: "var(--color-acid-lime)", border: "1px solid var(--color-ink)" }
-                            : { border: "1px solid var(--color-ink)", opacity: 0.55 }
+                            ? { background: "var(--color-acid-lime)", border: "1px solid var(--color-rule)" }
+                            : { border: "1px solid var(--color-rule)", opacity: 0.55 }
                         }
                       >
                         {ready ? "READY" : "SOON"}

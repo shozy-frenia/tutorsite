@@ -151,7 +151,7 @@ export default function PaperCoverflow({ papers }: Props) {
                   flexDirection: "column",
                   background: "var(--color-canvas)",
                   color: "var(--color-ink)",
-                  border: "3px solid var(--color-ink)",
+                  border: "3px solid var(--color-rule)",
                   boxShadow: "var(--shadow-brutal)",
                   transformOrigin: "center center",
                   transform: `translate(-50%, -50%) translateX(${rel * STEP_X}px) translateZ(${-rank * DEPTH}px) rotateY(${-rel * TILT}deg) scale(${Math.max(0.4, 1 - rank * SCALE_STEP)})`,
@@ -165,7 +165,7 @@ export default function PaperCoverflow({ papers }: Props) {
                   className="px-4 py-3"
                   style={{
                     background: "var(--color-highlighter)",
-                    borderBottom: "3px solid var(--color-ink)",
+                    borderBottom: "3px solid var(--color-rule)",
                   }}
                 >
                   <span className="t-micro">
@@ -190,7 +190,7 @@ export default function PaperCoverflow({ papers }: Props) {
                       <div
                         key={label}
                         style={{
-                          borderRight: index < 2 ? "1px solid var(--color-ink)" : undefined,
+                          borderRight: index < 2 ? "1px solid var(--color-rule)" : undefined,
                           paddingRight: 10,
                           paddingLeft: index > 0 ? 10 : 0,
                         }}
@@ -210,7 +210,7 @@ export default function PaperCoverflow({ papers }: Props) {
                       <li
                         key={topic}
                         className="t-micro px-2 py-1"
-                        style={{ border: "1px solid var(--color-ink)" }}
+                        style={{ border: "1px solid var(--color-rule)" }}
                       >
                         {topic}
                       </li>
@@ -227,7 +227,7 @@ export default function PaperCoverflow({ papers }: Props) {
                     <span
                       className="t-micro px-2 py-1"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "2px solid var(--color-rule)",
                         background: paper.pastPaper ? "var(--color-acid-lime)" : "transparent",
                       }}
                     >
@@ -239,7 +239,7 @@ export default function PaperCoverflow({ papers }: Props) {
                 <div
                   className="px-4 py-3 t-label"
                   style={{
-                    borderTop: "3px solid var(--color-ink)",
+                    borderTop: "3px solid var(--color-rule)",
                     background: isActive ? "var(--color-ink)" : "var(--color-paper)",
                     color: isActive ? "var(--color-canvas)" : "var(--color-ink)",
                     transition: "background 200ms ease, color 200ms ease",
@@ -273,7 +273,7 @@ export default function PaperCoverflow({ papers }: Props) {
           aria-label="Previous paper"
           className="press-swiss t-label"
           style={{
-            border: "3px solid var(--color-ink)",
+            border: "3px solid var(--color-rule)",
             boxShadow: "var(--shadow-brutal-sm)",
             background: "var(--color-canvas)",
             padding: "10px 18px",
@@ -291,7 +291,7 @@ export default function PaperCoverflow({ papers }: Props) {
           aria-label="Next paper"
           className="press-swiss t-label"
           style={{
-            border: "3px solid var(--color-ink)",
+            border: "3px solid var(--color-rule)",
             boxShadow: "var(--shadow-brutal-sm)",
             background: "var(--color-canvas)",
             padding: "10px 18px",

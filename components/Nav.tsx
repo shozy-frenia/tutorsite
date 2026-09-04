@@ -37,7 +37,7 @@ export default function Nav({ variant = "canvas" }: { variant?: "canvas" | "stud
         <Link href="/dashboard" className="t-label no-underline">
           ↳ DASHBOARD
         </Link>
-        <Link href="/library" className="pill pill-filled press no-underline">
+        <Link href="/library" className="pill press no-underline">
           START A MOCK
         </Link>
         {/* Renders nothing until Firebase is configured, so the bar is

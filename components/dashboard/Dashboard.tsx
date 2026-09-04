@@ -48,6 +48,7 @@ import { gradeRank, marksToNextGrade } from "@/lib/grading";
 import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
+import StaggerIn from "@/components/motion/StaggerIn";
 
 /**
  * Personal tracking dashboard.
@@ -132,7 +133,7 @@ export default function Dashboard() {
           <Loaded store={store} streak={streak} mastery={mastery} />
         )}
 
-        <div className="mt-10 pt-4" style={{ borderTop: "1px solid var(--color-ink)" }}>
+        <div className="mt-10 pt-4" style={{ borderTop: "1px solid var(--color-rule)" }}>
           <button
             onClick={() => {
               if (window.confirm("Delete your profile and all saved attempts on this device?")) {
@@ -142,7 +143,7 @@ export default function Dashboard() {
             className="t-micro"
             style={{
               background: "transparent",
-              border: "1px solid var(--color-ink)",
+              border: "1px solid var(--color-rule)",
               padding: "6px 12px",
               cursor: "pointer",
               opacity: 0.6,
@@ -191,7 +192,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
   return (
     <section className="px-5 md:px-10">
       <div className="swiss max-w-[720px] rise">
-        <div className="px-6 py-5" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="px-6 py-5" style={{ borderBottom: "2px solid var(--color-rule)" }}>
           <span className="mark t-micro">DEMO REGISTRATION</span>
           <h1 className="t-subheading mt-3">Set up your tracker</h1>
           <p className="text-[16px] mt-2 m-0" style={{ lineHeight: 1.35 }}>
@@ -227,7 +228,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
               placeholder="Aisha"
               className="px-4 py-3 text-[18px]"
               style={{
-                border: "2px solid var(--color-ink)",
+                border: "2px solid var(--color-rule)",
                 background: "var(--color-sheet)",
                 boxShadow: "var(--shadow-swiss)",
               }}
@@ -246,7 +247,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   onClick={() => setGradeYear(year)}
                   className="press-swiss t-label grow py-3"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "2px solid var(--color-rule)",
                     background:
                       gradeYear === year ? "var(--color-highlighter)" : "var(--color-sheet)",
                     boxShadow: gradeYear === year ? "var(--shadow-swiss)" : "none",
@@ -274,7 +275,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   onClick={() => setParallel(value)}
                   className="press-swiss grow py-3 px-4 text-left"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "2px solid var(--color-rule)",
                     background:
                       parallel === value ? "var(--color-highlighter)" : "var(--color-sheet)",
                     boxShadow: parallel === value ? "var(--shadow-swiss)" : "none",
@@ -306,7 +307,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                       onClick={() => toggleProfile(subject.id)}
                       className="press-swiss py-3 px-4 text-left flex items-center gap-3"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "2px solid var(--color-rule)",
                         background: picked ? "var(--color-acid-lime)" : "var(--color-sheet)",
                         boxShadow: picked ? "var(--shadow-swiss)" : "none",
                         cursor: "pointer",
@@ -339,7 +340,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   onClick={() => setTargetGrade(grade)}
                   className="press-swiss"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "2px solid var(--color-rule)",
                     background:
                       targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-sheet)",
                     boxShadow: targetGrade === grade ? "var(--shadow-swiss)" : "none",
@@ -358,7 +359,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           {/* Live preview of what this student will actually sit */}
           <div
             className="p-4"
-            style={{ border: "2px solid var(--color-ink)", background: "var(--color-study)" }}
+            style={{ border: "2px solid var(--color-rule)", background: "var(--color-study)" }}
           >
             <span className="t-micro" style={{ opacity: 0.6 }}>
               YOU WILL SIT
@@ -373,7 +374,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   <li
                     key={subject.id}
                     className="t-micro px-2 py-1"
-                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
+                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-rule)" }}
                   >
                     {subject.glyph} {subject.name}
                   </li>
@@ -389,7 +390,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
             style={{
               background: ready ? "var(--color-ink)" : "var(--color-paper)",
               color: ready ? "var(--color-canvas)" : "var(--color-ink)",
-              border: "2px solid var(--color-ink)",
+              border: "2px solid var(--color-rule)",
               boxShadow: "var(--shadow-swiss)",
               padding: "12px 22px",
               cursor: ready ? "pointer" : "not-allowed",
@@ -422,7 +423,7 @@ function EmptyState() {
         className="no-underline press-swiss t-label"
         style={{
           background: "var(--color-highlighter)",
-          border: "2px solid var(--color-ink)",
+          border: "2px solid var(--color-rule)",
           boxShadow: "var(--shadow-swiss)",
           padding: "12px 20px",
           color: "var(--color-ink)",
@@ -480,7 +481,7 @@ function Loaded({
   return (
     <>
       {/* ------------------------------------------------------ stat row */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StaggerIn className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="CURRENT GRADE" accent>
           <div className="flex items-center gap-3">
             <GradeBadge grade={latest.grade} size="lg" />
@@ -536,12 +537,12 @@ function Loaded({
             {totalMarks}/{totalAvailable} MARKS EARNED · BEST {best.grade}
           </span>
         </StatCard>
-      </div>
+      </StaggerIn>
 
       {/* ------------------------------------------------------- charts */}
-      <div className="grid lg:grid-cols-2 gap-4 mt-4">
+      <StaggerIn className="grid lg:grid-cols-2 gap-4 mt-4">
         <div className="swiss">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Subject mastery</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
               PERCENTAGE OF MARKS EARNED, BY TOPIC
@@ -590,7 +591,7 @@ function Loaded({
         </div>
 
         <div className="swiss">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Grade projection</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
               SCALED SCORE PER ATTEMPT, U THROUGH A*
@@ -658,14 +659,14 @@ function Loaded({
             )}
           </div>
         </div>
-      </div>
+      </StaggerIn>
 
       {/* -------------------------------------------------- weakest topics */}
       {mastery.length > 0 && (
         <div className="swiss mt-4">
           <div
             className="px-5 py-4 flex items-baseline justify-between gap-4 flex-wrap"
-            style={{ borderBottom: "2px solid var(--color-ink)" }}
+            style={{ borderBottom: "2px solid var(--color-rule)" }}
           >
             <h2 className="t-subheading">Work on these first</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
@@ -677,12 +678,12 @@ function Loaded({
               <li
                 key={row.topic}
                 className="px-5 py-3 flex items-center gap-4"
-                style={{ borderTop: "1px solid var(--color-ink)" }}
+                style={{ borderTop: "1px solid var(--color-rule)" }}
               >
                 <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
                 <div
                   className="hidden sm:block shrink-0"
-                  style={{ width: 200, height: 14, border: "2px solid var(--color-ink)" }}
+                  style={{ width: 200, height: 14, border: "2px solid var(--color-rule)" }}
                 >
                   <div
                     style={{
@@ -711,7 +712,7 @@ function Loaded({
 
       {/* ------------------------------------------------------- history */}
       <div className="swiss mt-4">
-        <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-rule)" }}>
           <h2 className="t-subheading">Test history</h2>
         </div>
         <div className="overflow-x-auto">
@@ -747,7 +748,7 @@ function Loaded({
           className="no-underline press-swiss t-label inline-block"
           style={{
             background: "var(--color-highlighter)",
-            border: "2px solid var(--color-ink)",
+            border: "2px solid var(--color-rule)",
             boxShadow: "var(--shadow-swiss)",
             padding: "12px 20px",
             color: "var(--color-ink)",
@@ -762,7 +763,7 @@ function Loaded({
 
 function AttemptRow({ attempt }: { attempt: Attempt }) {
   return (
-    <tr style={{ borderTop: "1px solid var(--color-ink)" }}>
+    <tr style={{ borderTop: "1px solid var(--color-rule)" }}>
       <td className="px-4 py-3 text-[15px] t-mono">
         {new Date(attempt.finishedAt).toLocaleDateString()}
       </td>

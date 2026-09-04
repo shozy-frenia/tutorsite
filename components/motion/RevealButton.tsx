@@ -16,6 +16,8 @@ interface RevealButtonProps {
   style?: CSSProperties;
   className?: string;
   disabled?: boolean;
+  /** Forwarded to the rendered element — the hero timeline addresses these. */
+  [key: `data-${string}`]: string | number | undefined;
 }
 
 /**
@@ -36,11 +38,12 @@ export default function RevealButton({
   hoverFill = "var(--color-highlighter)",
   textColor = "var(--color-canvas)",
   hoverTextColor = "var(--color-ink)",
-  border = "3px solid var(--color-ink)",
+  border = "2px solid var(--color-rule)",
   shadow = "var(--shadow-brutal)",
   style,
   className = "",
   disabled = false,
+  ...rest
 }: RevealButtonProps) {
   const overlayRef = useRef<HTMLSpanElement>(null);
 
@@ -78,7 +81,10 @@ export default function RevealButton({
     color: textColor,
     overflow: "hidden",
     cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
+    // Only written when it means something. An unconditional `opacity: 1`
+    // here is an inline style, so it outranks any class the caller adds —
+    // which silently disabled the hero's entrance on both of its buttons.
+    ...(disabled ? { opacity: 0.5 } : null),
     ...style,
   };
 
@@ -113,6 +119,7 @@ export default function RevealButton({
         onPointerLeave={onLeave}
         className={`no-underline ${className}`}
         style={sharedStyle}
+        {...rest}
       >
         <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
         {overlay}
@@ -129,6 +136,7 @@ export default function RevealButton({
       onPointerLeave={onLeave}
       className={className}
       style={sharedStyle}
+      {...rest}
     >
       <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
       {overlay}
