@@ -1,11 +1,14 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import ScrollReveal from "@/components/motion/ScrollReveal";
 import PaperFilter from "@/components/library/PaperFilter";
-import MaskedReveal from "@/components/motion/MaskedReveal";
-import PointerLift from "@/components/motion/PointerLift";
-import StaggerIn from "@/components/motion/StaggerIn";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
-import { GRADE_STAGES, examSubjectsFor, profileOptionsFor, subjectById } from "@/data/curriculum";
+import {
+  GRADE_STAGES,
+  examSubjectsFor,
+  profileOptionsFor,
+  subjectById,
+} from "@/data/curriculum";
 import { boundariesFor } from "@/data/grade-boundaries";
 
 export const metadata = {
@@ -21,221 +24,209 @@ export const metadata = {
  * the full product is visible without pretending the content is there.
  */
 export default function Library() {
-  const seededSubjects = new Set(PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`));
+  const seededSubjects = new Set(
+    PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`)
+  );
 
   return (
-    <main>
+    <>
+      <ScrollReveal />
       <Nav />
 
-      <section className="px-5 md:px-10">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal as="h1" className="t-heading" style={{ maxWidth: "12ch" }} text="Mock papers" />
-          <span className="t-label pb-2">↳ {PAPERS.length} READY TO SIT</span>
-        </div>
-
-        <PaperFilter
-          available={PAPERS.map((p) => ({ gradeYear: p.gradeYear, subjectId: p.subjectId }))}
-        />
-
-        <StaggerIn className="grid lg:grid-cols-2 gap-5">
-          {[...PAPERS]
-            .sort((a, b) => a.gradeYear - b.gradeYear)
-            .map((paper) => {
-            const subject = subjectById(paper.subjectId);
-            const component = boundariesFor(paper.subjectId, paper.gradeYear)?.components[
-              paper.componentIndex
-            ];
-            const marks = availableMarks(paper);
-            const topics = paperTopics(paper);
-
-            return (
-              <PointerLift
-                as="article"
-                key={paper.id}
-                className="brutal flex flex-col paper-card"
-                data-subject={paper.subjectId}
-                data-year={paper.gradeYear}
-              >
-                <div
-                  className="px-5 py-4 border-b-[3px] flex items-start justify-between gap-4"
-                  style={{ borderColor: "var(--color-ink)", background: "var(--color-highlighter)" }}
-                >
-                  <div>
-                    <span className="t-micro">
-                      GRADE {paper.gradeYear} · {subject?.name.toUpperCase()}
-                    </span>
-                    <h2 className="t-subheading mt-1">{paper.title}</h2>
-                    <span className="t-label mt-1 block">{paper.sitting}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span
-                      className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
-                    >
-                      {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
-                    </span>
-                    <span
-                      className="t-micro px-2 py-1"
-                      style={{
-                        border: "2px solid var(--color-ink)",
-                        background:
-                          paper.provenance === "transcribed"
-                            ? "var(--color-acid-lime)"
-                            : "var(--color-canvas)",
-                      }}
-                    >
-                      {paper.provenance === "transcribed" ? "PAST PAPER" : "PRACTICE"}
-                    </span>
-                  </div>
-                </div>
-
-                <p
-                  className="px-5 py-3 text-[14px] m-0"
-                  style={{ borderBottom: "1px solid var(--color-ink)", lineHeight: 1.35 }}
-                >
-                  {paper.provenanceNote}
-                </p>
-
-                <dl className="grid grid-cols-3 ruled-none">
-                  {[
-                    { label: "QUESTIONS", value: `${paper.questions.length}` },
-                    { label: "MARKS", value: `${marks}` },
-                    { label: "MINUTES", value: `${paper.durationMinutes}` },
-                  ].map((stat, i) => (
-                    <div
-                      key={stat.label}
-                      className="px-5 py-4"
-                      style={{
-                        borderRight: i < 2 ? "1px solid var(--color-ink)" : undefined,
-                      }}
-                    >
-                      <dt className="t-micro" style={{ opacity: 0.6 }}>
-                        {stat.label}
-                      </dt>
-                      <dd className="t-subheading t-mono m-0">{stat.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-
-                <div
-                  className="px-5 py-4 border-t"
-                  style={{ borderColor: "var(--color-ink)" }}
-                >
-                  <span className="t-micro" style={{ opacity: 0.6 }}>
-                    TOPICS
-                  </span>
-                  <ul className="flex flex-wrap gap-1.5 mt-2 list-none p-0">
-                    {topics.map((topic) => (
-                      <li
-                        key={topic}
-                        className="t-micro px-2 py-1"
-                        style={{ border: "1px solid var(--color-ink)" }}
-                      >
-                        {topic}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {component && (
-                  <div
-                    className="px-5 py-3 border-t t-micro flex flex-wrap gap-x-4 gap-y-1"
-                    style={{ borderColor: "var(--color-ink)", background: "var(--color-paper)" }}
-                  >
-                    <span style={{ opacity: 0.6 }}>GRADED ON {component.name.toUpperCase()} / {component.maxMark}:</span>
-                    {component.bands
-                      .filter((b) => b.grade !== "U")
-                      .map((band) => (
-                        <span key={band.grade}>
-                          {band.grade} ≥ {band.min}
-                        </span>
-                      ))}
-                  </div>
-                )}
-
-                <div className="p-5 mt-auto">
-                  <Link
-                    href={`/exam/${paper.id}`}
-                    className="no-underline press inline-block"
-                    style={{
-                      background: "var(--color-ink)",
-                      color: "var(--color-canvas)",
-                      border: "3px solid var(--color-ink)",
-                      boxShadow: "var(--shadow-brutal-sm)",
-                      padding: "12px 22px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    Sit this paper →
-                  </Link>
-                </div>
-              </PointerLift>
-            );
-          })}
-        </StaggerIn>
-      </section>
-
-      {/* Curriculum coverage — what exists and what does not */}
-      <section className="px-5 md:px-10 mt-12">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal
-            as="h2"
-            className="t-heading-sm"
-            style={{ maxWidth: "16ch" }}
-            text="The rest of the curriculum"
-          />
-          <span className="t-label pb-2">↳ NOT YET SEEDED</span>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-5">
-          {GRADE_STAGES.map((stage) => (
-            <div key={stage.year} className="swiss-flat p-5">
-              <span className="mark t-micro">GRADE {stage.year}</span>
-              <span className="t-micro block mt-3" style={{ opacity: 0.55 }}>
-                {stage.compulsory}
+      <main>
+        <section className="section-tight">
+          <div className="shell">
+            <div className="head head--left">
+              <span className="eyebrow" data-reveal>
+                ↳ {PAPERS.length} ready to sit
               </span>
-              <ul className="mt-2 list-none p-0 flex flex-col gap-2">
-                {[
-                  ...examSubjectsFor({
-                    gradeYear: stage.year,
-                    parallel: "kazakh",
-                    profileSubjectIds: [],
-                  }),
-                  ...profileOptionsFor(stage.year),
-                ].map((subject) => {
-                  const ready = seededSubjects.has(`${stage.year}:${subject.id}`);
+              <h1 className="h" data-hl>
+                Mock{" "}
+                <span className="hl">
+                  <span>papers</span>
+                </span>
+              </h1>
+            </div>
+
+            <PaperFilter
+              available={PAPERS.map((p) => ({
+                gradeYear: p.gradeYear,
+                subjectId: p.subjectId,
+              }))}
+            />
+
+            <div className="papers" data-stagger>
+              {[...PAPERS]
+                .sort((a, b) => a.gradeYear - b.gradeYear)
+                .map((paper) => {
+                  const subject = subjectById(paper.subjectId);
+                  const component = boundariesFor(
+                    paper.subjectId,
+                    paper.gradeYear
+                  )?.components[paper.componentIndex];
+                  const marks = availableMarks(paper);
+                  const topics = paperTopics(paper);
+
                   return (
-                    <li
-                      key={subject.id}
-                      className="flex items-center justify-between gap-3 text-[15px]"
+                    <article
+                      key={paper.id}
+                      className="card card--plain paper-card"
+                      data-subject={paper.subjectId}
+                      data-year={paper.gradeYear}
                     >
-                      <span>
-                        {subject.glyph} {subject.name}
-                      </span>
-                      <span
-                        className="t-micro px-2 py-0.5 shrink-0"
-                        style={
-                          ready
-                            ? { background: "var(--color-acid-lime)", border: "1px solid var(--color-ink)" }
-                            : { border: "1px solid var(--color-ink)", opacity: 0.55 }
-                        }
+                      <div className="paper-card__top">
+                        <div>
+                          <span className="mono muted">
+                            Grade {paper.gradeYear} · {subject?.name}
+                          </span>
+                          <h2 className="sub" style={{ marginTop: 4 }}>
+                            {paper.title}
+                          </h2>
+                          <span className="caption muted">{paper.sitting}</span>
+                        </div>
+                        <div className="paper-card__flags">
+                          <span className="tag tag--plain">
+                            {paper.calculator ? "calculator" : "no calculator"}
+                          </span>
+                          <span
+                            className={
+                              paper.provenance === "transcribed"
+                                ? "tag tag--mint"
+                                : "tag tag--outline"
+                            }
+                          >
+                            {paper.provenance === "transcribed"
+                              ? "past paper"
+                              : "practice"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="body-sm muted">{paper.provenanceNote}</p>
+
+                      <dl className="paper-card__stats">
+                        {[
+                          {
+                            label: "Questions",
+                            value: `${paper.questions.length}`,
+                          },
+                          { label: "Marks", value: `${marks}` },
+                          { label: "Minutes", value: `${paper.durationMinutes}` },
+                        ].map((stat) => (
+                          <div key={stat.label}>
+                            <dt className="mono muted">{stat.label}</dt>
+                            <dd className="paper-card__stat">{stat.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+
+                      <div>
+                        <span className="mono muted">Topics</span>
+                        <ul className="paper-card__topics">
+                          {topics.map((topic) => (
+                            <li key={topic} className="tag tag--plain">
+                              {topic}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {component && (
+                        <div className="paper-card__bands">
+                          <span className="mono muted">
+                            Graded on {component.name} / {component.maxMark}
+                          </span>
+                          <span className="paper-card__band-list">
+                            {component.bands
+                              .filter((b) => b.grade !== "U")
+                              .map((band) => (
+                                <span key={band.grade} className="mono">
+                                  {band.grade} ≥ {band.min}
+                                </span>
+                              ))}
+                          </span>
+                        </div>
+                      )}
+
+                      <Link
+                        href={`/exam/${paper.id}`}
+                        className="btn btn--primary btn--sm paper-card__cta"
                       >
-                        {ready ? "READY" : "SOON"}
-                      </span>
-                    </li>
+                        <span className="btn__arrow">→</span>Sit this paper
+                      </Link>
+                    </article>
                   );
                 })}
-              </ul>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <footer className="px-5 md:px-10 py-10 mt-12" style={{ background: "var(--color-ink)" }}>
-        <span className="t-micro" style={{ color: "var(--color-canvas)", opacity: 0.6 }}>
-          TALAP® · QUESTION CONTENT TRANSCRIBED FROM NIS PAST PAPERS FOR STUDY USE
-        </span>
+        {/* Curriculum coverage — what exists and what does not */}
+        <section className="section-tight">
+          <div className="shell">
+            <div className="head head--left">
+              <span className="eyebrow" data-reveal>
+                ↳ Not yet seeded
+              </span>
+              <h2 className="h-sm" data-hl>
+                The rest of the{" "}
+                <span className="hl hl--teal">
+                  <span>curriculum</span>
+                </span>
+              </h2>
+            </div>
+
+            <div className="coverage" data-stagger>
+              {GRADE_STAGES.map((stage) => (
+                <div key={stage.year} className="card card--plain">
+                  <span className="tag">Grade {stage.year}</span>
+                  <p
+                    className="mono muted"
+                    style={{ marginTop: "var(--spacing-16)" }}
+                  >
+                    {stage.compulsory}
+                  </p>
+                  <ul className="coverage__list">
+                    {[
+                      ...examSubjectsFor({
+                        gradeYear: stage.year,
+                        parallel: "kazakh",
+                        profileSubjectIds: [],
+                      }),
+                      ...profileOptionsFor(stage.year),
+                    ].map((subject) => {
+                      const ready = seededSubjects.has(
+                        `${stage.year}:${subject.id}`
+                      );
+                      return (
+                        <li key={subject.id}>
+                          <span>
+                            {subject.glyph} {subject.name}
+                          </span>
+                          <span
+                            className={`tag ${ready ? "tag--mint" : "tag--plain"}`}
+                          >
+                            {ready ? "ready" : "soon"}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div className="shell">
+          <p className="micro muted">
+            Talap® · question content transcribed from NIS past papers for study
+            use.
+          </p>
+        </div>
       </footer>
-    </main>
+    </>
   );
 }

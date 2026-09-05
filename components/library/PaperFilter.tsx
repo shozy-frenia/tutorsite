@@ -62,26 +62,13 @@ export default function PaperFilter({
 
   if (!profile) {
     return (
-      <div
-        className="swiss-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
-        style={{ background: "var(--color-paper)" }}
-      >
-        <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
-          Showing every paper. Set up a profile and the library narrows to the exams you
-          actually sit.
+      <div className="filter-bar card card--plain">
+        <p className="body-sm">
+          Showing every paper. Set up a profile and the library narrows to the
+          exams you actually sit.
         </p>
-        <Link
-          href="/dashboard"
-          className="no-underline press-swiss t-label shrink-0"
-          style={{
-            background: "var(--color-highlighter)",
-            border: "2px solid var(--color-ink)",
-            boxShadow: "var(--shadow-swiss)",
-            padding: "8px 14px",
-            color: "var(--color-ink)",
-          }}
-        >
-          SET UP A PROFILE →
+        <Link href="/dashboard" className="btn btn--yellow btn--sm shrink-0">
+          <span className="btn__arrow">→</span>Set up a profile
         </Link>
       </div>
     );
@@ -108,45 +95,32 @@ export default function PaperFilter({
       {filtering && showRules && (
         <style>{`${showRules} { display: flex; }`}</style>
       )}
-      <div
-        className="swiss px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
-        style={{ background: "var(--color-highlighter)" }}
-      >
-      <div className="min-w-0">
-        <span className="t-micro" style={{ opacity: 0.7 }}>
-          {profile.name.toUpperCase()} · GRADE {profile.gradeYear} ·{" "}
-          {PARALLEL_LABEL[profile.parallel].toUpperCase()}
-        </span>
-        <p className="text-[15px] m-0 mt-1" style={{ lineHeight: 1.35 }}>
-          {showAll
-            ? "Showing every paper in the library."
-            : `Showing only your ${stageFor(profile.gradeYear)?.load ?? "exam subjects"}.`}
-        </p>
-        <ul className="flex flex-wrap gap-1.5 mt-2 list-none p-0">
-          {subjects.map((subject) => (
-            <li
-              key={subject.id}
-              className="t-micro px-2 py-1"
-              style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
-            >
-              {subject.glyph} {subject.name}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div className="filter-bar card card--yellow">
+        <div className="min-w-0">
+          <span className="mono" style={{ opacity: 0.7 }}>
+            {profile.name} · Grade {profile.gradeYear} ·{" "}
+            {PARALLEL_LABEL[profile.parallel]}
+          </span>
+          <p className="body-sm" style={{ marginTop: 4 }}>
+            {showAll
+              ? "Showing every paper in the library."
+              : `Showing only your ${stageFor(profile.gradeYear)?.load ?? "exam subjects"}.`}
+          </p>
+          <ul className="filter-bar__subjects">
+            {subjects.map((subject) => (
+              <li key={subject.id} className="tag tag--outline">
+                {subject.glyph} {subject.name}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <button
+          type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="press-swiss t-label shrink-0"
-          style={{
-            background: "var(--color-sheet)",
-            border: "2px solid var(--color-ink)",
-            boxShadow: "var(--shadow-swiss)",
-            padding: "8px 14px",
-            cursor: "pointer",
-          }}
+          className="btn btn--outline btn--sm shrink-0"
         >
-          {showAll ? "SHOW ONLY MINE" : "SHOW EVERYTHING"}
+          {showAll ? "Show only mine" : "Show everything"}
         </button>
       </div>
 
@@ -162,11 +136,8 @@ export default function PaperFilter({
  */
 function NoMatchNotice({ year }: { year: number }) {
   return (
-    <div
-      className="swiss-flat px-5 py-4 mb-5 empty-notice"
-      style={{ background: "var(--color-paper)" }}
-    >
-      <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
+    <div className="card card--tint empty-notice" style={{ marginBottom: "var(--spacing-20)" }}>
+      <p className="body-sm">
         No papers seeded for your Grade {year} subjects yet. Use{" "}
         <strong>Show everything</strong> above to practise on another year&rsquo;s papers in
         the meantime.

@@ -118,19 +118,10 @@ export default function AskTalap() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Open the study assistant"
-        className="press t-label fixed z-40"
-        style={{
-          right: "20px",
-          bottom: "20px",
-          background: "var(--color-highlighter)",
-          border: "3px solid var(--color-ink)",
-          boxShadow: "var(--shadow-brutal-sm)",
-          color: "var(--color-ink)",
-          padding: "12px 18px",
-          cursor: "pointer",
-        }}
+        className="ask"
       >
-        ASK TALAP ↗
+        <i aria-hidden="true" />
+        Ask Talap ↗
       </button>
     );
   }
@@ -145,70 +136,58 @@ export default function AskTalap() {
         bottom: "20px",
         width: "min(400px, calc(100vw - 40px))",
         height: "min(560px, calc(100vh - 40px))",
-        background: "var(--color-sheet)",
-        border: "3px solid var(--color-ink)",
-        boxShadow: "var(--shadow-brutal)",
+        background: "var(--color-cream-paper)",
+        border: "1px solid var(--color-forest-ink)",
+        borderRadius: "var(--radius-cards)",
+        overflow: "hidden",
+        boxShadow: "var(--shadow-lifted)",
       }}
     >
       <div
         className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-        style={{ background: "var(--color-ink)", borderBottom: "3px solid var(--color-ink)" }}
+        style={{
+          background: "var(--color-whisper-gray)",
+          borderBottom: "1px solid var(--color-pencil-gray)",
+        }}
       >
         <div className="flex items-center gap-2">
-          <span className="mark t-micro">ASK TALAP</span>
+          <span className="mono">Ask Talap</span>
           {mode === "offline" && (
-            <span
-              className="t-micro px-2 py-1"
-              style={{ border: "1px solid var(--color-canvas)", color: "var(--color-canvas)" }}
-            >
-              OFFLINE
-            </span>
+            <span className="tag tag--outline">offline</span>
           )}
         </div>
         <button
           onClick={() => setOpen(false)}
-          className="t-label"
-          style={{
-            background: "transparent",
-            border: "2px solid var(--color-canvas)",
-            color: "var(--color-canvas)",
-            padding: "4px 10px",
-            cursor: "pointer",
-          }}
+          className="btn btn--outline btn--sm"
+          aria-label="Close the study assistant"
         >
-          CLOSE ✕
+          Close ✕
         </button>
       </div>
 
       <div ref={logRef} className="grow overflow-y-auto p-3 flex flex-col gap-2.5">
-        <div className="swiss-flat p-3">
-          <p className="text-[14px] m-0" style={{ lineHeight: 1.4 }}>
-            {OPENING}
-          </p>
-        </div>
+        <p className="msg msg--ai">{OPENING}</p>
 
         {messages.map((message, i) => (
-          <div
+          <p
             key={i}
-            className="p-3"
-            style={{
-              border: "2px solid var(--color-ink)",
-              background:
-                message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
-              alignSelf: message.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "94%",
-            }}
+            className={`msg whitespace-pre-wrap ${
+              message.role === "user" ? "msg--me" : "msg--ai"
+            }`}
           >
-            <span className="t-micro block mb-1" style={{ opacity: 0.6 }}>
-              {message.role === "user" ? "YOU" : "TALAP"}
-            </span>
-            <p className="text-[14px] whitespace-pre-wrap m-0" style={{ lineHeight: 1.45 }}>
-              {renderText(message.content)}
-            </p>
-          </div>
+            {renderText(message.content)}
+          </p>
         ))}
 
-        {busy && <span className="t-micro blink">THINKING…</span>}
+        {busy && (
+          <p className="msg msg--ai" aria-live="polite">
+            <span className="typing">
+              <i />
+              <i />
+              <i />
+            </span>
+          </p>
+        )}
 
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
@@ -216,15 +195,8 @@ export default function AskTalap() {
               <button
                 key={chip}
                 onClick={() => void ask(chip)}
-                className="t-micro press-swiss text-left"
-                style={{
-                  border: "2px solid var(--color-ink)",
-                  background: "var(--color-study)",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  textTransform: "none",
-                  letterSpacing: 0,
-                }}
+                className="btn btn--quiet btn--sm"
+                style={{ textAlign: "left" }}
               >
                 {chip}
               </button>
@@ -235,7 +207,7 @@ export default function AskTalap() {
 
       <form
         className="shrink-0 p-3 flex gap-2"
-        style={{ borderTop: "2px solid var(--color-ink)" }}
+        style={{ borderTop: "1px solid var(--color-pencil-gray)" }}
         onSubmit={(event) => {
           event.preventDefault();
           const text = draft.trim();
@@ -250,21 +222,14 @@ export default function AskTalap() {
           onChange={(event) => setDraft(event.target.value)}
           maxLength={600}
           placeholder="Ask about the exam…"
-          className="grow px-3 py-2 text-[14px]"
-          style={{ border: "2px solid var(--color-ink)", background: "var(--color-sheet)" }}
+          className="field grow"
         />
         <button
           type="submit"
           disabled={busy || !draft.trim()}
-          className="press-swiss t-label px-4"
-          style={{
-            background: busy ? "var(--color-paper)" : "var(--color-ink)",
-            color: "var(--color-canvas)",
-            border: "2px solid var(--color-ink)",
-            cursor: busy ? "wait" : "pointer",
-          }}
+          className="btn btn--primary btn--sm"
         >
-          SEND
+          Send
         </button>
       </form>
     </aside>

@@ -4,12 +4,20 @@ import type { Grade, GradeYear } from "@/data/grade-boundaries";
 import type { Parallel } from "@/data/curriculum";
 
 /**
- * Local persistence for the demo.
+ * Device storage.
  *
- * Everything lives in localStorage under one namespaced key. There is no
- * server-side account in the MVP — registration is a name and a target grade,
- * which is enough to make the dashboard meaningful without asking students for
- * credentials the app cannot yet protect.
+ * This is still the primary store, and that is a deliberate choice rather than
+ * a leftover from the MVP. Sign-in is optional: a student can open a paper and
+ * sit it without an account, exactly as before. 10 of 26 pilots closed the site
+ * inside five minutes, and putting a registration wall in front of the one
+ * thing they came to do would make that number worse, not better.
+ *
+ * What changed: the store is now mirrored to Supabase for signed-in students,
+ * and `replaceStore` exists so the sync layer can write a merged result back in
+ * one atomic step. Everything else keeps the same signatures the exam and
+ * dashboard components already import.
+ *
+ * See lib/supabase/sync.ts for the cloud half.
  */
 
 const KEY = "talap.v1";
@@ -44,6 +52,10 @@ export interface QuestionOutcome {
 }
 
 export interface Attempt {
+  /**
+   * Device-generated id. Doubles as `client_id` in Postgres, which is what
+   * makes the local → cloud merge idempotent across devices and retries.
+   */
   id: string;
   paperId: string;
   paperTitle: string;
@@ -73,6 +85,14 @@ export interface Store {
 const EMPTY: Store = { profile: null, attempts: [], activeDays: [] };
 
 const isBrowser = () => typeof window !== "undefined";
+
+/** Stable id for a new attempt, with a fallback for older mobile browsers. */
+export function newAttemptId(): string {
+  if (isBrowser() && typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `a_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
 
 /**
  * Validate a profile restored from storage.
@@ -133,6 +153,19 @@ function writeStore(store: Store): void {
   }
 }
 
+/**
+ * Overwrite the whole store.
+ *
+ * Only the sync layer should call this, and only with an already-merged result.
+ * It exists so that a merge lands as one write and one `talap:store` event
+ * rather than as a burst that makes the dashboard flicker through intermediate
+ * states.
+ */
+export function replaceStore(store: Store): Store {
+  writeStore(store);
+  return store;
+}
+
 export const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 export function saveProfile(profile: Profile): Store {
@@ -152,6 +185,22 @@ export function saveAttempt(attempt: Attempt): Store {
       ? store.activeDays
       : [...store.activeDays, day].sort(),
   };
+  writeStore(next);
+  return next;
+}
+
+/**
+ * Record that the student was here today without finishing a paper.
+ *
+ * Revising, reading a mark scheme or asking the tutor a question is practice,
+ * and the streak is the single mechanic most likely to bring someone back
+ * tomorrow — so it should not require finishing an 18-question paper to tick.
+ */
+export function touchToday(): Store {
+  const store = readStore();
+  const day = todayIso();
+  if (store.activeDays.includes(day)) return store;
+  const next: Store = { ...store, activeDays: [...store.activeDays, day].sort() };
   writeStore(next);
   return next;
 }
@@ -220,4 +269,19 @@ export function topicMastery(
       percent: marks > 0 ? Math.round((awarded / marks) * 100) : 0,
     }))
     .sort((a, b) => a.percent - b.percent);
+}
+
+/** Subscribe to any local store change. Returns an unsubscribe function. */
+export function onStoreChange(handler: () => void): () => void {
+  if (!isBrowser()) return () => {};
+  window.addEventListener("talap:store", handler);
+  // Another tab wrote to localStorage — keep this one in step.
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === KEY) handler();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener("talap:store", handler);
+    window.removeEventListener("storage", onStorage);
+  };
 }
