@@ -45,7 +45,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "EF = 3/8 d - 1/2 b; |b| = |d| = 16",
-      accepts: [
+      acceptedAnswers: [
         "EF=3/8d-1/2b; |b|=|d|=16",
         "3/8d-1/2b, 16",
         "-1/2b+3/8d; 16",
@@ -74,7 +74,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "4",
-      accepts: ["gradient 4", "k=4", "slope 4"],
+      acceptedAnswers: ["gradient 4", "k=4", "slope 4"],
       markScheme: [
         { text: "Gradient MN = (1 − (−19)) / (1 − (−4)) = 20/5 = 4", marks: 1 },
         {
@@ -101,7 +101,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "m = ±√2",
-      accepts: ["m=±√2", "±√2", "m=√2 or m=-√2", "sqrt2,-sqrt2", "m=±sqrt(2)"],
+      acceptedAnswers: ["m=±√2", "±√2", "m=√2 or m=-√2", "sqrt2,-sqrt2", "m=±sqrt(2)"],
       markScheme: [
         { text: "Gradient AB = (m + 2 − 3) / (4m − (3m − 1)) = (m − 1)/(m + 1)", marks: 2 },
         { text: "Gradient CD = (4m − 1 − (m + 3)) / (m − 0) = (3m − 4)/m", marks: 2 },
@@ -167,7 +167,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "E(2; −10)",
-      accepts: ["(2,-10)", "2,-10", "E=(2,-10)", "x=2,y=-10"],
+      acceptedAnswers: ["(2,-10)", "2,-10", "E=(2,-10)", "x=2,y=-10"],
       markScheme: [
         { text: "AB = (8; −2) and AD = (16; −4) = 2·AB, so the scale factor is 2", marks: 1 },
         { text: "AC = (6; −8), therefore AE = 2·AC = (12; −16)", marks: 1 },
@@ -204,7 +204,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "1 − sin α cos α",
-      accepts: [
+      acceptedAnswers: [
         "1-sinacosa",
         "1-sin a cos a",
         "1-sinαcosα",
@@ -235,7 +235,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "42",
-      accepts: ["42°", "42 deg", "42 degrees"],
+      acceptedAnswers: ["42°", "42 deg", "42 degrees"],
       unit: "°",
       markScheme: [
         {
@@ -266,7 +266,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "AP = 8 cm, BP = 5 cm",
-      accepts: ["ap=8,bp=5", "8,5", "8 and 5", "ap=8cm,bp=5cm", "8cm,5cm"],
+      acceptedAnswers: ["ap=8,bp=5", "8,5", "8 and 5", "ap=8cm,bp=5cm", "8cm,5cm"],
       markScheme: [
         { text: "Intersecting chords: AP · BP = CP · DP", marks: 1 },
         { text: "AP · BP = 5 × 8 = 40", marks: 1 },
@@ -311,7 +311,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "arccos(√3/6) ≈ 73.2°",
-      accepts: [
+      acceptedAnswers: [
         "arccos(√3/6)",
         "arccos(sqrt3/6)",
         "73.2",
@@ -376,7 +376,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "(i) 15120  (ii) 10080",
-      accepts: ["15120,10080", "15120 and 10080", "i)15120 ii)10080", "15120;10080"],
+      acceptedAnswers: ["15120,10080", "15120 and 10080", "i)15120 ii)10080", "15120;10080"],
       markScheme: [
         { text: "(i) Identify repeats: two 2s, two 7s, three 8s", marks: 1 },
         { text: "(i) 9! / (2! · 2! · 3!) = 15120", marks: 1 },
@@ -404,7 +404,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "a) 2/15  b) 224/435",
-      accepts: ["2/15,224/435", "2/15 and 224/435", "a)2/15 b)224/435", "2/15;224/435"],
+      acceptedAnswers: ["2/15,224/435", "2/15 and 224/435", "a)2/15 b)224/435", "2/15;224/435"],
       markScheme: [
         { text: "a) P(box A) = 1/3", marks: 1 },
         { text: "a) P(white | A) = 4/10 = 2/5", marks: 1 },
@@ -444,7 +444,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "x = πn; x = ±arccos(√3/3) + 2πk",
-      accepts: [
+      acceptedAnswers: [
         "x=pin, x=±arccos(√3/3)+2pik",
         "πn, ±arccos(√3/3)+2πk",
         "x=πn and x=±arccos(1/√3)+2πk",
@@ -474,7 +474,7 @@ export const MATHS_10_P1_MARCH: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "[π/4; 11π/12] ∪ [5π/4; 23π/12]",
-      accepts: [
+      acceptedAnswers: [
         "π/4≤x≤11π/12, 5π/4≤x≤23π/12",
         "pi/4,11pi/12,5pi/4,23pi/12",
         "[pi/4;11pi/12]u[5pi/4;23pi/12]",

@@ -79,7 +79,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "-7.44",
-      accepts: ["−7.44", "-7.444", "-67/9", "-7,44"],
+      acceptedAnswers: ["−7.44", "-7.444", "-67/9", "-7,44"],
       markScheme: [
         {
           text: "Substitutes the limits into numerator and denominator: (4 × (−1.2) × 3 + 1) / (3 + (−1.2)).",
@@ -123,7 +123,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "6.25",
-      accepts: ["6,25", "6.25 cm", "6.25 см"],
+      acceptedAnswers: ["6,25", "6.25 cm", "6.25 см"],
       unit: "cm",
       markScheme: [
         {
@@ -147,7 +147,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "20.3",
-      accepts: ["20,3", "20.35", "20.3 cm2", "20.3 см2"],
+      acceptedAnswers: ["20,3", "20.35", "20.3 cm2", "20.3 см2"],
       unit: "cm²",
       markScheme: [
         { text: "Finds the scale factor between the similar triangles: k = AC/AB = 6.25/5 = 1.25.", marks: 1 },
@@ -169,7 +169,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "y = -x + 5",
-      accepts: ["y=-x+5", "y = 5 - x", "x + y = 5", "y=5-x"],
+      acceptedAnswers: ["y=-x+5", "y = 5 - x", "x + y = 5", "y=5-x"],
       markScheme: [
         { text: "Differentiates: dy/dx = 3x² − 2.", marks: 1 },
         { text: "Gradient of the tangent at x = 1 is 3 − 2 = 1.", marks: 1 },
@@ -190,7 +190,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "23.1",
-      accepts: ["23,1", "23.1°", "23.1 degrees"],
+      acceptedAnswers: ["23,1", "23.1°", "23.1 degrees"],
       unit: "°",
       markScheme: [
         { text: "Scalar product a·b = 2×1 + 0×(−1) + 3×3 = 11.", marks: 1 },
@@ -211,7 +211,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "(0, 2, -3)",
-      accepts: ["(0,2,-3)", "0, 2, -3", "0;2;-3", "(0; 2; −3)"],
+      acceptedAnswers: ["(0,2,-3)", "0, 2, -3", "0;2;-3", "(0; 2; −3)"],
       markScheme: [
         { text: "Component by component: (2 − 2, 0 + 2, 3 − 6) = (0, 2, −3).", marks: 1 },
       ],
@@ -273,7 +273,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "40(4x+4)^9",
-      accepts: ["40(4x + 4)^9", "40*(4x+4)^9", "40(4x+4)⁹"],
+      acceptedAnswers: ["40(4x + 4)^9", "40*(4x+4)^9", "40(4x+4)⁹"],
       markScheme: [
         { text: "Applies the chain rule: 10(4x + 4)⁹ × d/dx(4x + 4).", marks: 1 },
         { text: "Inner derivative is 4, giving 40(4x + 4)⁹.", marks: 1 },
@@ -291,7 +291,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "sin x + x cos x",
-      accepts: ["sinx + xcosx", "sin(x)+x*cos(x)", "x cos x + sin x", "xcosx+sinx"],
+      acceptedAnswers: ["sinx + xcosx", "sin(x)+x*cos(x)", "x cos x + sin x", "xcosx+sinx"],
       markScheme: [
         { text: "Identifies a product and states the product rule u′v + uv′.", marks: 1 },
         { text: "u = x gives u′ = 1; v = sin x gives v′ = cos x.", marks: 1 },
@@ -330,7 +330,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "±0.25",
-      accepts: ["+-0.25", "0.25 and -0.25", "±1/4", "±0,25", "-0.25, 0.25"],
+      acceptedAnswers: ["+-0.25", "0.25 and -0.25", "±1/4", "±0,25", "-0.25, 0.25"],
       markScheme: [
         { text: "Picks the term in x³: C(5,3)(2x)³k² = 10 × 8x³ × k².", marks: 1 },
         { text: "Sets the coefficient equal to 5: 80k² = 5.", marks: 1 },
@@ -349,7 +349,7 @@ export const MATHS_10_P2_MAY_2024: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "x = π/2, 2π/3",
-      accepts: ["π/2, 2π/3", "pi/2, 2pi/3", "x = π/2 and x = 2π/3", "2π/3, π/2"],
+      acceptedAnswers: ["π/2, 2π/3", "pi/2, 2pi/3", "x = π/2 and x = 2π/3", "2π/3, π/2"],
       markScheme: [
         { text: "Substitutes u = 2x − π/6 and transforms the interval to −π/6 ≤ u ≤ 11π/6.", marks: 1 },
         { text: "cos u = −√3/2 has principal solution u = 5π/6.", marks: 1 },

@@ -41,7 +41,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "3x − 7y − 24 = 0",
-      accepts: ["3x-7y-24=0", "3x-7y=24", "y=(3x-24)/7", "-3x+7y+24=0"],
+      acceptedAnswers: ["3x-7y-24=0", "3x-7y=24", "y=(3x-24)/7", "-3x+7y+24=0"],
       markScheme: [
         { text: "Rearrange to y = −(7/3)x + 2/3, so the given gradient is −7/3", marks: 1 },
         { text: "Perpendicular gradient is the negative reciprocal, 3/7", marks: 1 },
@@ -63,7 +63,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "A(−16; −9)",
-      accepts: ["(-16,-9)", "-16,-9", "a=(-16,-9)", "(8,-1)", "8,-1"],
+      acceptedAnswers: ["(-16,-9)", "-16,-9", "a=(-16,-9)", "(8,-1)", "8,-1"],
       markScheme: [
         { text: "PR = R − P = (−6; −2), and RA = 2·PR in length", marks: 1 },
         {
@@ -106,7 +106,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "-1",
-      accepts: ["−1", "-1"],
+      acceptedAnswers: ["−1", "-1"],
       markScheme: [
         {
           text: "Recognise that the sum of all coefficients is the value of the polynomial at x = 1",
@@ -130,7 +130,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "9 : 16",
-      accepts: ["9:16", "9/16", "0.5625", "9 to 16"],
+      acceptedAnswers: ["9:16", "9/16", "0.5625", "9 to 16"],
       markScheme: [
         {
           text: "Corresponding sides give DO/PE = OG/ET, so x/16 = (x + 6)/(2x)",
@@ -155,7 +155,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "sin t cos t",
-      accepts: ["sintcost", "sin t · cos t", "(1/2)sin2t", "0.5sin2t", "sin2t/2"],
+      acceptedAnswers: ["sintcost", "sin t · cos t", "(1/2)sin2t", "0.5sin2t", "sin2t/2"],
       markScheme: [
         {
           text: "Write sec t + cosec t = 1/cos t + 1/sin t = (sin t + cos t)/(sin t cos t)",
@@ -178,7 +178,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "2 cos α",
-      accepts: ["2cosa", "2cosα", "2 cos a", "2·cosα"],
+      acceptedAnswers: ["2cosa", "2cosα", "2 cos a", "2·cosα"],
       markScheme: [
         { text: "sin(π/2 − α) = cos α and cos(π + α) = −cos α, so the first two terms give 2cos α", marks: 1 },
         { text: "tan(π + α) = tan α", marks: 1 },
@@ -199,7 +199,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "30",
-      accepts: ["30°", "30 deg", "30 degrees"],
+      acceptedAnswers: ["30°", "30 deg", "30 degrees"],
       unit: "°",
       markScheme: [
         { text: "Let the arcs be 5k and 7k with 5k + 7k = 360°, so k = 30°", marks: 1 },
@@ -248,7 +248,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "numeric",
       answer: "16",
-      accepts: ["16cm", "16 cm"],
+      acceptedAnswers: ["16cm", "16 cm"],
       unit: "cm",
       markScheme: [
         {
@@ -275,7 +275,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "AP = 8 cm, BP = 5 cm",
-      accepts: ["ap=8,bp=5", "8,5", "8 and 5", "ap=8cm,bp=5cm", "8cm,5cm"],
+      acceptedAnswers: ["ap=8,bp=5", "8,5", "8 and 5", "ap=8cm,bp=5cm", "8cm,5cm"],
       markScheme: [
         { text: "Intersecting chords: AP · BP = CP · DP = 40", marks: 1 },
         { text: "Substitute BP = AP − 3 to get AP² − 3·AP − 40 = 0", marks: 1 },
@@ -319,7 +319,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "a) 49  b) 1/(10x + 8)  c) (x − 4)/5",
-      accepts: [
+      acceptedAnswers: [
         "49, 1/(10x+8), (x-4)/5",
         "49;1/(10x+8);(x-4)/5",
         "a)49 b)1/(10x+8) c)(x-4)/5",
@@ -346,7 +346,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "a1) 9979200  a2) 181440  a3) 40320  b) 15",
-      accepts: [
+      acceptedAnswers: [
         "9979200,181440,40320,15",
         "9979200;181440;40320;15",
         "a1)9979200 a2)181440 a3)40320 b)15",
@@ -400,7 +400,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "4/5",
-      accepts: ["0.8", "4/5", ".8"],
+      acceptedAnswers: ["0.8", "4/5", ".8"],
       markScheme: [
         { text: "Let θ = arcsin(−3/5), so sin θ = −3/5", marks: 1 },
         {
@@ -422,7 +422,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "x = ±π/3 + 2πn",
-      accepts: [
+      acceptedAnswers: [
         "±π/3+2πn",
         "x=±pi/3+2pin",
         "±pi/3+2pin",
@@ -453,7 +453,7 @@ export const MATHS_10_P1_APRIL: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "x ≠ 2πn, n ∈ ℤ",
-      accepts: [
+      acceptedAnswers: [
         "x≠2πn",
         "x≠2pin",
         "all x except 2πn",
