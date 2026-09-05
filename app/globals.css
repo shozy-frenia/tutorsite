@@ -1685,6 +1685,14 @@ html[data-filter-year] .paper-card {
   width: auto;
 }
 
+/* ...except the grade squares, which keep their exact size. Without this the
+   row's `width: auto` wins on specificity and the flex container crushes
+   seven single-letter buttons to the width of their glyphs. */
+.choice-row > .choice--grade {
+  width: 48px;
+  flex: none;
+}
+
 .choice-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

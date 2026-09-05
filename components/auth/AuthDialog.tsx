@@ -33,6 +33,35 @@ export default function AuthDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstFieldRef = useRef<HTMLButtonElement>(null);
 
+  /**
+   * Which providers this project actually has switched on.
+   *
+   * Asked rather than assumed: a "Continue with Google" button on a project
+   * where Google is not configured sends the student to an error page, which
+   * is a worse first impression than not offering it. Undefined until the
+   * answer arrives, so nothing flashes in and out.
+   */
+  const [googleEnabled, setGoogleEnabled] = useState<boolean | undefined>();
+
+  useEffect(() => {
+    if (!open || googleEnabled !== undefined) return;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return;
+
+    let alive = true;
+    fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (alive) setGoogleEnabled(Boolean(data?.external?.google));
+      })
+      .catch(() => alive && setGoogleEnabled(false));
+
+    return () => {
+      alive = false;
+    };
+  }, [open, googleEnabled]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -120,21 +149,27 @@ export default function AuthDialog({
           </button>
         </div>
 
-        <button
-          ref={firstFieldRef}
-          type="button"
-          className="btn btn-primary btn-block btn-lg"
-          onClick={signInWithGoogle}
-        >
-          <GoogleGlyph />
-          {t("auth.google")}
-        </button>
+        {googleEnabled && (
+          <button
+            ref={firstFieldRef}
+            type="button"
+            className="btn btn-primary btn-block btn-lg"
+            onClick={signInWithGoogle}
+          >
+            <GoogleGlyph />
+            {t("auth.google")}
+          </button>
+        )}
 
-        <div className="my-5 flex items-center gap-3">
-          <hr className="rule flex-1" />
-          <span className="t-micro muted">{t("auth.emailLabel")}</span>
-          <hr className="rule flex-1" />
-        </div>
+        {/* "Or use your email" only makes sense when there is something to
+            be an alternative to. */}
+        {googleEnabled && (
+          <div className="my-5 flex items-center gap-3">
+            <hr className="rule flex-1" />
+            <span className="t-micro muted">{t("auth.emailLabel")}</span>
+            <hr className="rule flex-1" />
+          </div>
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
