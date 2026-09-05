@@ -65,6 +65,18 @@ const robotoMono = Roboto_Mono({
   variable: "--font-roboto-mono",
 });
 
+/**
+ * The public origin, used for canonical and hreflang URLs.
+ *
+ * It is a variable rather than a constant because the deployed site
+ * canonicalises to www — talap.online 308s to www.talap.online — and pointing
+ * canonical at the address that redirects tells crawlers the wrong thing. Set
+ * NEXT_PUBLIC_SITE_URL if that ever flips to the apex.
+ */
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.talap.online"
+).replace(/\/$/, "");
+
 const fontVariables = [
   inter.variable,
   bricolage.variable,
@@ -107,11 +119,11 @@ export async function generateMetadata(): Promise<Metadata> {
     // cookie, not a path — so alternates point at the same href with different
     // hreflang, which is what tells crawlers the page is multilingual.
     alternates: {
-      canonical: "https://talap.online/",
+      canonical: `${SITE_URL}/`,
       languages: {
-        kk: "https://talap.online/",
-        ru: "https://talap.online/",
-        en: "https://talap.online/",
+        kk: `${SITE_URL}/`,
+        ru: `${SITE_URL}/`,
+        en: `${SITE_URL}/`,
       },
     },
   };
