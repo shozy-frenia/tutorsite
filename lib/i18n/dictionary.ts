@@ -161,6 +161,16 @@ const en: Dict = {
     "We store your first name, grade year, parallel and your attempts. Nothing else.",
   "auth.syncing": "Syncing",
   "auth.syncFailed": "Could not sync. Your work is safe on this device.",
+  "auth.synced": "Saved to your account",
+  "auth.account": "Account",
+  "auth.guestTitle": "This device only",
+  "auth.guestPitch":
+    "Sign in and your papers follow you to your phone, and survive clearing your browser.",
+  "auth.deleteData": "Delete my account data",
+  "auth.deleteConfirm":
+    "Delete every attempt and your profile from your account and this device? This cannot be undone.",
+  "auth.deleteDone": "Deleted. You are signed out and back to a clean device.",
+  "auth.deleteFailed": "Could not delete just now. Nothing was removed.",
 
   // ---- exam ------------------------------------------------------------
   "exam.question": "Question {n} of {total}",
@@ -323,6 +333,16 @@ const ru: Dict = {
     "Мы храним имя, класс, параллель и твои попытки. Больше ничего.",
   "auth.syncing": "Синхронизация",
   "auth.syncFailed": "Синхронизировать не вышло. Твои работы целы на этом устройстве.",
+  "auth.synced": "Сохранено в аккаунте",
+  "auth.account": "Аккаунт",
+  "auth.guestTitle": "Только на этом устройстве",
+  "auth.guestPitch":
+    "Войди — и работы будут доступны с телефона и не пропадут, если очистишь браузер.",
+  "auth.deleteData": "Удалить мои данные",
+  "auth.deleteConfirm":
+    "Удалить все попытки и профиль из аккаунта и с этого устройства? Отменить будет нельзя.",
+  "auth.deleteDone": "Удалено. Ты вышел из аккаунта, устройство чистое.",
+  "auth.deleteFailed": "Удалить не вышло. Ничего не тронуто.",
 
   "exam.question": "Вопрос {n} из {total}",
   "exam.yourAnswer": "Твой ответ",
@@ -481,6 +501,16 @@ const kk: Dict = {
     "Біз сенің атыңды, сыныбыңды, параллеліңді және талпыныстарыңды сақтаймыз. Басқа ештеңе емес.",
   "auth.syncing": "Синхрондау",
   "auth.syncFailed": "Синхрондау болмады. Жұмыстарың осы құрылғыда аман.",
+  "auth.synced": "Аккаунтқа сақталды",
+  "auth.account": "Аккаунт",
+  "auth.guestTitle": "Тек осы құрылғыда",
+  "auth.guestPitch":
+    "Кірсең, жұмыстарың телефоннан да қолжетімді болады және браузерді тазаласаң да жоғалмайды.",
+  "auth.deleteData": "Деректерімді өшіру",
+  "auth.deleteConfirm":
+    "Барлық әрекеттер мен профильді аккаунттан және осы құрылғыдан өшіру керек пе? Мұны қайтару мүмкін емес.",
+  "auth.deleteDone": "Өшірілді. Аккаунттан шықтың, құрылғы таза.",
+  "auth.deleteFailed": "Өшіру болмады. Ештеңе жойылған жоқ.",
 
   "exam.question": "{total} сұрақтың {n}-шісі",
   "exam.yourAnswer": "Сенің жауабың",

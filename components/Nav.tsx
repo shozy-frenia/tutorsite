@@ -7,6 +7,7 @@ import BrandMark from "@/components/BrandMark";
 import LocaleSwitcher from "@/components/i18n/LocaleSwitcher";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useSession } from "@/components/auth/SessionProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 interface DropItem {
   label: string;
@@ -89,6 +90,7 @@ export default function Nav({
   void variant;
 
   const pathname = usePathname();
+  const t = useT();
   const { user, enabled, signOut } = useSession();
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -194,7 +196,7 @@ export default function Nav({
                   className="btn btn--outline btn--sm nav__account"
                   onClick={() => void signOut()}
                 >
-                  Sign out
+                  {t("nav.signOut")}
                 </button>
               ) : (
                 <button
@@ -202,7 +204,7 @@ export default function Nav({
                   className="btn btn--outline btn--sm nav__account"
                   onClick={() => setAuthOpen(true)}
                 >
-                  Sign in
+                  {t("nav.signIn")}
                 </button>
               ))}
 

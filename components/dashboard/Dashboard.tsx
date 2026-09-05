@@ -48,14 +48,19 @@ import { gradeRank, marksToNextGrade } from "@/lib/grading";
 import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
+import AccountPanel from "@/components/auth/AccountPanel";
 
 /**
  * Personal tracking dashboard.
  *
- * Reads entirely from localStorage — there is no account server in the MVP.
- * Everything shown is derived from real attempts; when there are none, the
- * page says so and points at the library rather than rendering placeholder
- * numbers that look like progress.
+ * Reads from localStorage, always. When an account is signed in, SessionProvider
+ * mirrors that store to Postgres in the background and merges it back on the
+ * next sign-in — but this component never waits on the network, and everything
+ * on the page works with no backend configured at all.
+ *
+ * Everything shown is derived from real attempts; when there are none, the page
+ * says so and points at the library rather than rendering placeholder numbers
+ * that look like progress.
  */
 
 const CHART_INK = "#1a3300";
@@ -126,6 +131,8 @@ export default function Dashboard() {
         ) : (
           <Loaded store={store} streak={streak} mastery={mastery} />
         )}
+
+        <AccountPanel onCleared={setStore} />
 
         <div className="dash-reset">
           <button
