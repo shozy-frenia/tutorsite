@@ -59,10 +59,10 @@ export default function BoundaryExplorer() {
       : componentRows;
 
   return (
-    <div className="brutal">
+    <div className="card">
       <div
-        className="px-5 py-4 border-b-[3px] flex items-center justify-between flex-wrap gap-3"
-        style={{ borderColor: "var(--color-ink)" }}
+        className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3"
+        style={{ borderColor: "var(--color-rule)" }}
       >
         <h2 className="t-subheading">The boundaries we grade against</h2>
         <span className="mark-quiet t-micro">MINIMUM MARK PER GRADE</span>
@@ -70,8 +70,8 @@ export default function BoundaryExplorer() {
 
       {/* Year switch */}
       <div
-        className="px-5 py-4 border-b-[3px] flex flex-wrap items-center gap-3"
-        style={{ borderColor: "var(--color-ink)", background: "var(--color-paper)" }}
+        className="px-5 py-4 border-b flex flex-wrap items-center gap-3"
+        style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
       >
         <div className="flex flex-wrap gap-2">
           {YEARS.map((value) => (
@@ -85,8 +85,8 @@ export default function BoundaryExplorer() {
                   year === value ? "var(--color-ink)" : "var(--color-canvas)",
                 color:
                   year === value ? "var(--color-canvas)" : "var(--color-ink)",
-                border: "3px solid var(--color-ink)",
-                boxShadow: year === value ? "none" : "var(--shadow-brutal-sm)",
+                border: "1px solid var(--color-rule)",
+                boxShadow: year === value ? "none" : "var(--shadow-card)",
                 padding: "8px 16px",
                 cursor: "pointer",
               }}
@@ -106,7 +106,7 @@ export default function BoundaryExplorer() {
               style={{
                 background:
                   view === value ? "var(--color-highlighter)" : "transparent",
-                border: "2px solid var(--color-ink)",
+                border: "1px solid var(--color-rule)",
                 padding: "6px 12px",
                 cursor: "pointer",
                 color: "var(--color-ink)",
@@ -120,8 +120,8 @@ export default function BoundaryExplorer() {
 
       {/* What this year actually is */}
       <div
-        className="px-5 py-3 border-b-[3px] flex flex-wrap gap-x-6 gap-y-1"
-        style={{ borderColor: "var(--color-ink)" }}
+        className="px-5 py-3 border-b flex flex-wrap gap-x-6 gap-y-1"
+        style={{ borderColor: "var(--color-rule)" }}
       >
         <span className="t-micro" style={{ opacity: 0.65 }}>
           {stage?.standard}
@@ -160,7 +160,7 @@ export default function BoundaryExplorer() {
                 key={row.key}
                 style={{
                   background: i % 2 ? "var(--color-paper)" : "transparent",
-                  borderTop: "1px solid var(--color-ink)",
+                  borderTop: "1px solid var(--color-rule)",
                 }}
               >
                 <td className="px-3 py-2 text-[14px]">
@@ -194,7 +194,7 @@ export default function BoundaryExplorer() {
 
       <p
         className="px-5 py-3 text-[13px] m-0"
-        style={{ borderTop: "3px solid var(--color-ink)", lineHeight: 1.45 }}
+        style={{ borderTop: "1px solid var(--color-rule)", lineHeight: 1.45 }}
       >
         A dash means the published table has no band there. A* is awarded at
         subject level in every year, but only Grade 12 component tables carry an

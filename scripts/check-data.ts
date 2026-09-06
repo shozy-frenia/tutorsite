@@ -188,9 +188,15 @@ for (const paper of PAPERS) {
 
 console.log("\nANSWER MATCHING");
 {
-  // Three pilot testers lost marks writing a correct sum in the other order.
+  // Three pilot testers reported "правильный ответ засчитало как
+  // неправильный", and both causes were one class of bug: the matcher
+  // compared strings where it should have compared values. Addition
+  // commutes, so "2x-6" and "-6+2x" are one answer; a half is a half whether
+  // it is written 1/2, 0.5 or 50%.
+  //
   // The rejections matter as much as the acceptances: a looser matcher that
-  // marks a wrong answer right is worse than the bug it replaces.
+  // marks a wrong answer right is worse than the bug it replaces, because it
+  // tells a student they are ready when they are not.
   const probe = (answer: string, answerKind: "exact" | "numeric") =>
     ({ id: "probe", number: 1, prompt: "", marks: 1, marking: "auto",
        answer, answerKind, scheme: [] }) as unknown as Parameters<typeof isCorrect>[1];
@@ -205,6 +211,24 @@ console.log("\nANSWER MATCHING");
     ["2,3", "3", false, "exact"],
     ["1e-5", "5-1e", false, "numeric"],
     ["16", "16.0", true, "numeric"],
+    // Same value, written the other way round. A mark scheme says 0.5 and a
+    // student writes 1/2; both are right and both directions must pass.
+    ["0.5", "1/2", true, "numeric"],
+    ["1/2", "0.5", true, "numeric"],
+    ["0.5", "50%", true, "numeric"],
+    ["0.5", "2/4", true, "numeric"],
+    ["0.75", "3/4", true, "numeric"],
+    ["1500", "1.5e3", true, "numeric"],
+    ["16", "16 cm", true, "numeric"],
+    // Tolerance is relative above 1 and absolute below it, so a chemistry
+    // answer in millimoles is not swallowed by the epsilon a combinatorics
+    // answer needs.
+    ["0.002", "0.002", true, "numeric"],
+    ["0.002", "0.003", false, "numeric"],
+    ["0.5", "1/3", false, "numeric"],
+    ["0.5", "1/0", false, "numeric"],
+    ["0.5", "x", false, "numeric"],
+    ["16", "17", false, "numeric"],
   ];
   let wrong = 0;
   for (const [answer, submitted, want, kind] of cases) {
@@ -213,7 +237,7 @@ console.log("\nANSWER MATCHING");
       wrong++;
     }
   }
-  if (!wrong) pass(`${cases.length} answer-order cases accept and reject correctly`);
+  if (!wrong) pass(`${cases.length} answer forms accept and reject correctly`);
 }
 
 console.log("\nCLOUD SYNC MERGE");

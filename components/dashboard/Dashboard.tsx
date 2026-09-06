@@ -48,6 +48,7 @@ import { gradeRank, marksToNextGrade } from "@/lib/grading";
 import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
+import StaggerIn from "@/components/motion/StaggerIn";
 
 /**
  * Personal tracking dashboard.
@@ -58,8 +59,14 @@ import Nav from "@/components/Nav";
  * numbers that look like progress.
  */
 
-const CHART_INK = "#151515";
-const CHART_YELLOW = "#fff824";
+/* Recharts takes literal colours, not CSS custom properties, so these track
+   --color-ink and --color-highlighter by hand. The stroke yellow is the deep
+   token rather than the highlighter: a #ffe95c line one pixel wide on cream
+   paper is invisible, while the same colour as a fill is exactly right. */
+const CHART_INK = "#1a3300";
+const CHART_YELLOW = "#ffe95c";
+const CHART_YELLOW_DEEP = "#e8c400";
+const CHART_RULE = "#dcd8cb";
 
 export default function Dashboard() {
   const [store, setStore] = useState<Store>({ profile: null, attempts: [], activeDays: [] });
@@ -132,7 +139,7 @@ export default function Dashboard() {
           <Loaded store={store} streak={streak} mastery={mastery} />
         )}
 
-        <div className="mt-10 pt-4" style={{ borderTop: "1px solid var(--color-ink)" }}>
+        <div className="mt-10 pt-4" style={{ borderTop: "1px solid var(--color-rule)" }}>
           <button
             onClick={() => {
               if (window.confirm("Delete your profile and all saved attempts on this device?")) {
@@ -142,7 +149,7 @@ export default function Dashboard() {
             className="t-micro"
             style={{
               background: "transparent",
-              border: "1px solid var(--color-ink)",
+              border: "1px solid var(--color-rule)",
               padding: "6px 12px",
               cursor: "pointer",
               opacity: 0.6,
@@ -190,8 +197,8 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 
   return (
     <section className="px-5 md:px-10">
-      <div className="swiss max-w-[720px] rise">
-        <div className="px-6 py-5" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+      <div className="panel max-w-[720px] rise">
+        <div className="px-6 py-5" style={{ borderBottom: "1px solid var(--color-rule)" }}>
           <span className="mark t-micro">DEMO REGISTRATION</span>
           <h1 className="t-subheading mt-3">Set up your tracker</h1>
           <p className="text-[16px] mt-2 m-0" style={{ lineHeight: 1.35 }}>
@@ -225,12 +232,8 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
               maxLength={40}
               required
               placeholder="Aisha"
-              className="px-4 py-3 text-[18px]"
-              style={{
-                border: "2px solid var(--color-ink)",
-                background: "var(--color-sheet)",
-                boxShadow: "var(--shadow-swiss)",
-              }}
+              className="auth-input"
+              style={{ fontSize: 18, padding: "13px 16px" }}
             />
           </label>
 
@@ -244,14 +247,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={year}
                   type="button"
                   onClick={() => setGradeYear(year)}
-                  className="press-swiss t-label grow py-3"
-                  style={{
-                    border: "2px solid var(--color-ink)",
-                    background:
-                      gradeYear === year ? "var(--color-highlighter)" : "var(--color-sheet)",
-                    boxShadow: gradeYear === year ? "var(--shadow-swiss)" : "none",
-                    cursor: "pointer",
-                  }}
+                  aria-pressed={gradeYear === year}
+                  className={`btn grow ${gradeYear === year ? "btn-mark" : "btn-outline"}`}
+                  style={gradeYear === year ? undefined : { background: "var(--color-sheet)" }}
                 >
                   {year}
                 </button>
@@ -272,12 +270,18 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={value}
                   type="button"
                   onClick={() => setParallel(value)}
-                  className="press-swiss grow py-3 px-4 text-left"
+                  aria-pressed={parallel === value}
+                  className="press-soft grow py-3 px-4 text-left"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: `1px solid ${
+                      parallel === value ? "var(--color-ink)" : "var(--color-rule)"
+                    }`,
+                    borderRadius: "var(--radius-md)",
                     background:
-                      parallel === value ? "var(--color-highlighter)" : "var(--color-sheet)",
-                    boxShadow: parallel === value ? "var(--shadow-swiss)" : "none",
+                      parallel === value
+                        ? "var(--color-highlighter-wash)"
+                        : "var(--color-sheet)",
+                    boxShadow: parallel === value ? "var(--shadow-card)" : "none",
                     cursor: "pointer",
                   }}
                 >
@@ -304,11 +308,11 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                       key={subject.id}
                       type="button"
                       onClick={() => toggleProfile(subject.id)}
-                      className="press-swiss py-3 px-4 text-left flex items-center gap-3"
+                      className="press-soft py-3 px-4 text-left flex items-center gap-3"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "1px solid var(--color-rule)",
                         background: picked ? "var(--color-acid-lime)" : "var(--color-sheet)",
-                        boxShadow: picked ? "var(--shadow-swiss)" : "none",
+                        boxShadow: picked ? "var(--shadow-card)" : "none",
                         cursor: "pointer",
                       }}
                     >
@@ -337,12 +341,19 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={grade}
                   type="button"
                   onClick={() => setTargetGrade(grade)}
-                  className="press-swiss"
+                  aria-pressed={targetGrade === grade}
+                  className="press-soft"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: `1px solid ${
+                      targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-rule)"
+                    }`,
+                    borderRadius: "var(--radius-md)",
                     background:
-                      targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-sheet)",
-                    boxShadow: targetGrade === grade ? "var(--shadow-swiss)" : "none",
+                      targetGrade === grade
+                        ? "var(--color-acid-lime-wash)"
+                        : "var(--color-sheet)",
+                    color: targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-ink)",
+                    boxShadow: targetGrade === grade ? "var(--shadow-card)" : "none",
                     width: 46,
                     height: 42,
                     fontWeight: 700,
@@ -358,7 +369,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           {/* Live preview of what this student will actually sit */}
           <div
             className="p-4"
-            style={{ border: "2px solid var(--color-ink)", background: "var(--color-study)" }}
+            style={{ border: "1px solid var(--color-rule)", background: "var(--color-study)" }}
           >
             <span className="t-micro" style={{ opacity: 0.6 }}>
               YOU WILL SIT
@@ -373,7 +384,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   <li
                     key={subject.id}
                     className="t-micro px-2 py-1"
-                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
+                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-rule)" }}
                   >
                     {subject.glyph} {subject.name}
                   </li>
@@ -385,17 +396,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           <button
             type="submit"
             disabled={!ready}
-            className="press-swiss t-label self-start"
-            style={{
-              background: ready ? "var(--color-ink)" : "var(--color-paper)",
-              color: ready ? "var(--color-canvas)" : "var(--color-ink)",
-              border: "2px solid var(--color-ink)",
-              boxShadow: "var(--shadow-swiss)",
-              padding: "12px 22px",
-              cursor: ready ? "pointer" : "not-allowed",
-            }}
+            className={`btn self-start ${ready ? "btn-primary" : "btn-outline"}`}
           >
-            START TRACKING →
+            Start tracking →
           </button>
         </form>
       </div>
@@ -407,7 +410,7 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 
 function EmptyState() {
   return (
-    <div className="swiss p-8 flex flex-col items-start gap-4 rise">
+    <div className="panel p-8 flex flex-col items-start gap-4 rise">
       <span className="mark t-micro">NOTHING RECORDED YET</span>
       <h2 className="t-subheading" style={{ maxWidth: "22ch" }}>
         Sit one paper and this page fills up
@@ -419,11 +422,11 @@ function EmptyState() {
       </p>
       <Link
         href="/library"
-        className="no-underline press-swiss t-label"
+        className="no-underline press-soft t-label"
         style={{
           background: "var(--color-highlighter)",
-          border: "2px solid var(--color-ink)",
-          boxShadow: "var(--shadow-swiss)",
+          border: "1px solid var(--color-rule)",
+          boxShadow: "var(--shadow-card)",
           padding: "12px 20px",
           color: "var(--color-ink)",
         }}
@@ -480,7 +483,7 @@ function Loaded({
   return (
     <>
       {/* ------------------------------------------------------ stat row */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StaggerIn className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="CURRENT GRADE" accent>
           <div className="flex items-center gap-3">
             <GradeBadge grade={latest.grade} size="lg" />
@@ -536,12 +539,12 @@ function Loaded({
             {totalMarks}/{totalAvailable} MARKS EARNED · BEST {best.grade}
           </span>
         </StatCard>
-      </div>
+      </StaggerIn>
 
       {/* ------------------------------------------------------- charts */}
-      <div className="grid lg:grid-cols-2 gap-4 mt-4">
-        <div className="swiss">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+      <StaggerIn className="grid lg:grid-cols-2 gap-4 mt-4">
+        <div className="panel">
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Subject mastery</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
               PERCENTAGE OF MARKS EARNED, BY TOPIC
@@ -551,7 +554,7 @@ function Loaded({
             {radarData.length >= 3 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} outerRadius="72%">
-                  <PolarGrid stroke={CHART_INK} strokeOpacity={0.25} />
+                  <PolarGrid stroke={CHART_RULE} strokeOpacity={1} />
                   <PolarAngleAxis
                     dataKey="topic"
                     tick={{ fill: CHART_INK, fontSize: 10, fontWeight: 700 }}
@@ -559,22 +562,22 @@ function Loaded({
                   <PolarRadiusAxis
                     domain={[0, 100]}
                     tick={{ fill: CHART_INK, fontSize: 9 }}
-                    stroke={CHART_INK}
-                    strokeOpacity={0.25}
+                    stroke={CHART_RULE}
                   />
                   <Radar
                     name="Mastery"
                     dataKey="percent"
-                    stroke={CHART_INK}
+                    stroke={CHART_YELLOW_DEEP}
                     strokeWidth={2}
                     fill={CHART_YELLOW}
-                    fillOpacity={0.75}
+                    fillOpacity={0.55}
                   />
                   <Tooltip
                     contentStyle={{
-                      border: `2px solid ${CHART_INK}`,
-                      borderRadius: 0,
+                      border: `1px solid ${CHART_RULE}`,
+                      borderRadius: 12,
                       background: "#fff",
+                      boxShadow: "0 6px 18px -6px rgba(26,51,0,0.16)",
                       fontSize: 13,
                     }}
                     formatter={(value) => [`${value ?? 0}%`, "Marks earned"]}
@@ -589,8 +592,8 @@ function Loaded({
           </div>
         </div>
 
-        <div className="swiss">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="panel">
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Grade projection</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
               SCALED SCORE PER ATTEMPT, U THROUGH A*
@@ -600,23 +603,24 @@ function Loaded({
             {trend.length >= 2 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend} margin={{ top: 8, right: 12, bottom: 4, left: -18 }}>
-                  <CartesianGrid stroke={CHART_INK} strokeOpacity={0.15} />
+                  <CartesianGrid stroke={CHART_RULE} strokeOpacity={1} />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: CHART_INK, fontSize: 11, fontWeight: 700 }}
-                    stroke={CHART_INK}
+                    tick={{ fill: CHART_INK, fontSize: 11, fontWeight: 600 }}
+                    stroke={CHART_RULE}
                   />
                   <YAxis
                     domain={[0, 100]}
                     tick={{ fill: CHART_INK, fontSize: 11 }}
-                    stroke={CHART_INK}
+                    stroke={CHART_RULE}
                     unit="%"
                   />
                   <Tooltip
                     contentStyle={{
-                      border: `2px solid ${CHART_INK}`,
-                      borderRadius: 0,
+                      border: `1px solid ${CHART_RULE}`,
+                      borderRadius: 12,
                       background: "#fff",
+                      boxShadow: "0 6px 18px -6px rgba(26,51,0,0.16)",
                       fontSize: 13,
                     }}
                     formatter={(value, _name, item) => [
@@ -633,7 +637,7 @@ function Loaded({
                     name="SCALED %"
                     stroke={CHART_INK}
                     strokeWidth={3}
-                    dot={{ fill: CHART_YELLOW, stroke: CHART_INK, strokeWidth: 2, r: 5 }}
+                    dot={{ fill: CHART_YELLOW, stroke: CHART_INK, strokeWidth: 1.5, r: 4 }}
                     activeDot={{ r: 7 }}
                   />
                 </LineChart>
@@ -658,14 +662,14 @@ function Loaded({
             )}
           </div>
         </div>
-      </div>
+      </StaggerIn>
 
       {/* -------------------------------------------------- weakest topics */}
       {mastery.length > 0 && (
-        <div className="swiss mt-4">
+        <div className="panel mt-4">
           <div
             className="px-5 py-4 flex items-baseline justify-between gap-4 flex-wrap"
-            style={{ borderBottom: "2px solid var(--color-ink)" }}
+            style={{ borderBottom: "1px solid var(--color-rule)" }}
           >
             <h2 className="t-subheading">Work on these first</h2>
             <span className="t-micro" style={{ opacity: 0.55 }}>
@@ -677,12 +681,12 @@ function Loaded({
               <li
                 key={row.topic}
                 className="px-5 py-3 flex items-center gap-4"
-                style={{ borderTop: "1px solid var(--color-ink)" }}
+                style={{ borderTop: "1px solid var(--color-rule)" }}
               >
                 <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
                 <div
                   className="hidden sm:block shrink-0"
-                  style={{ width: 200, height: 14, border: "2px solid var(--color-ink)" }}
+                  style={{ width: 200, height: 14, border: "1px solid var(--color-rule)" }}
                 >
                   <div
                     style={{
@@ -710,8 +714,8 @@ function Loaded({
       )}
 
       {/* ------------------------------------------------------- history */}
-      <div className="swiss mt-4">
-        <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+      <div className="panel mt-4">
+        <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
           <h2 className="t-subheading">Test history</h2>
         </div>
         <div className="overflow-x-auto">
@@ -744,11 +748,11 @@ function Loaded({
       <div className="mt-6">
         <Link
           href="/library"
-          className="no-underline press-swiss t-label inline-block"
+          className="no-underline press-soft t-label inline-block"
           style={{
             background: "var(--color-highlighter)",
-            border: "2px solid var(--color-ink)",
-            boxShadow: "var(--shadow-swiss)",
+            border: "1px solid var(--color-rule)",
+            boxShadow: "var(--shadow-card)",
             padding: "12px 20px",
             color: "var(--color-ink)",
           }}
@@ -762,7 +766,7 @@ function Loaded({
 
 function AttemptRow({ attempt }: { attempt: Attempt }) {
   return (
-    <tr style={{ borderTop: "1px solid var(--color-ink)" }}>
+    <tr style={{ borderTop: "1px solid var(--color-rule)" }}>
       <td className="px-4 py-3 text-[15px] t-mono">
         {new Date(attempt.finishedAt).toLocaleDateString()}
       </td>
@@ -796,7 +800,7 @@ function StatCard({
 }) {
   return (
     <div
-      className="swiss p-5 flex flex-col gap-2"
+      className="panel p-5 flex flex-col gap-2"
       style={accent ? { background: "var(--color-highlighter)" } : undefined}
     >
       <span className="t-micro" style={{ opacity: 0.6 }}>

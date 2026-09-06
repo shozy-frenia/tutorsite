@@ -334,6 +334,55 @@ To check which mode a deployment is in without reading the logs: the tutor
 drawer and the assistant panel both show an `OFFLINE` badge when no key is
 resolving, and `/api/tutor` returns an `X-Tutor-Mode` header.
 
+## Accounts
+
+`/auth` is the sign-in and registration window. Google and email/password both
+go through Firebase Auth; progress is mirrored to a Firebase **Realtime
+Database** so a paper sat on a phone opens on a laptop.
+
+Accounts are optional by construction. With no Firebase config the app behaves
+exactly as it did before they existed — every paper, the marking and the
+dashboard all work, progress lives in `localStorage`, and `/auth` renders an
+explanation instead of a form rather than throwing.
+
+### Configuring it
+
+Six `NEXT_PUBLIC_FIREBASE_*` variables, from Firebase console → Project
+settings → General → Your apps → Web app → SDK setup and config:
+
+| Variable | Needed for |
+|---|---|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | sign-in |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | sign-in |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | sign-in |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | sign-in |
+| `NEXT_PUBLIC_FIREBASE_DATABASE_URL` | cross-device sync only |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | optional |
+
+The first four turn accounts on. `DATABASE_URL` is separate on purpose: without
+it an account still works, it just does not carry history between devices, and
+losing sync should not cost someone the ability to sign in at all.
+
+`NEXT_PUBLIC_` is correct here and is not the mistake it would be for the AI
+key. Firebase web config is public by design — it ships inside every client
+bundle that has ever used Firebase, and identifies the project rather than
+authorising anything. What keeps one student's attempts out of another's hands
+is `database.rules.json`, which scopes `students/$uid` to the signed-in user
+and denies everything else. Deploy those rules before the first real user:
+
+```bash
+firebase deploy --only database
+```
+
+Two things must also be set in the Firebase console itself, and neither is
+visible from the code:
+
+1. **Authentication → Sign-in method** — enable Google *and* Email/Password.
+   A provider that is off returns `auth/operation-not-allowed`.
+2. **Authentication → Settings → Authorized domains** — add the production
+   domain. A domain that is missing returns `auth/unauthorized-domain`, and it
+   is the usual reason sign-in works locally and not in production.
+
 #### “No Next.js version detected”
 
 Vercel raises this when it cannot find a `package.json` with `next` in it at

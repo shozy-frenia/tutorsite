@@ -13,8 +13,8 @@ import type { Paper } from "@/lib/exam-types";
  * Question 3(c) requires the two printed internet-provider tariff tables and
  * question 6(h) requires the printed C++ listing to trace; neither is in the
  * document's text layer, and inventing the numbers would mean inventing exam
- * content. The workspace scales whatever is answered onto the official 60-mark
- * Component 2 scale, so the grade stays honest either way.
+ * content. The workspace scales whatever is answered onto the official
+ * 80-mark published scale, so the grade stays honest either way.
  *
  * Every question is self-marked. This paper awards marks for justification and
  * for code that a machine cannot check by string comparison — "предложите и
@@ -24,7 +24,20 @@ import type { Paper } from "@/lib/exam-types";
 export const CS_10_P2_MAY_2025: Paper = {
   id: "cs-10-p2-2025-05",
   subjectId: "computer-science",
-  componentIndex: 1,
+  /**
+   * Index 0, not 1, even though this is Component 2.
+   *
+   * `componentIndex` selects a published boundary table, not a paper number.
+   * NIS publishes exactly one table for this subject at Grade 10 — its
+   * maxMark equals the whole-subject maxMark — so Component 2's marks are
+   * read against that same table. Pointing at index 1 selected a table that
+   * does not exist, `gradeComponent` returned null, and the workspace had no
+   * grade to show. That is part of what three pilots meant by "оценка и баллы
+   * выглядели странно".
+   *
+   * The title below still says Component 2, because that is what the paper is.
+   */
+  componentIndex: 0,
   title: "Computer Science Component 2",
   gradeYear: 10,
   sitting: "May 2025",

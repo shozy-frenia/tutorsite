@@ -16,6 +16,8 @@ interface RevealButtonProps {
   style?: CSSProperties;
   className?: string;
   disabled?: boolean;
+  /** Forwarded to the rendered element — the hero timeline addresses these. */
+  [key: `data-${string}`]: string | number | undefined;
 }
 
 /**
@@ -23,10 +25,16 @@ interface RevealButtonProps {
  * pointer entered — the same two-face technique as OriginKit's Radial
  * Reveal Button, rebuilt on a plain CSS clip-path transition instead of
  * framer-motion. The rest of the site presses its buttons with plain CSS
- * transitions (see `.press` / `.press-swiss` in globals.css); this keeps
+ * transitions (see `.press` / `.press-soft` in globals.css); this keeps
  * that same register rather than introducing a second animation runtime
- * for one button. Square corners and a hard offset shadow throughout —
- * no blur, no glow, matching the neo-brutalist landing register.
+ * for one button.
+ *
+ * The reveal itself survived the retheme unchanged — a circle growing from
+ * where your pointer landed is a good interaction regardless of how loud the
+ * surface is. What changed is the shell it happens inside: rounded corners
+ * and a soft shadow instead of square corners and a hard offset rectangle, so
+ * the button matches `.btn` in globals.css rather than a system that no
+ * longer exists.
  */
 export default function RevealButton({
   href,
@@ -36,11 +44,12 @@ export default function RevealButton({
   hoverFill = "var(--color-highlighter)",
   textColor = "var(--color-canvas)",
   hoverTextColor = "var(--color-ink)",
-  border = "3px solid var(--color-ink)",
-  shadow = "var(--shadow-brutal)",
+  border = "1px solid transparent",
+  shadow = "var(--shadow-card)",
   style,
   className = "",
   disabled = false,
+  ...rest
 }: RevealButtonProps) {
   const overlayRef = useRef<HTMLSpanElement>(null);
 
@@ -70,15 +79,19 @@ export default function RevealButton({
     justifyContent: "center",
     border,
     boxShadow: shadow,
+    borderRadius: "var(--radius-md)",
     padding: "14px 26px",
-    fontWeight: 700,
-    fontSize: "18px",
-    letterSpacing: "-0.02em",
+    fontWeight: 600,
+    fontSize: "16px",
+    letterSpacing: "-0.01em",
     background: fill,
     color: textColor,
     overflow: "hidden",
     cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
+    // Only written when it means something. An unconditional `opacity: 1`
+    // here is an inline style, so it outranks any class the caller adds —
+    // which silently disabled the hero's entrance on both of its buttons.
+    ...(disabled ? { opacity: 0.5 } : null),
     ...style,
   };
 
@@ -96,9 +109,9 @@ export default function RevealButton({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontWeight: 700,
-        fontSize: "18px",
-        letterSpacing: "-0.02em",
+        fontWeight: 600,
+        fontSize: "16px",
+        letterSpacing: "-0.01em",
       }}
     >
       {children}
@@ -113,6 +126,7 @@ export default function RevealButton({
         onPointerLeave={onLeave}
         className={`no-underline ${className}`}
         style={sharedStyle}
+        {...rest}
       >
         <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
         {overlay}
@@ -129,6 +143,7 @@ export default function RevealButton({
       onPointerLeave={onLeave}
       className={className}
       style={sharedStyle}
+      {...rest}
     >
       <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
       {overlay}

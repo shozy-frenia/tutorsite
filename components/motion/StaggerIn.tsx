@@ -38,6 +38,12 @@ export default function StaggerIn({ children, className = "", style }: Props) {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
 
+    // Hiding something that is already on screen produces a visible blink —
+    // the group paints, the effect runs a frame later and blanks it, then it
+    // fades back. A group that is already in view has missed its entrance, so
+    // it simply keeps the one it rendered with.
+    if (root.getBoundingClientRect().top < window.innerHeight * 0.9) return undefined;
+
     gsap.set(items, { autoAlpha: 0, y: 20, scale: 0.97 });
     const io = new IntersectionObserver(
       (entries) => {

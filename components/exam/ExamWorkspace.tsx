@@ -263,25 +263,18 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 
           <button
             onClick={submit}
-            className="press-swiss t-label"
-            style={{
-              background: "var(--color-highlighter)",
-              color: "var(--color-ink)",
-              border: "2px solid var(--color-canvas)",
-              padding: "7px 14px",
-              cursor: "pointer",
-            }}
+            className="btn btn-sm btn-mark"
           >
-            SUBMIT
+            Submit
           </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[auto_1fr_270px] gap-0">
+      <div className="grid lg:grid-cols-[auto_minmax(0,880px)_300px] gap-0 lg:justify-center">
         {/* -------------------------------------------------------- rail */}
         <nav
           className="flex lg:flex-col gap-1.5 p-3 overflow-x-auto lg:overflow-visible lg:sticky lg:top-[60px] lg:self-start"
-          style={{ borderRight: "1px solid var(--color-ink)" }}
+          style={{ borderRight: "1px solid var(--color-rule)" }}
           aria-label="Question navigation"
         >
           {paper.questions.map((q, i) => {
@@ -312,9 +305,14 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
                   width: 38,
                   height: 38,
                   background,
-                  border: `2px solid var(--color-ink)`,
-                  boxShadow: active ? "3px 3px 0 var(--color-ink)" : "none",
-                  transform: active ? "translate(-1px,-1px)" : "none",
+                  border: `1px solid ${active ? "var(--color-ink)" : "var(--color-rule)"}`,
+                  borderRadius: "var(--radius-md)",
+                  /* The active question was marked with a hard 3px offset
+                     shadow and a 1px nudge. Depth is no longer how this system
+                     says "here" — a full-ink frame and a lift is. */
+                  boxShadow: active ? "var(--shadow-lift)" : "none",
+                  transform: active ? "translateY(-2px)" : "none",
+                  transition: "transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), border-color 180ms ease",
                   cursor: "pointer",
                 }}
               >
@@ -340,21 +338,17 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             onAskTutor={() => setDrawerOpen(true)}
           />
 
-          <div className="flex items-center justify-between gap-3 mt-6">
+          <div
+            className="flex items-center justify-between gap-3 mt-6"
+            style={{ maxWidth: 820 }}
+          >
             <button
               onClick={() => setIndex((i) => Math.max(i - 1, 0))}
               disabled={index === 0}
-              className="press-swiss t-label"
-              style={{
-                background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
-                boxShadow: "var(--shadow-swiss)",
-                padding: "10px 18px",
-                opacity: index === 0 ? 0.4 : 1,
-                cursor: index === 0 ? "not-allowed" : "pointer",
-              }}
+              className="btn btn-sm btn-outline"
+              style={{ background: "var(--color-sheet)" }}
             >
-              ← PREVIOUS
+              ← Previous
             </button>
 
             <span className="t-micro" style={{ opacity: 0.6 }}>
@@ -364,18 +358,12 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             <button
               onClick={() => setIndex((i) => Math.min(i + 1, paper.questions.length - 1))}
               disabled={index === paper.questions.length - 1}
-              className="press-swiss t-label"
+              className="btn btn-sm btn-outline"
               style={{
                 background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
-                boxShadow: "var(--shadow-swiss)",
-                padding: "10px 18px",
-                opacity: index === paper.questions.length - 1 ? 0.4 : 1,
-                cursor:
-                  index === paper.questions.length - 1 ? "not-allowed" : "pointer",
               }}
             >
-              NEXT →
+              Next →
             </button>
           </div>
         </main>
@@ -383,9 +371,9 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         {/* ------------------------------------------------------- score */}
         <aside
           className="p-4 lg:sticky lg:top-[60px] lg:self-start"
-          style={{ borderLeft: "1px solid var(--color-ink)" }}
+          style={{ borderLeft: "1px solid var(--color-rule)" }}
         >
-          <div className="swiss p-4 flex flex-col gap-3">
+          <div className="panel p-4 flex flex-col gap-3">
             <span className="t-micro" style={{ opacity: 0.6 }}>
               LIVE SCORE
             </span>
@@ -401,7 +389,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 
             {scaled && component && (
               <>
-                <div className="pt-3" style={{ borderTop: "1px solid var(--color-ink)" }}>
+                <div className="pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
                   <span className="t-micro block" style={{ opacity: 0.6 }}>
                     ON THE {component.name.toUpperCase()} SCALE
                   </span>
@@ -431,7 +419,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               </>
             )}
 
-            <div className="pt-3 flex flex-col gap-1" style={{ borderTop: "1px solid var(--color-ink)" }}>
+            <div className="pt-3 flex flex-col gap-1" style={{ borderTop: "1px solid var(--color-rule)" }}>
               <Stat label="ANSWERED" value={`${answeredCount} / ${paper.questions.length}`} />
               <Stat label="MARKED" value={`${checkedCount} / ${paper.questions.length}`} />
               <Stat label="ELAPSED" value={formatClock(elapsed)} />
@@ -445,18 +433,10 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="press-swiss w-full mt-3 t-label"
-            style={{
-              background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
-              borderLeftWidth: 6,
-              borderLeftColor: "var(--color-highlighter)",
-              boxShadow: "var(--shadow-swiss)",
-              padding: "12px",
-              cursor: "pointer",
-            }}
+            className="btn btn-sm btn-outline w-full mt-3"
+            style={{ background: "var(--color-sheet)" }}
           >
-            ASK THE AI TUTOR
+            Ask the AI tutor
           </button>
 
           {/* The paper says whether a calculator is allowed; offering one on a
@@ -521,11 +501,11 @@ function QuestionSheet({
   const wrong = result?.checked && result.awarded === 0;
 
   return (
-    <article className="swiss rise" style={{ maxWidth: 820 }}>
+    <article className="panel rise" style={{ maxWidth: 820 }}>
       {/* header */}
       <div
         className="flex items-start justify-between gap-4 px-5 py-4"
-        style={{ borderBottom: "2px solid var(--color-ink)" }}
+        style={{ borderBottom: "1px solid var(--color-rule)" }}
       >
         <div className="flex items-baseline gap-3">
           <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
@@ -540,7 +520,7 @@ function QuestionSheet({
         </div>
         <span
           className="t-label px-2 py-1 shrink-0"
-          style={{ border: "2px solid var(--color-ink)" }}
+          style={{ border: "1px solid var(--color-rule)" }}
         >
           [{question.marks}]
         </span>
@@ -570,7 +550,7 @@ function QuestionSheet({
           <figure className="m-0">
             <div
               className="inline-block p-3"
-              style={{ border: "1px solid var(--color-ink)", background: "var(--color-sheet)" }}
+              style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
             >
               <Image
                 src={question.figure}
@@ -602,7 +582,7 @@ function QuestionSheet({
       {/* answer zone */}
       {question.marking === "assessed" ? (
         <div
-          style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+          style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-study)" }}
         >
           <ExtendedAnswer
             paperId={paperId}
@@ -614,25 +594,17 @@ function QuestionSheet({
           <div className="px-5 pb-5">
             <button
               onClick={onAskTutor}
-              className="press-swiss t-label"
-              style={{
-                background: "var(--color-sheet)",
-                border: "2px solid var(--color-ink)",
-                borderLeftWidth: 6,
-                borderLeftColor: "var(--color-highlighter)",
-                boxShadow: "var(--shadow-swiss)",
-                padding: "10px 18px",
-                cursor: "pointer",
-              }}
+              className="btn btn-sm btn-outline"
+              style={{ background: "var(--color-sheet)" }}
             >
-              ASK THE TUTOR
+              Ask the tutor
             </button>
           </div>
         </div>
       ) : (
       <div
         className="px-5 py-5 flex flex-col gap-3"
-        style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-study)" }}
+        style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-study)" }}
       >
         {question.marking === "auto" && question.answerKind === "choice" ? (
           <fieldset className="border-0 p-0 m-0 flex flex-col gap-2">
@@ -644,11 +616,11 @@ function QuestionSheet({
               return (
                 <label
                   key={option}
-                  className="press-swiss flex items-center gap-3 px-4 py-3 cursor-pointer"
+                  className="press-soft flex items-center gap-3 px-4 py-3 cursor-pointer"
                   style={{
-                    border: "2px solid var(--color-ink)",
+                    border: "1px solid var(--color-rule)",
                     background: selected ? "var(--color-highlighter)" : "var(--color-sheet)",
-                    boxShadow: selected ? "var(--shadow-swiss)" : "none",
+                    boxShadow: selected ? "var(--shadow-card)" : "none",
                   }}
                 >
                   <input
@@ -665,7 +637,7 @@ function QuestionSheet({
                     style={{
                       width: 16,
                       height: 16,
-                      border: "2px solid var(--color-ink)",
+                      border: "1px solid var(--color-rule)",
                       background: selected ? "var(--color-ink)" : "transparent",
                       flexShrink: 0,
                     }}
@@ -686,12 +658,8 @@ function QuestionSheet({
               disabled={result?.checked}
               maxLength={220}
               placeholder="Type your answer…"
-              className="px-4 py-3 text-[18px] t-mono"
-              style={{
-                border: "2px solid var(--color-ink)",
-                background: "var(--color-sheet)",
-                boxShadow: "var(--shadow-swiss)",
-              }}
+              className="auth-input t-mono"
+              style={{ fontSize: 18, padding: "13px 16px" }}
             />
           </label>
         ) : (
@@ -707,9 +675,9 @@ function QuestionSheet({
               placeholder="Set out your working, one step per line…"
               className="px-4 py-3 text-[16px]"
               style={{
-                border: "2px solid var(--color-ink)",
+                border: "1px solid var(--color-rule)",
                 background: "var(--color-sheet)",
-                boxShadow: "var(--shadow-swiss)",
+                boxShadow: "var(--shadow-card)",
                 resize: "vertical",
                 lineHeight: 1.4,
               }}
@@ -722,52 +690,27 @@ function QuestionSheet({
             <button
               onClick={onCheck}
               disabled={!value.trim()}
-              className="press-swiss t-label"
-              style={{
-                background: value.trim() ? "var(--color-highlighter)" : "var(--color-paper)",
-                color: "var(--color-ink)",
-                opacity: value.trim() ? 1 : 0.55,
-                border: "2px solid var(--color-ink)",
-                boxShadow: "var(--shadow-swiss)",
-                padding: "10px 18px",
-                cursor: value.trim() ? "pointer" : "not-allowed",
-              }}
+              className={`btn btn-sm ${value.trim() ? "btn-mark" : "btn-outline"}`}
             >
-              CHECK ANSWER
+              Check answer
             </button>
           )}
 
           {question.marking === "worked" && !revealed && (
             <button
               onClick={onReveal}
-              className="press-swiss t-label"
-              style={{
-                background: "var(--color-ink)",
-                color: "var(--color-canvas)",
-                border: "2px solid var(--color-ink)",
-                boxShadow: "var(--shadow-swiss)",
-                padding: "10px 18px",
-                cursor: "pointer",
-              }}
+              className="btn btn-sm btn-primary"
             >
-              REVEAL MARK SCHEME
+              Reveal mark scheme
             </button>
           )}
 
           <button
             onClick={onAskTutor}
-            className="press-swiss t-label"
-            style={{
-              background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
-              borderLeftWidth: 6,
-              borderLeftColor: "var(--color-highlighter)",
-              boxShadow: "var(--shadow-swiss)",
-              padding: "10px 18px",
-              cursor: "pointer",
-            }}
+            className="btn btn-sm btn-outline"
+            style={{ background: "var(--color-sheet)" }}
           >
-            ASK THE TUTOR
+            Ask the tutor
           </button>
 
         </div>
@@ -781,15 +724,31 @@ function QuestionSheet({
         <div
           className="px-5 py-4 rise"
           style={{
-            borderTop: "2px solid var(--color-ink)",
+            borderTop: "1px solid var(--color-rule)",
+            borderLeft: `4px solid ${
+              correct
+                ? "var(--color-acid-lime)"
+                : wrong
+                  ? "var(--color-signal-red)"
+                  : "var(--color-highlighter-deep)"
+            }`,
             background: correct
-              ? "var(--color-acid-lime)"
+              ? "var(--color-acid-lime-wash)"
               : wrong
-                ? "var(--color-signal-red)"
-                : "var(--color-highlighter)",
+                ? "var(--color-signal-red-wash)"
+                : "var(--color-highlighter-wash)",
           }}
         >
-          <span className="t-label">
+          <span
+            className="t-label"
+            style={{
+              color: correct
+                ? "var(--color-acid-lime)"
+                : wrong
+                  ? "var(--color-signal-red)"
+                  : "var(--color-ink)",
+            }}
+          >
             {correct
               ? `CORRECT — ${question.marks} MARK${question.marks === 1 ? "" : "S"}`
               : "NOT THE ANSWER — 0 MARKS"}
@@ -806,7 +765,7 @@ function QuestionSheet({
       {revealed && (
         <div
           className="px-5 py-4"
-          style={{ borderTop: "1px solid var(--color-ink)", background: "var(--color-sheet)" }}
+          style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
         >
           <span className="t-micro" style={{ opacity: 0.6 }}>
             MARK SCHEME
@@ -818,10 +777,15 @@ function QuestionSheet({
               <li key={i}>
                 {question.marking === "worked" ? (
                   <label
-                    className="flex items-start gap-3 px-3 py-2 cursor-pointer press-swiss"
+                    className="flex items-start gap-3 px-3 py-2 cursor-pointer press-soft"
                     style={{
-                      border: "2px solid var(--color-ink)",
-                      background: steps[i] ? "var(--color-acid-lime)" : "var(--color-sheet)",
+                      border: `1px solid ${
+                        steps[i] ? "var(--color-acid-lime)" : "var(--color-rule)"
+                      }`,
+                      borderRadius: "var(--radius-md)",
+                      background: steps[i]
+                        ? "var(--color-acid-lime-wash)"
+                        : "var(--color-sheet)",
                     }}
                   >
                     <input
@@ -838,7 +802,7 @@ function QuestionSheet({
                       aria-hidden
                       className="t-micro shrink-0 px-1.5 py-0.5"
                       style={{
-                        border: "2px solid var(--color-ink)",
+                        border: "1px solid var(--color-rule)",
                         background: steps[i] ? "var(--color-ink)" : "transparent",
                         color: steps[i] ? "var(--color-canvas)" : "var(--color-ink)",
                         minWidth: 24,
@@ -852,7 +816,7 @@ function QuestionSheet({
                     </span>
                   </label>
                 ) : (
-                  <div className="flex items-start gap-3 px-3 py-2" style={{ border: "1px solid var(--color-ink)" }}>
+                  <div className="flex items-start gap-3 px-3 py-2" style={{ border: "1px solid var(--color-rule)" }}>
                     <span
                       className="t-micro shrink-0 px-1.5 py-0.5"
                       style={{ background: "var(--color-highlighter)", minWidth: 24, textAlign: "center" }}
@@ -870,8 +834,11 @@ function QuestionSheet({
 
           <p className="text-[16px] mt-3 mb-0">
             <span
-              className="t-micro px-1.5 py-0.5 mr-2"
-              style={{ background: "var(--color-acid-lime)" }}
+              className="t-micro px-2 py-0.5 mr-2"
+              style={{
+                background: "var(--color-acid-lime-wash)",
+                color: "var(--color-acid-lime)",
+              }}
             >
               ANSWER
             </span>
@@ -879,23 +846,23 @@ function QuestionSheet({
           </p>
 
           {question.marking === "worked" && (
-            <div className="flex items-center justify-between gap-3 mt-4 pt-3" style={{ borderTop: "1px solid var(--color-ink)" }}>
+            <div className="flex items-center justify-between gap-3 mt-4 pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
               <span className="t-label">
                 SELF-MARK: {selfAwarded} / {question.marks}
               </span>
               <button
                 onClick={() => onSelfMark(selfAwarded)}
-                className="press-swiss t-label"
-                style={{
-                  background: result?.checked ? "var(--color-acid-lime)" : "var(--color-ink)",
-                  color: result?.checked ? "var(--color-ink)" : "var(--color-canvas)",
-                  border: "2px solid var(--color-ink)",
-                  boxShadow: "var(--shadow-swiss)",
-                  padding: "9px 16px",
-                  cursor: "pointer",
-                }}
+                className="btn btn-sm btn-primary"
+                style={
+                  result?.checked
+                    ? {
+                        background: "var(--color-acid-lime-wash)",
+                        color: "var(--color-acid-lime)",
+                      }
+                    : undefined
+                }
               >
-                {result?.checked ? `RECORDED — ${result.awarded}` : "RECORD MY MARKS"}
+                {result?.checked ? `Recorded — ${result.awarded}` : "Record my marks"}
               </button>
             </div>
           )}
@@ -912,22 +879,22 @@ function HintBlock({ hint }: { hint: string }) {
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="t-label"
+          className="btn btn-sm btn-outline"
           style={{
-            background: "transparent",
-            border: "2px dashed var(--color-ink)",
-            padding: "8px 14px",
-            cursor: "pointer",
-            opacity: 0.75,
+            /* Dashed on purpose: this is the one control on the sheet that
+               costs you something to press, and a broken outline reads as
+               "optional" where a solid one reads as "next step". */
+            borderStyle: "dashed",
+            color: "var(--color-muted)",
           }}
         >
-          ↳ SHOW HINT
+          Show a hint
         </button>
       ) : (
         <div
           className="p-3 rise"
           style={{
-            border: "2px solid var(--color-ink)",
+            border: "1px solid var(--color-rule)",
             borderLeftWidth: 6,
             borderLeftColor: "var(--color-highlighter)",
             background: "var(--color-highlighter-wash)",
@@ -1005,7 +972,7 @@ function Results({
         </h1>
 
         <div className="grid md:grid-cols-4 gap-4 mt-8">
-          <div className="swiss p-5 flex flex-col justify-between md:col-span-1">
+          <div className="panel p-5 flex flex-col justify-between md:col-span-1">
             <span className="t-micro" style={{ opacity: 0.6 }}>
               GRADE
             </span>
@@ -1017,7 +984,7 @@ function Results({
             )}
           </div>
 
-          <div className="swiss p-5 md:col-span-3 grid sm:grid-cols-3 gap-4">
+          <div className="panel p-5 md:col-span-3 grid sm:grid-cols-3 gap-4">
             <Metric label="RAW MARK" value={`${rawMark}`} sub={`of ${availableMarks} available`} />
             <Metric
               label="SCALED"
@@ -1029,8 +996,8 @@ function Results({
         </div>
 
         {/* topic breakdown */}
-        <div className="swiss mt-4">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="panel mt-4">
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Where the marks went</h2>
           </div>
           <ul className="list-none p-0 m-0">
@@ -1038,22 +1005,32 @@ function Results({
               <li
                 key={row.topic}
                 className="px-5 py-3 flex items-center gap-4"
-                style={{ borderTop: "1px solid var(--color-ink)" }}
+                style={{ borderTop: "1px solid var(--color-rule)" }}
               >
                 <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
                 <div
                   className="hidden sm:block shrink-0"
-                  style={{ width: 180, height: 14, border: "2px solid var(--color-ink)" }}
+                  style={{
+                    width: 180,
+                    height: 10,
+                    background: "var(--color-paper)",
+                    borderRadius: "var(--radius-full)",
+                    overflow: "hidden",
+                  }}
                 >
                   <div
                     style={{
                       width: `${row.percent}%`,
                       height: "100%",
+                      borderRadius: "var(--radius-full)",
+                      /* Solid colour is right here and only here: a 10px bar
+                         is a data mark, not a surface, and it has no text on
+                         it to fight. */
                       background:
                         row.percent >= 70
                           ? "var(--color-acid-lime)"
                           : row.percent >= 40
-                            ? "var(--color-highlighter)"
+                            ? "var(--color-highlighter-deep)"
                             : "var(--color-signal-red)",
                     }}
                   />
@@ -1067,8 +1044,8 @@ function Results({
         </div>
 
         {/* question list */}
-        <div className="swiss mt-4">
-          <div className="px-5 py-4" style={{ borderBottom: "2px solid var(--color-ink)" }}>
+        <div className="panel mt-4">
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
             <h2 className="t-subheading">Question by question</h2>
           </div>
           <ul className="list-none p-0 m-0">
@@ -1079,12 +1056,12 @@ function Results({
                 <li
                   key={q.id}
                   className="px-5 py-3 flex items-start gap-3"
-                  style={{ borderTop: "1px solid var(--color-ink)" }}
+                  style={{ borderTop: "1px solid var(--color-rule)" }}
                 >
                   <span
                     className="t-label shrink-0 px-2 py-1"
                     style={{
-                      border: "2px solid var(--color-ink)",
+                      border: "1px solid var(--color-rule)",
                       background:
                         awarded === q.marks
                           ? "var(--color-acid-lime)"
@@ -1115,29 +1092,16 @@ function Results({
         <div className="flex flex-wrap gap-3 mt-6 items-center">
           <Link
             href="/dashboard"
-            className="no-underline press-swiss t-label"
-            style={{
-              background: "var(--color-highlighter)",
-              border: "2px solid var(--color-ink)",
-              boxShadow: "var(--shadow-swiss)",
-              padding: "12px 20px",
-              color: "var(--color-ink)",
-            }}
+            className="btn btn-primary no-underline"
           >
-            SEE IT ON THE DASHBOARD →
+            See it on the dashboard →
           </Link>
           <Link
             href="/library"
-            className="no-underline press-swiss t-label"
-            style={{
-              background: "var(--color-sheet)",
-              border: "2px solid var(--color-ink)",
-              boxShadow: "var(--shadow-swiss)",
-              padding: "12px 20px",
-              color: "var(--color-ink)",
-            }}
+            className="btn btn-outline no-underline"
+            style={{ background: "var(--color-sheet)" }}
           >
-            ANOTHER PAPER
+            Another paper
           </Link>
           {saved && (
             <span className="t-micro" style={{ opacity: 0.6 }}>

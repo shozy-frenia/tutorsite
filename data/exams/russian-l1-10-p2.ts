@@ -22,7 +22,20 @@ import type { Paper } from "@/lib/exam-types";
 export const RUSSIAN_L1_10_P2: Paper = {
   id: "russian-l1-10-p2",
   subjectId: "russian-l1",
-  componentIndex: 1,
+  /**
+   * Index 0, not 1, even though this is Component 2.
+   *
+   * `componentIndex` selects a published boundary table, not a paper number.
+   * NIS publishes exactly one table for this subject at Grade 10 — its
+   * maxMark equals the whole-subject maxMark — so Component 2's marks are
+   * read against that same table. Pointing at index 1 selected a table that
+   * does not exist, `gradeComponent` returned null, and the workspace had no
+   * grade to show. That is part of what three pilots meant by "оценка и баллы
+   * выглядели странно".
+   *
+   * The title below still says Component 2, because that is what the paper is.
+   */
+  componentIndex: 0,
   title: "Russian Language & Literature Я1 Component 2",
   gradeYear: 10,
   sitting: "2025",

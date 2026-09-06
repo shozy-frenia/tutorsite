@@ -63,25 +63,15 @@ export default function PaperFilter({
   if (!profile) {
     return (
       <div
-        className="swiss-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
-        style={{ background: "var(--color-paper)" }}
+        className="panel-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
+        style={{ background: "var(--color-paper)", borderColor: "transparent" }}
       >
         <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
           Showing every paper. Set up a profile and the library narrows to the exams you
           actually sit.
         </p>
-        <Link
-          href="/dashboard"
-          className="no-underline press-swiss t-label shrink-0"
-          style={{
-            background: "var(--color-highlighter)",
-            border: "2px solid var(--color-ink)",
-            boxShadow: "var(--shadow-swiss)",
-            padding: "8px 14px",
-            color: "var(--color-ink)",
-          }}
-        >
-          SET UP A PROFILE →
+        <Link href="/dashboard" className="btn btn-sm btn-primary no-underline shrink-0">
+          Set up a profile →
         </Link>
       </div>
     );
@@ -109,8 +99,11 @@ export default function PaperFilter({
         <style>{`${showRules} { display: flex; }`}</style>
       )}
       <div
-        className="swiss px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
-        style={{ background: "var(--color-highlighter)" }}
+        className="panel px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
+        style={{
+          background: "var(--color-highlighter-wash)",
+          borderColor: "transparent",
+        }}
       >
       <div className="min-w-0">
         <span className="t-micro" style={{ opacity: 0.7 }}>
@@ -126,8 +119,8 @@ export default function PaperFilter({
           {subjects.map((subject) => (
             <li
               key={subject.id}
-              className="t-micro px-2 py-1"
-              style={{ background: "var(--color-sheet)", border: "1px solid var(--color-ink)" }}
+              className="chip"
+              style={{ background: "var(--color-sheet)", borderColor: "transparent" }}
             >
               {subject.glyph} {subject.name}
             </li>
@@ -137,16 +130,10 @@ export default function PaperFilter({
 
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="press-swiss t-label shrink-0"
-          style={{
-            background: "var(--color-sheet)",
-            border: "2px solid var(--color-ink)",
-            boxShadow: "var(--shadow-swiss)",
-            padding: "8px 14px",
-            cursor: "pointer",
-          }}
+          className="btn btn-sm btn-outline shrink-0 whitespace-nowrap"
+          style={{ background: "var(--color-sheet)" }}
         >
-          {showAll ? "SHOW ONLY MINE" : "SHOW EVERYTHING"}
+          {showAll ? "Show only mine" : "Show everything"}
         </button>
       </div>
 
@@ -163,7 +150,7 @@ export default function PaperFilter({
 function NoMatchNotice({ year }: { year: number }) {
   return (
     <div
-      className="swiss-flat px-5 py-4 mb-5 empty-notice"
+      className="panel-flat px-5 py-4 mb-5 empty-notice"
       style={{ background: "var(--color-paper)" }}
     >
       <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
