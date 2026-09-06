@@ -11,7 +11,7 @@ interface Props {
   [key: `data-${string}`]: string | number | undefined;
 }
 
-/** The system's resting shadow offset, px — `--shadow-brutal`. */
+/** The system's resting shadow offset, px — `--shadow-card`. */
 const REST = 5;
 /** How far the offset may travel either side of REST, px. */
 const SWING = 5;

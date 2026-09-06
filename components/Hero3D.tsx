@@ -16,12 +16,17 @@ import * as THREE from "three";
  * the scene has no external asset dependency and cannot fail to render.
  */
 
-const INK = "#151515";
-const RULE = "#37332c";
-const LIME = "#b8f000";
+/* Literals, because three.js materials cannot read CSS custom properties.
+   Kept in step with the tokens in globals.css by hand — if the palette there
+   moves, these move with it. */
+const INK = "#1a3300";
+/* The wireframe rule is a shade darker than the page's 1px pencil line: at
+   this scale, under perspective, --color-rule itself disappears. */
+const RULE = "#a8a291";
+const LIME = "#4b7a00";
 /** The badge plate for every grade below A*. */
-const PLATE = "#f0ede5";
-const CANVAS_BG = "#f6f4ef";
+const PLATE = "#f1efe6";
+const CANVAS_BG = "#fcfaf5";
 
 const GRADES = ["A*", "A", "B", "C", "D", "E", "U"] as const;
 

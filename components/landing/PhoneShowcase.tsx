@@ -35,9 +35,9 @@ const CONVERSATION = [
 export default function PhoneShowcase() {
   return (
     <section className="px-5 md:px-10 mt-12 md:mt-14">
-      <div className="brutal overflow-hidden">
+      <div className="card overflow-hidden">
         <div
-          className="px-5 py-4 border-b-2 flex items-center justify-between flex-wrap gap-3"
+          className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3"
           style={{ borderColor: "var(--color-rule)" }}
         >
           <h2 className="t-subheading">It answers in the language you asked in</h2>
@@ -131,7 +131,7 @@ export default function PhoneShowcase() {
                     style={{
                       paddingTop: 38,
                       paddingBottom: 10,
-                      borderBottom: "2px solid var(--color-rule)",
+                      borderBottom: "1px solid var(--color-rule)",
                     }}
                   >
                     <BrandMark height={16} />
@@ -143,7 +143,7 @@ export default function PhoneShowcase() {
                   {/* grade dial */}
                   <div
                     className="px-4 py-4 shrink-0"
-                    style={{ borderBottom: "2px solid var(--color-rule)" }}
+                    style={{ borderBottom: "1px solid var(--color-rule)" }}
                   >
                     <div className="flex items-end justify-between gap-3">
                       <div>
@@ -164,7 +164,7 @@ export default function PhoneShowcase() {
                         className="t-label"
                         style={{
                           background: "var(--color-highlighter)",
-                          border: "2px solid var(--color-rule)",
+                          border: "1px solid var(--color-rule)",
                           padding: "6px 12px",
                         }}
                       >
@@ -213,7 +213,7 @@ export default function PhoneShowcase() {
                       <div
                         key={i}
                         style={{
-                          border: "2px solid var(--color-rule)",
+                          border: "1px solid var(--color-rule)",
                           background:
                             message.role === "student"
                               ? "var(--color-highlighter)"
@@ -234,12 +234,12 @@ export default function PhoneShowcase() {
                   {/* composer */}
                   <div
                     className="shrink-0 flex gap-2 px-3 py-3"
-                    style={{ borderTop: "2px solid var(--color-rule)" }}
+                    style={{ borderTop: "1px solid var(--color-rule)" }}
                   >
                     <div
                       className="grow t-micro flex items-center px-2"
                       style={{
-                        border: "2px solid var(--color-rule)",
+                        border: "1px solid var(--color-rule)",
                         height: 30,
                         opacity: 0.45,
                         textTransform: "none",

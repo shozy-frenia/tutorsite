@@ -52,36 +52,57 @@ export default function Library() {
               <PointerLift
                 as="article"
                 key={paper.id}
-                className="brutal flex flex-col paper-card"
+                className="card flex flex-col paper-card overflow-hidden"
                 data-subject={paper.subjectId}
                 data-year={paper.gradeYear}
               >
+                {/* The header used to be a solid highlighter field. With eight
+                    papers on screen that put eight yellow blocks in one
+                    viewport, which is precisely the thing the pilot called
+                    "бьёт в глаза". The header is paper now, and the yellow
+                    survives as the rule down its left edge — one mark per
+                    card instead of one field per card. */}
                 <div
-                  className="px-5 py-4 border-b-2 flex items-start justify-between gap-4"
-                  style={{ borderColor: "var(--color-rule)", background: "var(--color-highlighter)" }}
+                  className="px-5 py-4 flex items-start justify-between gap-4"
+                  style={{
+                    borderBottom: "1px solid var(--color-rule)",
+                    borderLeft: "3px solid var(--color-highlighter)",
+                    background: "var(--color-paper)",
+                    borderTopLeftRadius: "inherit",
+                    borderTopRightRadius: "inherit",
+                  }}
                 >
                   <div>
-                    <span className="t-micro">
+                    <span className="t-micro t-muted">
                       GRADE {paper.gradeYear} · {subject?.name.toUpperCase()}
                     </span>
                     <h2 className="t-subheading mt-1">{paper.title}</h2>
-                    <span className="t-label mt-1 block">{paper.sitting}</span>
+                    <span className="t-label t-muted mt-1 block">{paper.sitting}</span>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span
                       className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
+                      style={{
+                        borderRadius: "var(--radius-full)",
+                        border: "1px solid var(--color-rule-strong)",
+                        color: "var(--color-muted)",
+                      }}
                     >
                       {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
                     </span>
                     <span
                       className="t-micro px-2 py-1"
                       style={{
-                        border: "2px solid var(--color-rule)",
+                        borderRadius: "var(--radius-full)",
+                        border: "1px solid transparent",
                         background:
                           paper.provenance === "transcribed"
-                            ? "var(--color-acid-lime)"
+                            ? "var(--color-acid-lime-wash)"
                             : "var(--color-canvas)",
+                        borderColor:
+                          paper.provenance === "transcribed"
+                            ? "transparent"
+                            : "var(--color-rule)",
                       }}
                     >
                       {paper.provenance === "transcribed" ? "PAST PAPER" : "PRACTICE"}
@@ -126,11 +147,7 @@ export default function Library() {
                   </span>
                   <ul className="flex flex-wrap gap-1.5 mt-2 list-none p-0">
                     {topics.map((topic) => (
-                      <li
-                        key={topic}
-                        className="t-micro px-2 py-1"
-                        style={{ border: "1px solid var(--color-rule)" }}
-                      >
+                      <li key={topic} className="chip chip-quiet">
                         {topic}
                       </li>
                     ))}
@@ -160,8 +177,8 @@ export default function Library() {
                     style={{
                       background: "var(--color-ink)",
                       color: "var(--color-canvas)",
-                      border: "3px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-brutal-sm)",
+                      border: "1px solid var(--color-rule)",
+                      boxShadow: "var(--shadow-card)",
                       padding: "12px 22px",
                       fontWeight: 700,
                     }}
@@ -189,7 +206,7 @@ export default function Library() {
 
         <div className="grid md:grid-cols-3 gap-5">
           {GRADE_STAGES.map((stage) => (
-            <div key={stage.year} className="swiss-flat p-5">
+            <div key={stage.year} className="panel-flat p-5">
               <span className="mark-quiet t-micro">GRADE {stage.year}</span>
               <span className="t-micro block mt-3" style={{ opacity: 0.55 }}>
                 {stage.compulsory}

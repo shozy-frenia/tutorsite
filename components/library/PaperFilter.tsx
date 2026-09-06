@@ -63,7 +63,7 @@ export default function PaperFilter({
   if (!profile) {
     return (
       <div
-        className="swiss-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
+        className="panel-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
         style={{ background: "var(--color-paper)" }}
       >
         <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
@@ -72,11 +72,11 @@ export default function PaperFilter({
         </p>
         <Link
           href="/dashboard"
-          className="no-underline press-swiss t-label shrink-0"
+          className="no-underline press-soft t-label shrink-0"
           style={{
             background: "var(--color-highlighter)",
-            border: "2px solid var(--color-rule)",
-            boxShadow: "var(--shadow-swiss)",
+            border: "1px solid var(--color-rule)",
+            boxShadow: "var(--shadow-card)",
             padding: "8px 14px",
             color: "var(--color-ink)",
           }}
@@ -109,7 +109,7 @@ export default function PaperFilter({
         <style>{`${showRules} { display: flex; }`}</style>
       )}
       <div
-        className="swiss px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
+        className="panel px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
         style={{ background: "var(--color-highlighter)" }}
       >
       <div className="min-w-0">
@@ -137,11 +137,11 @@ export default function PaperFilter({
 
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="press-swiss t-label shrink-0"
+          className="press-soft t-label shrink-0"
           style={{
             background: "var(--color-sheet)",
-            border: "2px solid var(--color-rule)",
-            boxShadow: "var(--shadow-swiss)",
+            border: "1px solid var(--color-rule)",
+            boxShadow: "var(--shadow-card)",
             padding: "8px 14px",
             cursor: "pointer",
           }}
@@ -163,7 +163,7 @@ export default function PaperFilter({
 function NoMatchNotice({ year }: { year: number }) {
   return (
     <div
-      className="swiss-flat px-5 py-4 mb-5 empty-notice"
+      className="panel-flat px-5 py-4 mb-5 empty-notice"
       style={{ background: "var(--color-paper)" }}
     >
       <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>

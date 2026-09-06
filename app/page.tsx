@@ -10,6 +10,7 @@ import PointerLift from "@/components/motion/PointerLift";
 import PaperCoverflow from "@/components/motion/PaperCoverflow";
 import HeroIntro from "@/components/motion/HeroIntro";
 import StaggerIn from "@/components/motion/StaggerIn";
+import Reveal from "@/components/motion/Reveal";
 import CountUp from "@/components/motion/CountUp";
 import { GRADE_STAGES, examSubjectsFor, subjectById } from "@/data/curriculum";
 import { allBoundarySets } from "@/data/grade-boundaries";
@@ -27,6 +28,20 @@ import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
  * CountUp on scroll. It had four scroll effects and still read as a still
  * image, because nothing moved in the seconds anyone actually watches.
  */
+
+/**
+ * One note colour per grade year.
+ *
+ * The three stage cards used to share an identical solid-ink header, which
+ * meant the header carried no information at all — you had to read the number
+ * to tell the cards apart. Tinting them makes the year legible at a glance and
+ * removes three dark fields from a page the pilot already called "броский".
+ */
+const STAGE_TINTS = [
+  "var(--color-note-mint)",
+  "var(--color-note-teal)",
+  "var(--color-note-sky)",
+];
 
 // Short, decorative labels for the SubjectRibbon — not the official subject
 // names (those stay exact on the Grade 10/11/12 cards below, where they carry
@@ -115,7 +130,7 @@ export default function Home() {
       {/* ---------------------------------------------------------------- HERO */}
       <HeroIntro>
         <section className="px-5 md:px-10">
-          <div className="brutal" style={{ boxShadow: "var(--shadow-brutal-lg)" }}>
+          <div className="card" style={{ boxShadow: "var(--shadow-lift)" }}>
             <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
               <div className="p-5 md:p-8 flex flex-col justify-between gap-8">
                 <div>
@@ -158,10 +173,10 @@ export default function Home() {
                     href="/library"
                     className="enter-rise"
                     data-enter="cta"
-                    fill="var(--color-highlighter)"
-                    textColor="var(--color-ink)"
-                    hoverFill="var(--color-ink)"
-                    hoverTextColor="var(--color-canvas)"
+                    fill="var(--color-ink)"
+                    textColor="var(--color-canvas)"
+                    hoverFill="var(--color-highlighter)"
+                    hoverTextColor="var(--color-ink)"
                   >
                     Sit a mock exam →
                   </RevealButton>
@@ -183,7 +198,7 @@ export default function Home() {
                   a shutter rather than a fade, which is what a system built out
                   of hard edges should do. */}
               <div
-                className="relative min-h-[380px] lg:min-h-[560px] border-t-2 lg:border-t-0 lg:border-l-2 enter-wipe"
+                className="relative min-h-[380px] lg:min-h-[560px] border-t lg:border-t-0 lg:border-l enter-wipe"
                 data-enter="panel"
                 style={{ borderColor: "var(--color-rule)" }}
               >
@@ -202,9 +217,9 @@ export default function Home() {
             {/* Ticker strip. The counts moved out to the stat band below, where
                 they can be read; a marquee is the wrong place for a number. */}
             <div
-              className="border-t-2 overflow-hidden enter-rise"
+              className="border-t border-b overflow-hidden enter-rise"
               data-enter="ticker"
-              style={{ borderColor: "var(--color-rule)", background: "var(--color-ink)" }}
+              style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
             >
               <div className="flex whitespace-nowrap marquee-track">
                 {[0, 1].map((copy) => (
@@ -243,7 +258,7 @@ export default function Home() {
             { figure: totalMarks, label: "MARKS AVAILABLE", note: "Scored the way the examiner scores" },
             { figure: allBoundarySets().length, label: "BOUNDARY TABLES", note: "Published МЭСК grades, not percentages" },
           ].map((stat) => (
-            <div key={stat.label} className="brutal p-5 flex flex-col gap-1">
+            <div key={stat.label} className="card p-5 flex flex-col gap-1">
               <CountUp to={stat.figure} className="t-heading-sm" />
               <span className="t-label">{stat.label}</span>
               <span className="t-micro mt-1" style={{ opacity: 0.6, letterSpacing: 0 }}>
@@ -268,7 +283,7 @@ export default function Home() {
               key={feature.badge}
               // No `.press` here: PointerLift owns box-shadow, and press's
               // hover rule would outrank it and freeze the swing.
-              className={`brutal p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
+              className={`card p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
               style={
                 feature.accent
                   ? { background: "var(--color-highlighter-wash)" }
@@ -311,7 +326,9 @@ export default function Home() {
           <span className="t-label pb-2">↳ CLICK A CARD · ARROW KEYS WORK</span>
         </div>
 
-        <PaperCoverflow papers={coverflowPapers} />
+        <Reveal from="scale">
+          <PaperCoverflow papers={coverflowPapers} />
+        </Reveal>
       </section>
 
       {/* ---------------------------------------------------------------- GRADES */}
@@ -327,19 +344,19 @@ export default function Home() {
         </div>
 
         <StaggerIn className="grid lg:grid-cols-3 gap-5">
-          {GRADE_STAGES.map((stage) => (
-            <article key={stage.year} className="brutal flex flex-col">
+          {GRADE_STAGES.map((stage, index) => (
+            <article key={stage.year} className="card flex flex-col overflow-hidden">
               <div
-                className="flex items-baseline justify-between px-5 py-4 border-b-2"
-                style={{ borderColor: "var(--color-rule)", background: "var(--color-ink)" }}
+                className="flex items-baseline justify-between px-5 py-4 border-b"
+                style={{
+                  borderColor: "var(--color-rule)",
+                  background: STAGE_TINTS[index % STAGE_TINTS.length],
+                }}
               >
-                <span
-                  className="t-heading-sm"
-                  style={{ color: "var(--color-highlighter)", lineHeight: 0.8 }}
-                >
+                <span className="t-heading-sm" style={{ lineHeight: 0.85 }}>
                   {stage.year}
                 </span>
-                <span className="t-micro" style={{ color: "var(--color-canvas)" }}>
+                <span className="t-micro" style={{ opacity: 0.65 }}>
                   GRADE
                 </span>
               </div>
@@ -357,18 +374,14 @@ export default function Home() {
                     parallel: "kazakh",
                     profileSubjectIds: [],
                   }).map((subject) => (
-                    <li
-                      key={subject.id}
-                      className="t-micro px-2 py-1"
-                      style={{ border: "2px solid var(--color-rule)" }}
-                    >
+                    <li key={subject.id} className="chip chip-quiet">
                       {subject.glyph} {subject.name}
                     </li>
                   ))}
                   {stage.year !== 11 && (
                     <li
-                      className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-highlighter-wash)", border: "2px solid var(--color-rule)" }}
+                      className="chip"
+                      style={{ background: "var(--color-highlighter-wash)", borderColor: "transparent" }}
                     >
                       + {stage.year === 12 ? "2 PROFILES" : "1 PROFILE"}
                     </li>
@@ -377,7 +390,7 @@ export default function Home() {
               </div>
 
               <div
-                className="px-5 py-3 border-t-2 t-label"
+                className="px-5 py-3 border-t t-label"
                 style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
               >
                 {stage.load}
@@ -389,7 +402,9 @@ export default function Home() {
 
       {/* -------------------------------------------------------------- BOUNDARY */}
       <section className="px-5 md:px-10 mt-12 md:mt-14">
-        <BoundaryExplorer />
+        <Reveal>
+          <BoundaryExplorer />
+        </Reveal>
       </section>
 
       <PhoneShowcase />
@@ -397,8 +412,8 @@ export default function Home() {
       {/* ------------------------------------------------------------------ CTA */}
       <section className="px-5 md:px-10 mt-12 md:mt-14">
         <div
-          className="brutal p-6 md:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8"
-          style={{ background: "var(--color-ink)", boxShadow: "var(--shadow-brutal-lg)" }}
+          className="card p-6 md:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8"
+          style={{ background: "var(--color-ink)", boxShadow: "var(--shadow-lift)" }}
         >
           <MaskedReveal
             as="h2"
@@ -418,8 +433,8 @@ export default function Home() {
               textColor="var(--color-ink)"
               hoverFill="var(--color-canvas)"
               hoverTextColor="var(--color-ink)"
-              border="2px solid var(--color-canvas)"
-              shadow="4px 4px 0 var(--color-canvas)"
+              border="1px solid transparent"
+              shadow="0 6px 18px -6px rgba(0,0,0,0.4)"
             >
               Choose a mock →
             </RevealButton>

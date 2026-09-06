@@ -1,13 +1,38 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope, Roboto_Mono } from "next/font/google";
 import AskTalap from "@/components/AskTalap";
+import PageTransition from "@/components/motion/PageTransition";
 import ScrollProgress from "@/components/motion/ScrollProgress";
 import "./globals.css";
 
+/**
+ * Three faces, all carrying Cyrillic.
+ *
+ * That last part is the constraint the whole type system bends around. The
+ * reference this design follows sets its display type in Bricolage Grotesque,
+ * which ships latin, latin-ext and vietnamese and no Cyrillic at all — every
+ * Russian and Kazakh headline on the site would fall back to the system face
+ * mid-word. Manrope is the closest geometric grotesque that carries cyrillic
+ * and cyrillic-ext, so it takes the display role instead.
+ */
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
   display: "swap",
   variable: "--font-inter",
+});
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["700", "800"],
+  display: "swap",
+  variable: "--font-manrope",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-roboto-mono",
 });
 
 export const metadata: Metadata = {
@@ -18,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f6f4ef",
+  themeColor: "#fcfaf5",
   colorScheme: "light",
 };
 
@@ -43,13 +68,13 @@ setTimeout(function(){if(!d.dataset.motionReady)d.classList.remove('js-motion');
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="ru" className={`${inter.variable} ${manrope.variable} ${robotoMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: ARM_MOTION }} />
       </head>
       <body>
         <ScrollProgress />
-        {children}
+        <PageTransition>{children}</PageTransition>
         <AskTalap />
       </body>
     </html>

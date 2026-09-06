@@ -235,6 +235,60 @@ function commaSet(expr: string): string | null {
   return parts.length > 1 ? parts.sort().join(",") : null;
 }
 
+/**
+ * Read a normalised answer as a number, accepting the forms students actually
+ * type for the same value.
+ *
+ * A mark scheme writes 0.5; a student writes 1/2, and both are right. This was
+ * the second half of "правильный ответ засчитало как неправильный" — the term
+ * ordering fix above covers algebra, and this covers arithmetic. Handled here:
+ *
+ *   "1/2"    -> 0.5     a plain fraction
+ *   "50%"    -> 0.5     a percentage
+ *   "16cm"   -> 16      a value with its unit still attached
+ *   "1.5e3"  -> 1500    scientific notation
+ *
+ * Returns null for anything that is not a single value, so a comma-separated
+ * pair or an equation never reaches the numeric comparison and falls through
+ * to exact matching instead.
+ */
+function numericValue(expr: string): number | null {
+  if (!expr || expr.includes(",") || expr.includes("=")) return null;
+
+  const percent = expr.endsWith("%");
+  const body = percent ? expr.slice(0, -1) : expr;
+
+  // Strip a trailing unit, but only letters that follow the number — a leading
+  // letter means this is a variable or a word, not a measurement.
+  const stripped = SCIENTIFIC.test(body) ? body : body.replace(/[a-z]+$/, "");
+  if (!stripped || /^[a-z]/.test(stripped)) return null;
+
+  const fraction = /^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/.exec(stripped);
+  let value: number;
+  if (fraction) {
+    const denominator = Number(fraction[2]);
+    if (denominator === 0) return null;
+    value = Number(fraction[1]) / denominator;
+  } else {
+    value = Number(stripped);
+  }
+
+  if (!Number.isFinite(value)) return null;
+  return percent ? value / 100 : value;
+}
+
+/**
+ * Compare two numbers the way a marker would.
+ *
+ * An absolute epsilon is wrong across the range this app covers: answers run
+ * from 0.002 mol to 1 680 arrangements, and a tolerance that is sane for one
+ * is nonsense for the other. Relative for large values, absolute near zero.
+ */
+function closeEnough(a: number, b: number): boolean {
+  const scale = Math.max(Math.abs(a), Math.abs(b));
+  return Math.abs(a - b) <= (scale > 1 ? scale * 1e-9 : 1e-9);
+}
+
 /** Does a submitted answer match the key (or any accepted variant)? */
 export function isCorrect(submitted: string, question: Question): boolean {
   if (!submitted.trim()) return false;
@@ -242,14 +296,16 @@ export function isCorrect(submitted: string, question: Question): boolean {
   const keys = [question.answer, ...(question.accepts ?? [])].map(normaliseAnswer);
   if (keys.includes(candidate)) return true;
 
-  // Numeric answers: compare as numbers so "16" === "16.0" === "16 cm".
+  // Numeric answers: compare as numbers so "16" === "16.0" === "16 cm", and
+  // "1/2" === "0.5" === "50%".
   if (question.answerKind === "numeric") {
-    const num = Number(candidate.replace(/[a-z]/g, ""));
-    if (!Number.isNaN(num)) {
-      return keys.some((k) => {
-        const kn = Number(k.replace(/[a-z]/g, ""));
-        return !Number.isNaN(kn) && Math.abs(kn - num) < 1e-9;
+    const num = numericValue(candidate);
+    if (num !== null) {
+      const matched = keys.some((k) => {
+        const kn = numericValue(k);
+        return kn !== null && closeEnough(kn, num);
       });
+      if (matched) return true;
     }
   }
 

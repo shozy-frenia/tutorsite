@@ -125,11 +125,11 @@ export default function CalculatorPanel() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="press-swiss t-label"
+        className="press-soft t-label"
         style={{
           background: "var(--color-sheet)",
-          border: "2px solid var(--color-rule)",
-          boxShadow: "var(--shadow-swiss)",
+          border: "1px solid var(--color-rule)",
+          boxShadow: "var(--shadow-card)",
           padding: "10px 18px",
           cursor: "pointer",
           width: "100%",
@@ -141,7 +141,7 @@ export default function CalculatorPanel() {
   }
 
   return (
-    <div style={{ border: "3px solid var(--color-rule)", background: "var(--color-sheet)" }}>
+    <div style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}>
       <div
         className="flex items-center justify-between gap-2 px-3 py-2"
         style={{ background: "var(--color-ink)" }}
@@ -179,7 +179,7 @@ export default function CalculatorPanel() {
       </div>
 
       {/* display */}
-      <div className="px-3 py-2" style={{ borderBottom: "2px solid var(--color-rule)" }}>
+      <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--color-rule)" }}>
         <input
           ref={inputRef}
           value={expression}
@@ -193,7 +193,7 @@ export default function CalculatorPanel() {
           placeholder="type or tap — e.g. acos(11/sqrt(143))"
           spellCheck={false}
           className="w-full px-2 py-2 t-mono text-[16px]"
-          style={{ border: "2px solid var(--color-rule)", background: "var(--color-canvas)" }}
+          style={{ border: "1px solid var(--color-rule)", background: "var(--color-canvas)" }}
         />
 
         <div className="mt-2 flex items-baseline justify-between gap-3 min-h-[26px]">
@@ -228,7 +228,7 @@ export default function CalculatorPanel() {
                 onClick={() => press(key)}
                 className="t-mono"
                 style={{
-                  border: "2px solid var(--color-rule)",
+                  border: "1px solid var(--color-rule)",
                   background:
                     key.action === "equals"
                       ? "var(--color-highlighter)"

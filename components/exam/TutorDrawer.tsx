@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Thinking from "@/components/motion/Thinking";
 import type { Question } from "@/lib/exam-types";
 import type { GeneratedQuestion } from "@/lib/offline-variants";
 
@@ -234,7 +235,7 @@ export default function TutorDrawer({
         style={{
           width: "min(520px, 100vw)",
           background: "var(--color-sheet)",
-          borderLeft: "3px solid var(--color-rule)",
+          borderLeft: "1px solid var(--color-rule)",
         }}
         role="dialog"
         aria-label="AI tutor"
@@ -242,7 +243,7 @@ export default function TutorDrawer({
         {/* Header */}
         <div
           className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-          style={{ borderBottom: "2px solid var(--color-rule)", background: "var(--color-ink)" }}
+          style={{ borderBottom: "1px solid var(--color-rule)", background: "var(--color-ink)" }}
         >
           <div className="flex items-center gap-2">
             <span className="mark t-micro">AI TUTOR</span>
@@ -257,7 +258,7 @@ export default function TutorDrawer({
           </div>
           <button
             onClick={onClose}
-            className="t-label press-swiss"
+            className="t-label press-soft"
             style={{
               background: "transparent",
               border: "2px solid var(--color-canvas)",
@@ -271,7 +272,7 @@ export default function TutorDrawer({
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "2px solid var(--color-rule)" }}>
+        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "1px solid var(--color-rule)" }}>
           {(["explain", "practise"] as Tab[]).map((value) => (
             <button
               key={value}
@@ -280,7 +281,7 @@ export default function TutorDrawer({
               style={{
                 background: tab === value ? "var(--color-highlighter)" : "var(--color-sheet)",
                 border: 0,
-                borderRight: value === "explain" ? "2px solid var(--color-rule)" : undefined,
+                borderRight: value === "explain" ? "1px solid var(--color-rule)" : undefined,
                 cursor: "pointer",
                 color: "var(--color-ink)",
               }}
@@ -309,18 +310,18 @@ export default function TutorDrawer({
           <>
             <div ref={logRef} className="grow overflow-y-auto p-4 flex flex-col gap-3">
               {messages.length === 0 && !streaming && (
-                <div className="swiss-flat p-4">
+                <div className="panel-flat p-4">
                   <p className="text-[15px]" style={{ lineHeight: 1.35 }}>
                     Ask for the step you are stuck on. The tutor starts from where your
                     working diverges — it will not just hand you the answer.
                   </p>
                   <button
                     onClick={() => ask()}
-                    className="press-swiss mt-3"
+                    className="press-soft mt-3"
                     style={{
                       background: "var(--color-highlighter)",
-                      border: "2px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-swiss)",
+                      border: "1px solid var(--color-rule)",
+                      boxShadow: "var(--shadow-card)",
                       padding: "10px 16px",
                       fontWeight: 700,
                       cursor: "pointer",
@@ -336,7 +337,7 @@ export default function TutorDrawer({
                   key={i}
                   className="p-3"
                   style={{
-                    border: "2px solid var(--color-rule)",
+                    border: "1px solid var(--color-rule)",
                     background:
                       message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
                     alignSelf: message.role === "user" ? "flex-end" : "flex-start",
@@ -359,20 +360,17 @@ export default function TutorDrawer({
               ))}
 
               {streaming && messages.length === 0 && (
-                <div className="flex flex-col gap-1">
-                  <span className="t-micro blink">TUTOR IS THINKING…</span>
-                  {slow && (
-                    <span className="t-micro" style={{ opacity: 0.6, textTransform: "none" }}>
-                      Первый ответ занимает больше обычного. Ещё несколько секунд.
-                    </span>
-                  )}
-                </div>
+                <Thinking
+                  label="Tutor is thinking"
+                  slow={slow}
+                  slowNote="Первый ответ занимает больше обычного. Ещё несколько секунд."
+                />
               )}
 
               {error && (
                 <div
                   className="p-3 t-label"
-                  style={{ border: "2px solid var(--color-rule)", background: "var(--color-signal-red)" }}
+                  style={{ border: "1px solid var(--color-rule)", background: "var(--color-signal-red)" }}
                 >
                   {error}
                 </div>
@@ -382,7 +380,7 @@ export default function TutorDrawer({
             {/* Composer */}
             <form
               className="shrink-0 p-3 flex gap-2"
-              style={{ borderTop: "2px solid var(--color-rule)" }}
+              style={{ borderTop: "1px solid var(--color-rule)" }}
               onSubmit={(event) => {
                 event.preventDefault();
                 const text = draft.trim();
@@ -397,16 +395,16 @@ export default function TutorDrawer({
                 maxLength={600}
                 placeholder="Ask a follow-up…"
                 className="grow px-3 py-2 text-[15px]"
-                style={{ border: "2px solid var(--color-rule)", background: "var(--color-sheet)" }}
+                style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
               />
               <button
                 type="submit"
                 disabled={streaming || !draft.trim()}
-                className="press-swiss t-label px-4"
+                className="press-soft t-label px-4"
                 style={{
                   background: streaming ? "var(--color-paper)" : "var(--color-ink)",
                   color: "var(--color-canvas)",
-                  border: "2px solid var(--color-rule)",
+                  border: "1px solid var(--color-rule)",
                   cursor: streaming ? "wait" : "pointer",
                 }}
               >
@@ -416,7 +414,7 @@ export default function TutorDrawer({
           </>
         ) : (
           <div className="grow overflow-y-auto p-4 flex flex-col gap-3">
-            <div className="swiss-flat p-4">
+            <div className="panel-flat p-4">
               <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
                 Get a new question on <strong>{question.topic}</strong> worth exactly{" "}
                 <strong>{question.marks} marks</strong> — same syllabus content, same number
@@ -425,11 +423,11 @@ export default function TutorDrawer({
               <button
                 onClick={() => void generate()}
                 disabled={variantLoading}
-                className="press-swiss mt-3"
+                className="press-soft mt-3"
                 style={{
                   background: "var(--color-highlighter)",
-                  border: "2px solid var(--color-rule)",
-                  boxShadow: "var(--shadow-swiss)",
+                  border: "1px solid var(--color-rule)",
+                  boxShadow: "var(--shadow-card)",
                   padding: "10px 16px",
                   fontWeight: 700,
                   cursor: variantLoading ? "wait" : "pointer",
@@ -442,14 +440,14 @@ export default function TutorDrawer({
             {variantWarning && (
               <div
                 className="p-3 text-[14px]"
-                style={{ border: "2px solid var(--color-rule)", background: "var(--color-highlighter)" }}
+                style={{ border: "1px solid var(--color-rule)", background: "var(--color-highlighter)" }}
               >
                 {variantWarning}
               </div>
             )}
 
             {variant && (
-              <article className="swiss p-4 rise">
+              <article className="panel p-4 rise">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="mark t-micro">{variant.topic}</span>
                   <span className="t-micro">[{variant.marks}]</span>
@@ -471,11 +469,11 @@ export default function TutorDrawer({
                 {!variantAnswerShown ? (
                   <button
                     onClick={() => setVariantAnswerShown(true)}
-                    className="press-swiss mt-3 t-label"
+                    className="press-soft mt-3 t-label"
                     style={{
                       background: "var(--color-sheet)",
-                      border: "2px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-swiss)",
+                      border: "1px solid var(--color-rule)",
+                      boxShadow: "var(--shadow-card)",
                       padding: "8px 14px",
                       cursor: "pointer",
                     }}
@@ -517,7 +515,7 @@ export default function TutorDrawer({
             {error && (
               <div
                 className="p-3 t-label"
-                style={{ border: "2px solid var(--color-rule)", background: "var(--color-signal-red)" }}
+                style={{ border: "1px solid var(--color-rule)", background: "var(--color-signal-red)" }}
               >
                 {error}
               </div>
