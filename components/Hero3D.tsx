@@ -16,17 +16,32 @@ import * as THREE from "three";
  * the scene has no external asset dependency and cannot fail to render.
  */
 
-const INK = "#151515";
-const YELLOW = "#fff824";
-const LIME = "#b8f000";
-const CANVAS_BG = "#f3f3f3";
+/* Literals, because three.js materials cannot read CSS custom properties.
+   Kept in step with the tokens in globals.css by hand — if the palette there
+   moves, these move with it. */
+const INK = "#1a3300";
+/* The wireframe rule is a shade darker than the page's 1px pencil line: at
+   this scale, under perspective, --color-rule itself disappears. */
+const RULE = "#a8a291";
+const LIME = "#4b7a00";
+/** The badge plate for every grade below A*. */
+const PLATE = "#f1efe6";
+const CANVAS_BG = "#fcfaf5";
 
 const GRADES = ["A*", "A", "B", "C", "D", "E", "U"] as const;
 
 /** Half-width of the ladder in world units. Badges are 1 unit wide. */
 const HALF_SPREAD = 2.15;
 
-/** Draw a grade letter into a canvas texture: yellow plate, black letter. */
+/**
+ * Draw a grade letter into a canvas texture.
+ *
+ * Every badge used to be highlighter yellow, which made the hero a wall of it
+ * — the single loudest thing the pilot testers complained about — and, worse,
+ * said nothing: if all seven grades are the same colour the ladder has no top.
+ * Only A* is chromatic now. The rest are paper, and the one lit tile is the
+ * thing you are climbing towards.
+ */
 function useBadgeTexture(label: string, accent: string) {
   return useMemo(() => {
     const size = 256;
@@ -40,8 +55,8 @@ function useBadgeTexture(label: string, accent: string) {
     ctx.fillRect(0, 0, size, size);
 
     // Hairline frame, matching the ruled-rectangle grammar of the 2D system.
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 14;
+    ctx.strokeStyle = RULE;
+    ctx.lineWidth = 12;
     ctx.strokeRect(7, 7, size - 14, size - 14);
 
     ctx.fillStyle = INK;
@@ -73,7 +88,7 @@ function Badge({ label, position, accent, spin, phase, onGrab }: BadgeProps) {
 
   // Six side faces in ink, front face carrying the letter texture.
   const materials = useMemo(() => {
-    const side = new THREE.MeshBasicMaterial({ color: INK });
+    const side = new THREE.MeshBasicMaterial({ color: RULE });
     const face = texture
       ? new THREE.MeshBasicMaterial({ map: texture })
       : new THREE.MeshBasicMaterial({ color: accent });
@@ -117,7 +132,7 @@ function Badge({ label, position, accent, spin, phase, onGrab }: BadgeProps) {
       {/* Hard black outline, drawn as real edges rather than a shader */}
       <lineSegments>
         <edgesGeometry args={[new THREE.BoxGeometry(1, 1, 0.18)]} />
-        <lineBasicMaterial color={INK} />
+        <lineBasicMaterial color={RULE} />
       </lineSegments>
     </group>
   );
@@ -138,19 +153,19 @@ function Scaffold() {
     <group ref={group}>
       <lineSegments position={[-2.7, 1.35, -2.2]}>
         <edgesGeometry args={[new THREE.IcosahedronGeometry(0.82, 0)]} />
-        <lineBasicMaterial color={INK} transparent opacity={0.42} />
+        <lineBasicMaterial color={RULE} transparent opacity={0.42} />
       </lineSegments>
       <lineSegments position={[2.9, -1.15, -2.6]}>
         <edgesGeometry args={[new THREE.TorusGeometry(0.72, 0.26, 6, 12)]} />
-        <lineBasicMaterial color={INK} transparent opacity={0.34} />
+        <lineBasicMaterial color={RULE} transparent opacity={0.34} />
       </lineSegments>
       <lineSegments position={[1.9, 1.75, -3]}>
         <edgesGeometry args={[new THREE.TetrahedronGeometry(0.72)]} />
-        <lineBasicMaterial color={INK} transparent opacity={0.36} />
+        <lineBasicMaterial color={RULE} transparent opacity={0.36} />
       </lineSegments>
       <lineSegments position={[-3.1, -1.5, -1.8]}>
         <edgesGeometry args={[new THREE.BoxGeometry(0.7, 0.7, 0.7)]} />
-        <lineBasicMaterial color={INK} transparent opacity={0.3} />
+        <lineBasicMaterial color={RULE} transparent opacity={0.3} />
       </lineSegments>
     </group>
   );
@@ -193,7 +208,7 @@ function Ladder({ onGrab }: { onGrab: (label: string) => void }) {
         return {
           label,
           position: [x, y, -t * 0.5] as [number, number, number],
-          accent: i === 0 ? LIME : YELLOW,
+          accent: i === 0 ? LIME : PLATE,
           spin: 0.35 + i * 0.05,
           phase: i * 0.9,
         };
@@ -223,7 +238,13 @@ export default function Hero3D({ onGrab }: { onGrab?: (label: string) => void })
     <Canvas
       dpr={[1, 2]}
       camera={{ position: [0, 0, 6.6], fov: 42 }}
-      gl={{ antialias: true }}
+      // No tone mapping. React Three Fiber defaults the renderer to ACES
+      // filmic, which is right for a lit scene and wrong for this one: every
+      // material here is a flat printed colour, and ACES was rolling them off
+      // — the paper badge plates measured rgb(225,225,223) against the
+      // rgb(240,237,229) they are authored as, which is why they read grey
+      // beside the page rather than as paper.
+      gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}
       style={{ background: CANVAS_BG, touchAction: "pan-y" }}
     >
       <Rig>

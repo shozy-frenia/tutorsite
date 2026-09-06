@@ -2522,6 +2522,8 @@ body.menu-open .mnav {
   }
 }
 
+/* The caret at the end of a streaming answer. A hard two-step blink is right
+   here — it is imitating a text cursor, which is exactly what blinks. */
 @keyframes blink {
   0%,
   100% {

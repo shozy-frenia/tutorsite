@@ -125,7 +125,7 @@ export default function CalculatorPanel() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="press-swiss t-label"
+        className="press-soft t-label"
         style={{
           background: "var(--color-cream-paper)",
           border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",

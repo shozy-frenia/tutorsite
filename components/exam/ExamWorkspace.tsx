@@ -362,7 +362,9 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
                     ON THE {component.name.toUpperCase()} SCALE
                   </span>
                   <span className="t-subheading t-mono">
-                    {scaled.scaledMark}
+                    <span key={scaled.scaledMark} className="tick">
+                      {scaled.scaledMark}
+                    </span>
                     <span className="t-label"> / {component.maxMark}</span>
                   </span>
                 </div>
@@ -574,7 +576,7 @@ function QuestionSheet({
               return (
                 <label
                   key={option}
-                  className="press-swiss flex items-center gap-3 px-4 py-3 cursor-pointer"
+                  className="press-soft flex items-center gap-3 px-4 py-3 cursor-pointer"
                   style={{
                     border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                     background: selected
@@ -686,13 +688,22 @@ function QuestionSheet({
           style={{
             borderTop: "1px solid var(--color-pencil-gray)",
             background: correct
-              ? "var(--color-acid-lime)"
+              ? "var(--color-acid-lime-wash)"
               : wrong
-                ? "var(--color-signal-red)"
-                : "var(--color-highlighter)",
+                ? "var(--color-signal-red-wash)"
+                : "var(--color-highlighter-wash)",
           }}
         >
-          <span className="t-label">
+          <span
+            className="t-label"
+            style={{
+              color: correct
+                ? "var(--color-acid-lime)"
+                : wrong
+                  ? "var(--color-signal-red)"
+                  : "var(--color-ink)",
+            }}
+          >
             {correct
               ? `CORRECT — ${question.marks} MARK${question.marks === 1 ? "" : "S"}`
               : "NOT THE ANSWER — 0 MARKS"}
@@ -721,7 +732,7 @@ function QuestionSheet({
               <li key={i}>
                 {question.marking === "worked" ? (
                   <label
-                    className="flex items-start gap-3 px-3 py-2 cursor-pointer press-swiss"
+                    className="flex items-start gap-3 px-3 py-2 cursor-pointer press-soft"
                     style={{
                       border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                       background: steps[i] ? "var(--color-acid-lime)" : "var(--color-sheet)",
@@ -773,8 +784,11 @@ function QuestionSheet({
 
           <p className="text-[16px] mt-3 mb-0">
             <span
-              className="t-micro px-1.5 py-0.5 mr-2"
-              style={{ background: "var(--color-acid-lime)" }}
+              className="t-micro px-2 py-0.5 mr-2"
+              style={{
+                background: "var(--color-acid-lime-wash)",
+                color: "var(--color-acid-lime)",
+              }}
             >
               ANSWER
             </span>
@@ -797,7 +811,7 @@ function QuestionSheet({
                   cursor: "pointer",
                 }}
               >
-                {result?.checked ? `RECORDED — ${result.awarded}` : "RECORD MY MARKS"}
+                {result?.checked ? `Recorded — ${result.awarded}` : "Record my marks"}
               </button>
             </div>
           )}
@@ -895,7 +909,7 @@ function Results({
         </h1>
 
         <div className="grid md:grid-cols-4 gap-4 mt-8">
-          <div className="swiss p-5 flex flex-col justify-between md:col-span-1">
+          <div className="panel p-5 flex flex-col justify-between md:col-span-1">
             <span className="t-micro" style={{ opacity: 0.6 }}>
               GRADE
             </span>
@@ -907,7 +921,7 @@ function Results({
             )}
           </div>
 
-          <div className="swiss p-5 md:col-span-3 grid sm:grid-cols-3 gap-4">
+          <div className="panel p-5 md:col-span-3 grid sm:grid-cols-3 gap-4">
             <Metric label="RAW MARK" value={`${rawMark}`} sub={`of ${availableMarks} available`} />
             <Metric
               label="SCALED"
@@ -939,11 +953,15 @@ function Results({
                     style={{
                       width: `${row.percent}%`,
                       height: "100%",
+                      borderRadius: "var(--radius-full)",
+                      /* Solid colour is right here and only here: a 10px bar
+                         is a data mark, not a surface, and it has no text on
+                         it to fight. */
                       background:
                         row.percent >= 70
                           ? "var(--color-acid-lime)"
                           : row.percent >= 40
-                            ? "var(--color-highlighter)"
+                            ? "var(--color-highlighter-deep)"
                             : "var(--color-signal-red)",
                     }}
                   />
@@ -1013,7 +1031,7 @@ function Results({
               color: "var(--color-ink)",
             }}
           >
-            SEE IT ON THE DASHBOARD →
+            See it on the dashboard →
           </Link>
           <Link
             href="/library"
@@ -1025,7 +1043,7 @@ function Results({
               color: "var(--color-ink)",
             }}
           >
-            ANOTHER PAPER
+            Another paper
           </Link>
           {saved && (
             <span className="t-micro" style={{ opacity: 0.6 }}>

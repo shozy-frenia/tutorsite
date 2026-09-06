@@ -107,7 +107,7 @@ export default function ExtendedAnswer({
             {question.sources.map((source) => (
               <details
                 key={source.ref}
-                className="swiss-flat"
+                className="panel-flat"
                 style={{ padding: "10px 14px" }}
               >
                 <summary className="t-label cursor-pointer">
@@ -167,7 +167,7 @@ export default function ExtendedAnswer({
         <button
           onClick={() => void mark()}
           disabled={marking || count < floor}
-          className="press-swiss t-label"
+          className="press-soft t-label"
           style={{
             background: count >= floor ? "var(--color-ink)" : "var(--color-paper)",
             color: count >= floor ? "var(--color-canvas)" : "var(--color-ink)",
@@ -239,7 +239,7 @@ export default function ExtendedAnswer({
           ) : null}
 
           {assessment.criteria.map((criterion) => (
-            <article key={criterion.id} className="swiss p-4">
+            <article key={criterion.id} className="panel p-4">
               <div className="flex items-baseline justify-between gap-3 flex-wrap">
                 <span className="t-label">{criterion.name}</span>
                 <span className="t-mono text-[15px]">

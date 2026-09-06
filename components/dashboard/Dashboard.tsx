@@ -66,6 +66,10 @@ import AccountPanel from "@/components/auth/AccountPanel";
 const CHART_INK = "#1a3300";
 const CHART_YELLOW = "#ffe95c";
 const CHART_PAPER = "#fcfaf5";
+/** Gridlines: the pencil rule, not the ink. */
+const CHART_RULE = "#e4e0d2";
+/** The radar outline: yellow that holds its own as a 2px stroke. */
+const CHART_YELLOW_DEEP = "#c8a600";
 
 export default function Dashboard() {
   const [store, setStore] = useState<Store>({ profile: null, attempts: [], activeDays: [] });
@@ -486,7 +490,7 @@ function Loaded({
             {radarData.length >= 3 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} outerRadius="72%">
-                  <PolarGrid stroke={CHART_INK} strokeOpacity={0.25} />
+                  <PolarGrid stroke={CHART_RULE} strokeOpacity={1} />
                   <PolarAngleAxis
                     dataKey="topic"
                     tick={{ fill: CHART_INK, fontSize: 10, fontWeight: 700 }}
@@ -494,16 +498,15 @@ function Loaded({
                   <PolarRadiusAxis
                     domain={[0, 100]}
                     tick={{ fill: CHART_INK, fontSize: 9 }}
-                    stroke={CHART_INK}
-                    strokeOpacity={0.25}
+                    stroke={CHART_RULE}
                   />
                   <Radar
                     name="Mastery"
                     dataKey="percent"
-                    stroke={CHART_INK}
+                    stroke={CHART_YELLOW_DEEP}
                     strokeWidth={2}
                     fill={CHART_YELLOW}
-                    fillOpacity={0.75}
+                    fillOpacity={0.55}
                   />
                   <Tooltip
                     contentStyle={{
@@ -534,16 +537,16 @@ function Loaded({
             {trend.length >= 2 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend} margin={{ top: 8, right: 12, bottom: 4, left: -18 }}>
-                  <CartesianGrid stroke={CHART_INK} strokeOpacity={0.15} />
+                  <CartesianGrid stroke={CHART_RULE} strokeOpacity={1} />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: CHART_INK, fontSize: 11, fontWeight: 700 }}
-                    stroke={CHART_INK}
+                    tick={{ fill: CHART_INK, fontSize: 11, fontWeight: 600 }}
+                    stroke={CHART_RULE}
                   />
                   <YAxis
                     domain={[0, 100]}
                     tick={{ fill: CHART_INK, fontSize: 11 }}
-                    stroke={CHART_INK}
+                    stroke={CHART_RULE}
                     unit="%"
                   />
                   <Tooltip
@@ -567,7 +570,7 @@ function Loaded({
                     name="SCALED %"
                     stroke={CHART_INK}
                     strokeWidth={3}
-                    dot={{ fill: CHART_YELLOW, stroke: CHART_INK, strokeWidth: 2, r: 5 }}
+                    dot={{ fill: CHART_YELLOW, stroke: CHART_INK, strokeWidth: 1.5, r: 4 }}
                     activeDot={{ r: 7 }}
                   />
                 </LineChart>

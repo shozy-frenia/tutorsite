@@ -80,6 +80,12 @@ export interface Store {
   attempts: Attempt[];
   /** ISO dates (YYYY-MM-DD) on which the student practised. */
   activeDays: string[];
+  /**
+   * ISO timestamp of the last local write. Cloud sync merges attempts by id,
+   * but the profile is a single value, so it needs to know which side is newer.
+   * Absent on stores written before sync existed.
+   */
+  updatedAt?: string;
 }
 
 const EMPTY: Store = { profile: null, attempts: [], activeDays: [] };
@@ -136,6 +142,7 @@ export function readStore(): Store {
       profile: validProfile(parsed.profile),
       attempts: Array.isArray(parsed.attempts) ? parsed.attempts : [],
       activeDays: Array.isArray(parsed.activeDays) ? parsed.activeDays : [],
+      updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : undefined,
     };
   } catch {
     // Corrupt or unavailable storage should never take the app down.
@@ -170,7 +177,7 @@ export const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 export function saveProfile(profile: Profile): Store {
   const store = readStore();
-  const next: Store = { ...store, profile };
+  const next: Store = { ...store, profile, updatedAt: new Date().toISOString() };
   writeStore(next);
   return next;
 }
@@ -184,6 +191,7 @@ export function saveAttempt(attempt: Attempt): Store {
     activeDays: store.activeDays.includes(day)
       ? store.activeDays
       : [...store.activeDays, day].sort(),
+    updatedAt: new Date().toISOString(),
   };
   writeStore(next);
   return next;
@@ -215,6 +223,30 @@ export function clearStore(): Store {
     }
   }
   return EMPTY;
+}
+
+/** Union the two stores so neither device loses work it recorded offline. */
+export function mergeStores(local: Store, remote: Store): Store {
+  const byId = new Map(remote.attempts.map((a) => [a.id, a]));
+  for (const attempt of local.attempts) byId.set(attempt.id, attempt);
+
+  const attempts = [...byId.values()]
+    .sort((a, b) => b.finishedAt.localeCompare(a.finishedAt))
+    .slice(0, 200);
+
+  const activeDays = [...new Set([...local.activeDays, ...remote.activeDays])].sort();
+
+  // The profile is one value, so the newer write wins. A store written before
+  // this field existed has no stamp and yields to one that has.
+  const localNewer = (local.updatedAt ?? "") >= (remote.updatedAt ?? "");
+  const profile = (localNewer ? local.profile : remote.profile) ?? remote.profile ?? local.profile;
+
+  return {
+    profile,
+    attempts,
+    activeDays,
+    updatedAt: localNewer ? local.updatedAt : remote.updatedAt,
+  };
 }
 
 /**

@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Thinking from "@/components/motion/Thinking";
 import type { Question } from "@/lib/exam-types";
 import type { GeneratedQuestion } from "@/lib/offline-variants";
+
+/** How long the tutor may think before we say so, and before we stop waiting. */
+const SLOW_AFTER_MS = 9_000;
+const GIVE_UP_AFTER_MS = 40_000;
 
 /**
  * Slide-over AI tutor panel.
@@ -43,6 +48,15 @@ export default function TutorDrawer({
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [streaming, setStreaming] = useState(false);
+  /**
+   * Five of twenty-six pilot testers reported the tutor "answered slowly or
+   * not at all". It already streams; what it lacked was any sign of life while
+   * the upstream thought, and any end to the wait if it never did. Two
+   * watchdogs on time-to-first-token: one says it is still working, the other
+   * gives up and offers a retry instead of a spinner that never resolves.
+   */
+  const [slow, setSlow] = useState(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"live" | "offline" | null>(null);
 
@@ -80,7 +94,19 @@ export default function TutorDrawer({
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streaming]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  const clearWatchdogs = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setSlow(false);
+  };
+
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      timersRef.current.forEach(clearTimeout);
+    },
+    []
+  );
 
   async function ask(followUp?: string) {
     if (!question || streaming) return;
@@ -95,6 +121,18 @@ export default function TutorDrawer({
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    clearWatchdogs();
+    timersRef.current.push(setTimeout(() => setSlow(true), SLOW_AFTER_MS));
+    timersRef.current.push(
+      setTimeout(() => {
+        controller.abort();
+        setError(
+          "Репетитор не ответил за 40 секунд. Нажмите «Спросить репетитора» ещё раз — " +
+            "объяснение и разбор по схеме никуда не денутся."
+        );
+      }, GIVE_UP_AFTER_MS)
+    );
 
     try {
       const response = await fetch("/api/tutor", {
@@ -132,6 +170,7 @@ export default function TutorDrawer({
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (assembled === "") clearWatchdogs(); // first token: it is alive
         assembled += decoder.decode(value, { stream: true });
         setMessages([...history, { role: "assistant", content: assembled }]);
       }
@@ -140,6 +179,7 @@ export default function TutorDrawer({
         setError("Could not reach the tutor. Check your connection.");
       }
     } finally {
+      clearWatchdogs();
       setStreaming(false);
     }
   }
@@ -266,14 +306,14 @@ export default function TutorDrawer({
           <>
             <div ref={logRef} className="grow overflow-y-auto p-4 flex flex-col gap-3">
               {messages.length === 0 && !streaming && (
-                <div className="swiss-flat p-4">
+                <div className="panel-flat p-4">
                   <p className="text-[15px]" style={{ lineHeight: 1.35 }}>
                     Ask for the step you are stuck on. The tutor starts from where your
                     working diverges — it will not just hand you the answer.
                   </p>
                   <button
                     onClick={() => ask()}
-                    className="press-swiss mt-3"
+                    className="press-soft mt-3"
                     style={{
                       background: "var(--color-highlighter)",
                       border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
@@ -315,7 +355,11 @@ export default function TutorDrawer({
               ))}
 
               {streaming && messages.length === 0 && (
-                <span className="t-micro blink">TUTOR IS THINKING…</span>
+                <Thinking
+                  label="Tutor is thinking"
+                  slow={slow}
+                  slowNote="Первый ответ занимает больше обычного. Ещё несколько секунд."
+                />
               )}
 
               {error && (
@@ -351,7 +395,7 @@ export default function TutorDrawer({
               <button
                 type="submit"
                 disabled={streaming || !draft.trim()}
-                className="press-swiss t-label px-4"
+                className="press-soft t-label px-4"
                 style={{
                   background: streaming ? "var(--color-paper)" : "var(--color-ink)",
                   color: "var(--color-canvas)",
@@ -365,7 +409,7 @@ export default function TutorDrawer({
           </>
         ) : (
           <div className="grow overflow-y-auto p-4 flex flex-col gap-3">
-            <div className="swiss-flat p-4">
+            <div className="panel-flat p-4">
               <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
                 Get a new question on <strong>{question.topic}</strong> worth exactly{" "}
                 <strong>{question.marks} marks</strong> — same syllabus content, same number
@@ -374,7 +418,7 @@ export default function TutorDrawer({
               <button
                 onClick={() => void generate()}
                 disabled={variantLoading}
-                className="press-swiss mt-3"
+                className="press-soft mt-3"
                 style={{
                   background: "var(--color-highlighter)",
                   border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
@@ -397,7 +441,7 @@ export default function TutorDrawer({
             )}
 
             {variant && (
-              <article className="swiss p-4 rise">
+              <article className="panel p-4 rise">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="mark t-micro">{variant.topic}</span>
                   <span className="t-micro">[{variant.marks}]</span>
@@ -419,7 +463,7 @@ export default function TutorDrawer({
                 {!variantAnswerShown ? (
                   <button
                     onClick={() => setVariantAnswerShown(true)}
-                    className="press-swiss mt-3 t-label"
+                    className="press-soft mt-3 t-label"
                     style={{
                       background: "var(--color-cream-paper)",
                       border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",

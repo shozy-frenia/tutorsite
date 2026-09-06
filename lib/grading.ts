@@ -226,6 +226,15 @@ const VULGAR_FRACTIONS: Record<string, string> = {
 
 const OPENERS = "([{";
 const CLOSERS = ")]}";
+
+/**
+ * Scientific notation hides a `+`/`-` that is not a term separator: splitting
+ * `1e-5` on signs would produce `1e` and `5`. Expressions carrying it are left
+ * whole and compared numerically instead.
+ */
+const SCIENTIFIC = /\de[-+]?\d/;
+const hasScientific = (text: string) => SCIENTIFIC.test(text);
+
 /** Characters after which a `+`/`-` is a sign on the next term, not an operator. */
 const PRECEDES_SIGN = new Set(["+", "-", "^", "/", "=", ",", ...OPENERS]);
 
@@ -263,7 +272,10 @@ function splitTerms(expr: string): string[] {
       (ch === "+" || ch === "-") &&
       depth === 0 &&
       i > start && // a sign opening the term is part of it
-      !PRECEDES_SIGN.has(expr[i - 1])
+      !PRECEDES_SIGN.has(expr[i - 1]) &&
+      // ...and not the sign of an exponent: the "-" in "1.5e-3" binds tighter
+      // than any addition and must stay inside the number.
+      !(expr[i - 1] === "e" && /\d/.test(expr[i - 2] ?? ""))
     ) {
       terms.push(expr.slice(start, i));
       start = i;
@@ -296,11 +308,26 @@ function canonicalExpression(expr: string): string {
   return terms.join("").replace(/^\+/, "");
 }
 
-/** Canonical form of a whole answer — each side of `=`, each item of a list. */
+/**
+ * Canonical form of a whole answer — each side of `=`, each item of a list.
+ *
+ * A list whose every item is an equation is a solution set: `x=2,x=3` and
+ * `x=3,x=2` are the same pair of roots, so the items are sorted. A list that
+ * is not all equations is left in the order it was written, because `(3,4)`
+ * and `(4,3)` are different points and sorting them would mark a wrong
+ * coordinate correct.
+ */
 function canonicalStatement(text: string): string {
-  return splitTop(text, "=")
-    .map((side) => splitTop(side, ",").map(canonicalExpression).join(","))
-    .join("=");
+  const items = splitTop(text, ",");
+  if (items.length > 1 && items.every((item) => item.includes("="))) {
+    return items.map(canonicalSides).sort().join(",");
+  }
+  return items.map(canonicalSides).join(",");
+}
+
+/** Canonical form of one item: every side of its `=` sorted independently. */
+function canonicalSides(item: string): string {
+  return splitTop(item, "=").map(canonicalExpression).join("=");
 }
 
 /** Everything that is the same regardless of how the comma is read. */
@@ -355,16 +382,48 @@ export function normaliseAnswer(raw: string): string {
   return answerForms(raw)[0] ?? "";
 }
 
-/** Value of a bare number or fraction, so `0.5`, `1/2` and `2/4` compare equal. */
+/**
+ * Value of a single quantity, however the student wrote it.
+ *
+ * A mark scheme prints 0.5; a student types 1/2, or 50%, or 5e-1, and every
+ * one of them is the same answer. A comma or an `=` means this is a list or an
+ * equation rather than one value, so those fall through to exact matching.
+ */
 function numericValue(text: string): number | null {
-  const match = /^([+-]?\d*\.?\d+)(?:\/([+-]?\d*\.?\d+))?$/.exec(text);
-  if (!match) return null;
-  const top = Number(match[1]);
-  if (!Number.isFinite(top)) return null;
-  if (match[2] === undefined) return top;
-  const bottom = Number(match[2]);
-  if (!Number.isFinite(bottom) || bottom === 0) return null;
-  return top / bottom;
+  if (!text || text.includes(",") || text.includes("=")) return null;
+
+  const percent = text.endsWith("%");
+  const body = percent ? text.slice(0, -1) : text;
+
+  const scalar = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+  const fraction = /^([+-]?(?:\d+\.?\d*|\.\d+))\/([+-]?(?:\d+\.?\d*|\.\d+))$/;
+
+  let value: number;
+  const asFraction = fraction.exec(body);
+  if (asFraction) {
+    const bottom = Number(asFraction[2]);
+    if (bottom === 0) return null;
+    value = Number(asFraction[1]) / bottom;
+  } else if (scalar.test(body)) {
+    value = Number(body);
+  } else {
+    return null;
+  }
+
+  if (!Number.isFinite(value)) return null;
+  return percent ? value / 100 : value;
+}
+
+/**
+ * Compare two numbers the way a marker would.
+ *
+ * A fixed epsilon is wrong across the range these papers cover — answers run
+ * from 0.002 mol to 1680 arrangements, and a tolerance sane for one is
+ * nonsense for the other. Relative above 1, absolute near zero.
+ */
+function closeEnough(a: number, b: number): boolean {
+  const scale = Math.max(Math.abs(a), Math.abs(b));
+  return Math.abs(a - b) <= (scale > 1 ? scale * 1e-9 : 1e-9);
 }
 
 /**
@@ -382,14 +441,20 @@ export function answersMatch(
   const keyForms = answerForms(key);
   if (submittedForms.some((form) => keyForms.includes(form))) return true;
 
-  const value = (form: string) =>
-    numericValue(options.numeric ? form.replace(/[a-z]/g, "") : form);
+  // On a question whose answer is a bare quantity, a trailing unit is noise:
+  // "16 cm" answers a key of "16". Only a trailing run of letters is dropped,
+  // and never from a number in scientific notation — stripping every letter
+  // would turn "1.5e3" into "1.53".
+  const value = (form: string) => {
+    if (!options.numeric || hasScientific(form)) return numericValue(form);
+    return numericValue(form.replace(/[a-z]+$/, ""));
+  };
   for (const form of submittedForms) {
     const left = value(form);
     if (left === null) continue;
     for (const keyForm of keyForms) {
       const right = value(keyForm);
-      if (right !== null && Math.abs(left - right) < 1e-9) return true;
+      if (right !== null && closeEnough(left, right)) return true;
     }
   }
   return false;

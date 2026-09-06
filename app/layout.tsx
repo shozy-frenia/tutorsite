@@ -20,6 +20,16 @@ import {
 } from "@/lib/i18n";
 import "./globals.css";
 
+/**
+ * Three faces, all carrying Cyrillic.
+ *
+ * That last part is the constraint the whole type system bends around. The
+ * reference this design follows sets its display type in Bricolage Grotesque,
+ * which ships latin, latin-ext and vietnamese and no Cyrillic at all — every
+ * Russian and Kazakh headline on the site would fall back to the system face
+ * mid-word. Manrope is the closest geometric grotesque that carries cyrillic
+ * and cyrillic-ext, so it takes the display role instead.
+ */
 const inter = Inter({
   // "latin-ext" and "cyrillic-ext" carry the Kazakh letters — ә ғ қ ң ө ұ ү һ і.
   // Without cyrillic-ext the Kazakh locale falls back to a system face mid-word,

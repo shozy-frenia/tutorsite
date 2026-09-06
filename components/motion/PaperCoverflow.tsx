@@ -266,7 +266,7 @@ export default function PaperCoverflow({ papers }: Props) {
           type="button"
           onClick={() => step(-1)}
           aria-label="Previous paper"
-          className="press-swiss t-label"
+          className="press-soft t-label"
           style={{
             border: "1px solid var(--color-forest-ink)",
             borderRadius: "var(--radius-md)",
@@ -284,7 +284,7 @@ export default function PaperCoverflow({ papers }: Props) {
           type="button"
           onClick={() => step(1)}
           aria-label="Next paper"
-          className="press-swiss t-label"
+          className="press-soft t-label"
           style={{
             border: "1px solid var(--color-forest-ink)",
             borderRadius: "var(--radius-md)",
