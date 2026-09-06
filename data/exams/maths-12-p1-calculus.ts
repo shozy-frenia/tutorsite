@@ -47,7 +47,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "xe^(3x)(2 + 3x)",
-      accepts: [
+      acceptedAnswers: [
         "xe^3x(2+3x)",
         "2xe^(3x)+3x^2e^(3x)",
         "2xe^3x+3x^2e^3x",
@@ -72,7 +72,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "(x²/2)ln x − x²/4 + C",
-      accepts: [
+      acceptedAnswers: [
         "x^2/2 ln x - x^2/4 + c",
         "(x^2 lnx)/2-(x^2)/4+c",
         "x^2(2lnx-1)/4+c",
@@ -98,7 +98,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "(1; 6) maximum, (3; 2) minimum",
-      accepts: [
+      acceptedAnswers: [
         "(1,6) max, (3,2) min",
         "(1,6) maximum and (3,2) minimum",
         "1,6 max;3,2 min",
@@ -128,7 +128,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "32/3",
-      accepts: ["32/3", "10 2/3", "32 / 3"],
+      acceptedAnswers: ["32/3", "10 2/3", "32 / 3"],
       markScheme: [
         { text: "Find the limits by solving 4 − x² = 0, giving x = −2 and x = 2", marks: 1 },
         { text: "Set up the definite integral ∫₋₂² (4 − x²) dx", marks: 1 },
@@ -149,7 +149,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "−4/5",
-      accepts: ["-4/5", "-0.8", "−0.8"],
+      acceptedAnswers: ["-4/5", "-0.8", "−0.8"],
       markScheme: [
         {
           text: "Differentiate term by term with respect to x, using the product rule on xy: 2x + y + x(dy/dx) + 2y(dy/dx) = 0",
@@ -170,7 +170,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "y = 3e^(x²)",
-      accepts: ["y=3e^(x^2)", "y=3e^x^2", "3e^(x²)", "y = 3exp(x^2)"],
+      acceptedAnswers: ["y=3e^(x^2)", "y=3e^x^2", "3e^(x²)", "y = 3exp(x^2)"],
       markScheme: [
         { text: "Separate the variables: (1/y) dy = 2x dx", marks: 1 },
         { text: "Integrate the left side: ln|y|", marks: 1 },
@@ -192,7 +192,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "20π",
-      accepts: ["20π", "20pi", "20 pi", "20π cm^3/s"],
+      acceptedAnswers: ["20π", "20pi", "20 pi", "20π cm^3/s"],
       markScheme: [
         { text: "State the volume of a sphere: V = (4/3)πr³", marks: 1 },
         { text: "Differentiate: dV/dr = 4πr²", marks: 1 },
@@ -212,7 +212,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "1 + x − x²/2 + x³/2, valid for |x| < 1/2",
-      accepts: [
+      acceptedAnswers: [
         "1+x-x^2/2+x^3/2, |x|<1/2",
         "1+x-x²/2+x³/2 |x|<0.5",
         "1 + x - 0.5x^2 + 0.5x^3, |x| < 1/2",
@@ -242,7 +242,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "|z| = 2, arg z = π/3, z⁶ = 64",
-      accepts: [
+      acceptedAnswers: [
         "|z|=2, arg=π/3, z^6=64",
         "2, pi/3, 64",
         "modulus 2 argument pi/3 z^6=64",
@@ -268,7 +268,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "−1/(2(x² + 1)²) + C",
-      accepts: [
+      acceptedAnswers: [
         "-1/(2(x^2+1)^2)+c",
         "-1/2(x^2+1)^-2+c",
         "-(x^2+1)^-2/2+c",
@@ -295,7 +295,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "−1/3",
-      accepts: ["-1/3", "−1/3", "-0.333", "-1 / 3"],
+      acceptedAnswers: ["-1/3", "−1/3", "-0.333", "-1 / 3"],
       markScheme: [
         { text: "AB = B − A = (3; 4; 0)", marks: 1 },
         { text: "|AB| = √(9 + 16 + 0) = 5", marks: 1 },
@@ -316,7 +316,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "7x − 16y − 3 = 0",
-      accepts: ["7x-16y-3=0", "7x−16y−3=0", "-7x+16y+3=0", "7x-16y=3"],
+      acceptedAnswers: ["7x-16y-3=0", "7x−16y−3=0", "-7x+16y+3=0", "7x-16y=3"],
       markScheme: [
         { text: "At x = 1, y = (2 − 1)/(1 + 3) = 1/4", marks: 1 },
         { text: "Apply the quotient rule with u = 2x − 1 and v = x + 3", marks: 2 },
@@ -340,7 +340,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "4/3",
-      accepts: ["4/3", "1 1/3", "4 / 3"],
+      acceptedAnswers: ["4/3", "1 1/3", "4 / 3"],
       markScheme: [
         { text: "Set x² = 2x to find where the graphs meet", marks: 1 },
         { text: "x(x − 2) = 0, so x = 0 and x = 2", marks: 1 },
@@ -366,7 +366,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "a) t = 2.5 ln 3 hours  b) 200 bacteria per hour",
-      accepts: [
+      acceptedAnswers: [
         "t=2.5ln3, 200",
         "2.5ln3 and 200",
         "a)2.5ln3 b)200",
@@ -393,7 +393,7 @@ export const MATHS_12_P1_CALCULUS: Paper = {
       marking: "auto",
       answerKind: "expression",
       answer: "dy/dx = 3(t² − 1)/(2t); t = ±1",
-      accepts: [
+      acceptedAnswers: [
         "(3t^2-3)/(2t), t=±1",
         "3(t^2-1)/(2t); t=1,-1",
         "dy/dx=(3t²-3)/(2t), t=±1",

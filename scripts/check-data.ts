@@ -12,9 +12,9 @@
  *   3. Every auto-marked question's own answer key marks itself correct.
  *   4. Every offline variant generator produces a scheme that sums correctly.
  *   5. Every assessed question's criteria sum to its tariff and carry bands.
- *   6. The calculator evaluates the arithmetic its papers actually need.
- *   7. Answer matching accepts a re-ordered sum and rejects a changed one.
- *   8. Cloud sync merges two devices without dropping either one's attempts.
+ *   6. Equivalent ways of writing an answer are marked the same, and
+ *      inequivalent ones are not.
+ *   7. The calculator evaluates the arithmetic its papers actually need.
  *
  * Check 3 is the important one: it catches an answer written in a form the
  * normaliser cannot match, which would silently mark correct students wrong.
@@ -22,11 +22,12 @@
 
 import { allBoundarySets, boundariesFor } from "../data/grade-boundaries";
 import { PAPERS } from "../data/exams";
+import type { Question } from "../lib/exam-types";
 import { paperMarkTotal, isCorrect } from "../lib/exam-types";
-import { mergeStores, type Attempt, type Store } from "../lib/storage";
-import { validateBoundarySet, gradeForMark } from "../lib/grading";
+import { validateBoundarySet, gradeForMark, answersMatch } from "../lib/grading";
 import { variantFor } from "../lib/offline-variants";
 import { evaluate } from "../lib/calculator";
+import { mergeStores, type Attempt, type Store } from "../lib/storage";
 
 let failures = 0;
 const fail = (message: string) => {
@@ -170,7 +171,7 @@ for (const paper of PAPERS) {
       if (!isCorrect(question.answer, question)) {
         fail(`${question.id}: its own answer key "${question.answer}" does not self-match`);
       }
-      for (const accepted of question.accepts ?? []) {
+      for (const accepted of question.acceptedAnswers ?? []) {
         if (!isCorrect(accepted, question)) {
           fail(`${question.id}: accepted variant "${accepted}" does not match`);
         }
@@ -301,6 +302,91 @@ for (const paper of PAPERS) {
 }
 pass(`${topicsSeen.size} topics generate valid same-tariff variants`);
 
+
+/* -------------------------------------------------------- answer matching */
+
+console.log("\nANSWER MATCHING");
+{
+  // Three pilots were marked wrong for a correct answer. Every pair here is
+  // one of those reports or the same fault in another guise: the student and
+  // the key mean the same thing and must be marked the same.
+  const equivalent: Array<[string, string, string]> = [
+    ["2x-6", "-6+2x", "terms in the other order (pilot 12)"],
+    ["  2x - 6 ", "-6+2x", "the same, spaced out"],
+    ["y=-x+5", "y = 5 - x", "sorted per side of the equals sign"],
+    ["sin x + x cos x", "xcosx+sinx", "sum of two non-numeric terms"],
+    ["0.5", "1/2", "decimal against fraction"],
+    ["1/2", "½", "fraction against the vulgar fraction glyph"],
+    ["0.5", "½", "decimal against the vulgar fraction glyph"],
+    ["2/4", "1/2", "unreduced fraction"],
+    ["-4/8", "-1/2", "unreduced negative fraction"],
+    ["6,25", "6.25", "decimal comma"],
+    ["-7,44", "-7.44", "decimal comma, negative"],
+    ["10 2/3", "32/3", "mixed number"],
+    ["(-16, -9)", "(−16; −9)", "unicode minus and semicolon separator"],
+    ["0;2;-3", "(0, 2, -3)", "semicolons against a bracketed list"],
+    ["4/5", "0.8", "fraction against decimal"],
+  ];
+  for (const [submitted, key, why] of equivalent) {
+    if (!answersMatch(submitted, key)) {
+      fail(`"${submitted}" should match "${key}" — ${why}`);
+    }
+  }
+
+  // The other direction matters just as much: a normaliser loose enough to
+  // pass everything would mark wrong answers correct.
+  const different: Array<[string, string]> = [
+    ["2x-6", "2x+6"],
+    ["2x-6", "2x-5"],
+    ["1/2", "1/3"],
+    ["0.5", "0.05"],
+    ["16", "61"],
+    ["-1/2", "1/2"],
+    ["x+y=5", "x+y=6"],
+    ["", "0"],
+  ];
+  for (const [submitted, key] of different) {
+    if (answersMatch(submitted, key)) fail(`"${submitted}" should not match "${key}"`);
+  }
+
+  // A unit belongs to the quantity, but only where the answer is a quantity.
+  if (!answersMatch("16 cm", "16", { numeric: true })) {
+    fail(`"16 cm" should match numeric key "16"`);
+  }
+
+  // What normalisation cannot reach, acceptedAnswers must.
+  const rearranged: Question = {
+    id: "test-accepted-answers",
+    number: 1,
+    marks: 1,
+    topic: "Straight line",
+    difficulty: "standard",
+    prompt: "Find the equation of the line.",
+    marking: "auto",
+    answerKind: "expression",
+    answer: "3x - 7y - 24 = 0",
+    acceptedAnswers: ["3x-7y=24", "y=(3x-24)/7"],
+    markScheme: [{ text: "Correct equation", marks: 1 }],
+    hint: "Use the gradient and one point.",
+  };
+  for (const accepted of rearranged.acceptedAnswers ?? []) {
+    if (!isCorrect(accepted, rearranged)) {
+      fail(`acceptedAnswers entry "${accepted}" was not accepted`);
+    }
+  }
+  if (!isCorrect("-24 + 3x - 7y = 0", rearranged)) {
+    fail("a reordered form of the answer key was not accepted");
+  }
+  if (isCorrect("3x - 7y - 25 = 0", rearranged)) {
+    fail("a wrong answer was accepted by the answer key");
+  }
+  if (isCorrect("   ", rearranged)) fail("a blank answer was accepted");
+
+  pass(
+    `${equivalent.length} equivalent forms match, ${different.length} inequivalent forms do not, ` +
+      "acceptedAnswers honoured"
+  );
+}
 
 /* ------------------------------------------------------------ calculator */
 

@@ -59,130 +59,76 @@ export default function BoundaryExplorer() {
       : componentRows;
 
   return (
-    <div className="card">
-      <div
-        className="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-3"
-        style={{ borderColor: "var(--color-rule)" }}
-      >
-        <h2 className="t-subheading">The boundaries we grade against</h2>
-        <span className="mark-quiet t-micro">MINIMUM MARK PER GRADE</span>
-      </div>
-
-      {/* Year switch */}
-      <div
-        className="px-5 py-4 border-b flex flex-wrap items-center gap-3"
-        style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
-      >
-        <div className="flex flex-wrap gap-2">
+    <>
+      <div className="bt__controls" data-reveal>
+        <div className="seg" role="group" aria-label="Grade year">
           {YEARS.map((value) => (
             <button
               key={value}
+              type="button"
               onClick={() => setYear(value)}
               aria-pressed={year === value}
-              className="press t-label"
-              style={{
-                background:
-                  year === value ? "var(--color-ink)" : "var(--color-canvas)",
-                color:
-                  year === value ? "var(--color-canvas)" : "var(--color-ink)",
-                border: "1px solid var(--color-rule)",
-                boxShadow: year === value ? "none" : "var(--shadow-card)",
-                padding: "8px 16px",
-                cursor: "pointer",
-              }}
             >
-              GRADE {value}
+              Grade {value}
             </button>
           ))}
         </div>
 
-        <div className="flex gap-2 md:ml-auto">
+        <div className="seg" role="group" aria-label="Level">
           {(["subject", "component"] as View[]).map((value) => (
             <button
               key={value}
+              type="button"
               onClick={() => setView(value)}
               aria-pressed={view === value}
-              className="t-micro"
-              style={{
-                background:
-                  view === value ? "var(--color-highlighter)" : "transparent",
-                border: "1px solid var(--color-rule)",
-                padding: "6px 12px",
-                cursor: "pointer",
-                color: "var(--color-ink)",
-              }}
             >
-              {value === "subject" ? "SUBJECT LEVEL" : "BY COMPONENT"}
+              {value === "subject" ? "Subject level" : "By component"}
             </button>
           ))}
         </div>
       </div>
 
-      {/* What this year actually is */}
-      <div
-        className="px-5 py-3 border-b flex flex-wrap gap-x-6 gap-y-1"
-        style={{ borderColor: "var(--color-rule)" }}
-      >
-        <span className="t-micro" style={{ opacity: 0.65 }}>
-          {stage?.standard}
-        </span>
-        <span className="t-micro" style={{ opacity: 0.65 }}>
-          {stage?.compulsory}
-        </span>
-        <span className="t-micro" style={{ opacity: 0.65 }}>
-          {rows.length} {view === "subject" ? "SUBJECTS" : "COMPONENTS"}
+      <div className="bt__meta" data-reveal>
+        <span className="tag tag--plain">{stage?.standard}</span>
+        <span className="caption muted">{stage?.compulsory}</span>
+        <span className="tag tag--outline">
+          {rows.length} {view === "subject" ? "subjects" : "components"}
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse t-mono" style={{ minWidth: 700 }}>
+      <div className="bt__scroll" data-reveal>
+        <table className="bt">
           <thead>
-            <tr style={{ background: "var(--color-ink)" }}>
-              {[view === "subject" ? "SUBJECT" : "SUBJECT · COMPONENT", "MAX", ...COLUMNS].map(
-                (head, i) => (
-                  <th
-                    key={head}
-                    className="t-micro px-3 py-2"
-                    style={{
-                      color: "var(--color-canvas)",
-                      textAlign: i === 0 ? "left" : "right",
-                    }}
-                  >
-                    {head}
-                  </th>
-                )
-              )}
+            <tr>
+              <th>{view === "subject" ? "Subject" : "Subject · component"}</th>
+              <th>Max</th>
+              {COLUMNS.map((grade) => (
+                <th key={grade}>{grade}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => (
-              <tr
-                key={row.key}
-                style={{
-                  background: i % 2 ? "var(--color-paper)" : "transparent",
-                  borderTop: "1px solid var(--color-rule)",
-                }}
-              >
-                <td className="px-3 py-2 text-[14px]">
-                  <span style={{ fontWeight: 700 }}>{row.subject}</span>
+            {rows.map((row) => (
+              <tr key={row.key}>
+                <td>
+                  {row.subject}
                   {row.component && (
-                    <span style={{ opacity: 0.6 }}> · {row.component}</span>
+                    <span className="muted"> · {row.component}</span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-[14px] text-right">{row.maxMark}</td>
+                <td className="cmax">{row.maxMark}</td>
                 {COLUMNS.map((grade) => {
                   const band = row.bands.find((b) => b.grade === grade);
+                  if (!band) {
+                    return (
+                      <td key={grade} className="cnone">
+                        —
+                      </td>
+                    );
+                  }
                   return (
-                    <td
-                      key={grade}
-                      className="px-3 py-2 text-[14px] text-right"
-                      style={
-                        grade === "A*" && band
-                          ? { background: "var(--color-highlighter)", fontWeight: 700 }
-                          : undefined
-                      }
-                    >
-                      {band ? band.min : "—"}
+                    <td key={grade} className={grade === "A*" ? "cA2" : undefined}>
+                      {band.min}
                     </td>
                   );
                 })}
@@ -192,15 +138,12 @@ export default function BoundaryExplorer() {
         </table>
       </div>
 
-      <p
-        className="px-5 py-3 text-[13px] m-0"
-        style={{ borderTop: "1px solid var(--color-rule)", lineHeight: 1.45 }}
-      >
+      <p className="body-sm muted measure bt__note" data-reveal>
         A dash means the published table has no band there. A* is awarded at
         subject level in every year, but only Grade 12 component tables carry an
         A* band — Grade 10 and 11 components stop at A. The app grades whatever
         bands the table actually shows rather than assuming a fixed ladder.
       </p>
-    </div>
+    </>
   );
 }

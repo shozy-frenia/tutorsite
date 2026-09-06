@@ -15,6 +15,8 @@
  * Only questions whose answer is unambiguous are set to `auto`.
  */
 
+import { answersMatch } from "./grading";
+
 export type MarkingMode = "auto" | "worked" | "assessed";
 
 export type AnswerKind = "numeric" | "expression" | "choice";
@@ -104,8 +106,12 @@ export interface Question {
   answerKind?: AnswerKind;
   /** Canonical answer. Present for every question — `worked` shows it on review. */
   answer: string;
-  /** Alternative accepted forms for auto-marked questions. */
-  accepts?: string[];
+  /**
+   * Extra answers to accept, beyond the key and everything normalisation
+   * already reaches. For equivalences the normaliser cannot decide — a
+   * rearranged equation, a valid alternative phrasing — not for spelling.
+   */
+  acceptedAnswers?: string[];
   /** Options for choice questions. */
   options?: string[];
   /** Unit suffix shown next to the input, e.g. "cm". */
@@ -165,25 +171,13 @@ export const paperMarkTotal = (paper: Paper): number =>
   paper.questions.reduce((sum, q) => sum + q.marks, 0);
 
 /**
- * Normalise a free-text answer for comparison.
+ * Answer marking.
  *
- * Students type `-16;-9`, `(-16, -9)` or `(−16; −9)` with a Unicode minus and
- * all three mean the same thing. Strip everything that is not semantically
- * load-bearing, then compare.
+ * The comparison itself lives in `lib/grading.ts`; these are the two entry
+ * points the workspace and `npm run check` have always called.
  */
-export function normaliseAnswer(raw: string): string {
-  return raw
-    .toLowerCase()
-    .replace(/[−–—]/g, "-") // unicode minus/dashes -> hyphen
-    .replace(/[°]/g, " deg")
-    .replace(/\s+/g, "")
-    .replace(/[(){}[\]]/g, "")
-    .replace(/;/g, ",")
-    .replace(/\*/g, "")
-    .replace(/·/g, "")
-    .replace(/^\+/, "")
-    .replace(/,$/, "");
-}
+
+export { normaliseAnswer } from "./grading";
 
 /**
  * Scientific notation hides a "+"/"-" that is not a term separator: splitting
@@ -292,29 +286,8 @@ function closeEnough(a: number, b: number): boolean {
 /** Does a submitted answer match the key (or any accepted variant)? */
 export function isCorrect(submitted: string, question: Question): boolean {
   if (!submitted.trim()) return false;
-  const candidate = normaliseAnswer(submitted);
-  const keys = [question.answer, ...(question.accepts ?? [])].map(normaliseAnswer);
-  if (keys.includes(candidate)) return true;
-
-  // Numeric answers: compare as numbers so "16" === "16.0" === "16 cm", and
-  // "1/2" === "0.5" === "50%".
-  if (question.answerKind === "numeric") {
-    const num = numericValue(candidate);
-    if (num !== null) {
-      const matched = keys.some((k) => {
-        const kn = numericValue(k);
-        return kn !== null && closeEnough(kn, num);
-      });
-      if (matched) return true;
-    }
-  }
-
-  // Same answer, written in another order. Both sides go through the same
-  // rewrite, and it only fires when both actually take that shape.
-  for (const rewrite of [additiveTerms, commaSet]) {
-    const mine = rewrite(candidate);
-    if (mine !== null && keys.some((k) => rewrite(k) === mine)) return true;
-  }
-
-  return false;
+  const keys = [question.answer, ...(question.acceptedAnswers ?? [])];
+  return keys.some((key) =>
+    answersMatch(submitted, key, { numeric: question.answerKind === "numeric" })
+  );
 }

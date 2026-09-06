@@ -48,25 +48,28 @@ import { gradeRank, marksToNextGrade } from "@/lib/grading";
 import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
-import StaggerIn from "@/components/motion/StaggerIn";
+import AccountPanel from "@/components/auth/AccountPanel";
 
 /**
  * Personal tracking dashboard.
  *
- * Reads entirely from localStorage — there is no account server in the MVP.
- * Everything shown is derived from real attempts; when there are none, the
- * page says so and points at the library rather than rendering placeholder
- * numbers that look like progress.
+ * Reads from localStorage, always. When an account is signed in, SessionProvider
+ * mirrors that store to Postgres in the background and merges it back on the
+ * next sign-in — but this component never waits on the network, and everything
+ * on the page works with no backend configured at all.
+ *
+ * Everything shown is derived from real attempts; when there are none, the page
+ * says so and points at the library rather than rendering placeholder numbers
+ * that look like progress.
  */
 
-/* Recharts takes literal colours, not CSS custom properties, so these track
-   --color-ink and --color-highlighter by hand. The stroke yellow is the deep
-   token rather than the highlighter: a #ffe95c line one pixel wide on cream
-   paper is invisible, while the same colour as a fill is exactly right. */
 const CHART_INK = "#1a3300";
 const CHART_YELLOW = "#ffe95c";
-const CHART_YELLOW_DEEP = "#e8c400";
-const CHART_RULE = "#dcd8cb";
+const CHART_PAPER = "#fcfaf5";
+/** Gridlines: the pencil rule, not the ink. */
+const CHART_RULE = "#e4e0d2";
+/** The radar outline: yellow that holds its own as a 2px stroke. */
+const CHART_YELLOW_DEEP = "#c8a600";
 
 export default function Dashboard() {
   const [store, setStore] = useState<Store>({ profile: null, attempts: [], activeDays: [] });
@@ -90,12 +93,10 @@ export default function Dashboard() {
   // Avoid a hydration mismatch: localStorage is not available on the server.
   if (!hydrated) {
     return (
-      <main style={{ background: "var(--color-study)", minHeight: "100vh" }}>
-        <Nav variant="study" />
-        <div className="px-5 md:px-10 py-10">
-          <span className="t-label" style={{ opacity: 0.5 }}>
-            LOADING YOUR RECORD…
-          </span>
+      <main style={{ minHeight: "100vh" }}>
+        <Nav />
+        <div className="shell section-tight">
+          <span className="mono muted">Loading your record…</span>
         </div>
       </main>
     );
@@ -103,33 +104,29 @@ export default function Dashboard() {
 
   if (!store.profile) {
     return (
-      <main style={{ background: "var(--color-study)", minHeight: "100vh" }}>
-        <Nav variant="study" />
+      <main style={{ minHeight: "100vh" }}>
+        <Nav />
         <Register onDone={(profile) => setStore(saveProfile(profile))} />
       </main>
     );
   }
 
   return (
-    <main style={{ background: "var(--color-study)", minHeight: "100vh" }} className="pb-16">
-      <Nav variant="study" />
+    <main style={{ minHeight: "100vh" }}>
+      <Nav />
 
-      <section className="px-5 md:px-10">
+      <section className="shell section-tight">
         {/* ------------------------------------------------------ header */}
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
+        <div className="dash-head">
           <div>
-            <span className="mark t-label">GRADE {store.profile.gradeYear}</span>
-            <h1 className="t-heading mt-3" style={{ maxWidth: "16ch" }}>
+            <span className="tag">Grade {store.profile.gradeYear}</span>
+            <h1 className="h" style={{ marginTop: "var(--spacing-16)" }}>
               {store.profile.name}
             </h1>
           </div>
-          <div className="flex items-end gap-4 pb-2">
-            <div className="text-right">
-              <span className="t-micro block" style={{ opacity: 0.6 }}>
-                TARGET
-              </span>
-              <GradeBadge grade={store.profile.targetGrade} size="lg" />
-            </div>
+          <div className="text-right">
+            <span className="mono muted">Target</span>
+            <GradeBadge grade={store.profile.targetGrade} size="lg" />
           </div>
         </div>
 
@@ -139,23 +136,18 @@ export default function Dashboard() {
           <Loaded store={store} streak={streak} mastery={mastery} />
         )}
 
-        <div className="mt-10 pt-4" style={{ borderTop: "1px solid var(--color-rule)" }}>
+        <AccountPanel onCleared={setStore} />
+
+        <div className="dash-reset">
           <button
             onClick={() => {
               if (window.confirm("Delete your profile and all saved attempts on this device?")) {
                 setStore(clearStore());
               }
             }}
-            className="t-micro"
-            style={{
-              background: "transparent",
-              border: "1px solid var(--color-rule)",
-              padding: "6px 12px",
-              cursor: "pointer",
-              opacity: 0.6,
-            }}
+            className="btn btn--outline btn--sm"
           >
-            RESET THIS DEVICE
+            Reset this device
           </button>
         </div>
       </section>
@@ -196,19 +188,22 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
   const ready = name.trim().length > 0 && profileIds.length === needed;
 
   return (
-    <section className="px-5 md:px-10">
-      <div className="panel max-w-[720px] rise">
-        <div className="px-6 py-5" style={{ borderBottom: "1px solid var(--color-rule)" }}>
-          <span className="mark t-micro">DEMO REGISTRATION</span>
-          <h1 className="t-subheading mt-3">Set up your tracker</h1>
-          <p className="text-[16px] mt-2 m-0" style={{ lineHeight: 1.35 }}>
-            No email, no password. This stays on your device. We ask for your parallel and
-            profile subjects so you only ever see papers for exams you will actually sit.
+    <section className="shell section-tight">
+      <div className="card card--plain register rise">
+        <div className="register__intro">
+          <span className="tag">Demo registration</span>
+          <h1 className="sub" style={{ marginTop: "var(--spacing-16)" }}>
+            Set up your tracker
+          </h1>
+          <p className="body-sm" style={{ marginTop: 8 }}>
+            No email, no password. This stays on your device. We ask for your
+            parallel and profile subjects so you only ever see papers for exams
+            you will actually sit.
           </p>
         </div>
 
         <form
-          className="px-6 py-5 flex flex-col gap-5"
+          className="register__form"
           onSubmit={(event) => {
             event.preventDefault();
             if (!ready) return;
@@ -222,71 +217,56 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
             });
           }}
         >
-          <label className="flex flex-col gap-2">
-            <span className="t-micro" style={{ opacity: 0.6 }}>
-              YOUR NAME
-            </span>
+          <label>
+            <span className="field-label">Your name</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={40}
               required
               placeholder="Aisha"
-              className="auth-input"
-              style={{ fontSize: 18, padding: "13px 16px" }}
+              className="field"
             />
           </label>
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
-              GRADE
-            </legend>
-            <div className="flex gap-2">
+            <legend className="field-label">Grade</legend>
+            <div className="choice-row">
               {([10, 11, 12] as const).map((year) => (
                 <button
                   key={year}
                   type="button"
                   onClick={() => setGradeYear(year)}
                   aria-pressed={gradeYear === year}
-                  className={`btn grow ${gradeYear === year ? "btn-mark" : "btn-outline"}`}
-                  style={gradeYear === year ? undefined : { background: "var(--color-sheet)" }}
+                  className="choice grow"
+                  style={{ textAlign: "center" }}
                 >
                   {year}
                 </button>
               ))}
             </div>
-            <span className="t-micro block mt-2" style={{ opacity: 0.55 }}>
+            <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
               {stageFor(gradeYear)?.compulsory}
             </span>
           </fieldset>
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
-              PARALLEL — LANGUAGE OF INSTRUCTION
+            <legend className="field-label">
+              Parallel — language of instruction
             </legend>
-            <div className="flex gap-2">
+            <div className="choice-grid">
               {(["kazakh", "russian"] as Parallel[]).map((value) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setParallel(value)}
                   aria-pressed={parallel === value}
-                  className="press-soft grow py-3 px-4 text-left"
-                  style={{
-                    border: `1px solid ${
-                      parallel === value ? "var(--color-ink)" : "var(--color-rule)"
-                    }`,
-                    borderRadius: "var(--radius-md)",
-                    background:
-                      parallel === value
-                        ? "var(--color-highlighter-wash)"
-                        : "var(--color-sheet)",
-                    boxShadow: parallel === value ? "var(--shadow-card)" : "none",
-                    cursor: "pointer",
-                  }}
+                  className="choice"
                 >
-                  <span className="t-label block">{PARALLEL_LABEL[value]}</span>
-                  <span className="t-micro block mt-1" style={{ opacity: 0.6 }}>
+                  <span className="body-sm" style={{ fontWeight: 600 }}>
+                    {PARALLEL_LABEL[value]}
+                  </span>
+                  <span className="micro muted" style={{ display: "block", marginTop: 4 }}>
                     Я1 {subjectById(firstLanguageFor(value))?.name.split(" (")[0]} · Я2{" "}
                     {subjectById(secondLanguageFor(value))?.name.split(" (")[0]}
                   </span>
@@ -297,10 +277,10 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 
           {needed > 0 && (
             <fieldset className="border-0 p-0 m-0">
-              <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
-                PROFILE {needed === 1 ? "SUBJECT" : "SUBJECTS"} — PICK {needed}
+              <legend className="field-label">
+                Profile {needed === 1 ? "subject" : "subjects"} — pick {needed}
               </legend>
-              <div className="grid sm:grid-cols-2 gap-2">
+              <div className="choice-grid">
                 {profileOptions.map((subject) => {
                   const picked = profileIds.includes(subject.id);
                   return (
@@ -308,57 +288,35 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                       key={subject.id}
                       type="button"
                       onClick={() => toggleProfile(subject.id)}
-                      className="press-soft py-3 px-4 text-left flex items-center gap-3"
-                      style={{
-                        border: "1px solid var(--color-rule)",
-                        background: picked ? "var(--color-acid-lime)" : "var(--color-sheet)",
-                        boxShadow: picked ? "var(--shadow-card)" : "none",
-                        cursor: "pointer",
-                      }}
+                      aria-pressed={picked}
+                      className="choice choice--mint"
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
                     >
                       <span style={{ fontSize: 20 }}>{subject.glyph}</span>
-                      <span className="text-[16px]">{subject.name}</span>
+                      <span className="body-sm">{subject.name}</span>
                     </button>
                   );
                 })}
               </div>
-              <span className="t-micro block mt-2" style={{ opacity: 0.55 }}>
-                {profileIds.length} OF {needed} CHOSEN
+              <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
+                {profileIds.length} of {needed} chosen
                 {needed === 2 && profileIds.length === 2
-                  ? " — PICKING A THIRD REPLACES THE OLDEST"
+                  ? " — picking a third replaces the oldest"
                   : ""}
               </span>
             </fieldset>
           )}
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
-              TARGET GRADE
-            </legend>
-            <div className="flex gap-1.5 flex-wrap">
+            <legend className="field-label">Target grade</legend>
+            <div className="choice-row">
               {[...GRADE_ORDER].reverse().map((grade) => (
                 <button
                   key={grade}
                   type="button"
                   onClick={() => setTargetGrade(grade)}
                   aria-pressed={targetGrade === grade}
-                  className="press-soft"
-                  style={{
-                    border: `1px solid ${
-                      targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-rule)"
-                    }`,
-                    borderRadius: "var(--radius-md)",
-                    background:
-                      targetGrade === grade
-                        ? "var(--color-acid-lime-wash)"
-                        : "var(--color-sheet)",
-                    color: targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-ink)",
-                    boxShadow: targetGrade === grade ? "var(--shadow-card)" : "none",
-                    width: 46,
-                    height: 42,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
+                  className="choice choice--grade choice--mint"
                 >
                   {grade}
                 </button>
@@ -367,25 +325,18 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           </fieldset>
 
           {/* Live preview of what this student will actually sit */}
-          <div
-            className="p-4"
-            style={{ border: "1px solid var(--color-rule)", background: "var(--color-study)" }}
-          >
-            <span className="t-micro" style={{ opacity: 0.6 }}>
-              YOU WILL SIT
-            </span>
+          <div className="card card--tint">
+            <span className="mono muted">You will sit</span>
             {subjects.length === 0 ? (
-              <p className="text-[15px] m-0 mt-2" style={{ opacity: 0.6 }}>
-                Pick your {needed === 1 ? "profile subject" : "profile subjects"} to see the list.
+              <p className="body-sm muted" style={{ marginTop: 8 }}>
+                Pick your{" "}
+                {needed === 1 ? "profile subject" : "profile subjects"} to see
+                the list.
               </p>
             ) : (
-              <ul className="flex flex-wrap gap-2 mt-2 list-none p-0">
+              <ul className="filter-bar__subjects">
                 {subjects.map((subject) => (
-                  <li
-                    key={subject.id}
-                    className="t-micro px-2 py-1"
-                    style={{ background: "var(--color-sheet)", border: "1px solid var(--color-rule)" }}
-                  >
+                  <li key={subject.id} className="tag tag--outline">
                     {subject.glyph} {subject.name}
                   </li>
                 ))}
@@ -396,9 +347,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           <button
             type="submit"
             disabled={!ready}
-            className={`btn self-start ${ready ? "btn-primary" : "btn-outline"}`}
+            className="btn btn--primary self-start"
           >
-            Start tracking →
+            <span className="btn__arrow">→</span>Start tracking
           </button>
         </form>
       </div>
@@ -410,28 +361,16 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 
 function EmptyState() {
   return (
-    <div className="panel p-8 flex flex-col items-start gap-4 rise">
-      <span className="mark t-micro">NOTHING RECORDED YET</span>
-      <h2 className="t-subheading" style={{ maxWidth: "22ch" }}>
-        Sit one paper and this page fills up
-      </h2>
-      <p className="text-[17px] m-0" style={{ maxWidth: "52ch", lineHeight: 1.35 }}>
-        Mastery by topic, your grade trend, and how many marks separate you from the next
-        band — all of it comes from real attempts, so there is nothing to show until you
-        make one.
+    <div className="card card--plain empty-state rise">
+      <span className="tag">Nothing recorded yet</span>
+      <h2 className="sub measure-sm">Sit one paper and this page fills up</h2>
+      <p className="body measure">
+        Mastery by topic, your grade trend, and how many marks separate you from
+        the next band — all of it comes from real attempts, so there is nothing
+        to show until you make one.
       </p>
-      <Link
-        href="/library"
-        className="no-underline press-soft t-label"
-        style={{
-          background: "var(--color-highlighter)",
-          border: "1px solid var(--color-rule)",
-          boxShadow: "var(--shadow-card)",
-          padding: "12px 20px",
-          color: "var(--color-ink)",
-        }}
-      >
-        CHOOSE A PAPER →
+      <Link href="/library" className="btn btn--primary">
+        <span className="btn__arrow">→</span>Choose a paper
       </Link>
     </div>
   );
@@ -483,74 +422,71 @@ function Loaded({
   return (
     <>
       {/* ------------------------------------------------------ stat row */}
-      <StaggerIn className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="CURRENT GRADE" accent>
+      <div className="stat-row">
+        <StatCard label="Current grade" accent>
           <div className="flex items-center gap-3">
             <GradeBadge grade={latest.grade} size="lg" />
             <div>
-              <span className="t-micro block" style={{ opacity: 0.6 }}>
-                LATEST PAPER
+              <span className="mono muted" style={{ display: "block" }}>
+                Latest paper
               </span>
-              <span className="t-label">
+              <span className="mono">
                 {latest.scaledMark}/{latest.componentMax}
               </span>
             </div>
           </div>
         </StatCard>
 
-        <StatCard label="STUDY STREAK">
+        <StatCard label="Study streak">
           <div className="flex items-baseline gap-2">
-            <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
+            <span className="stat-card__big">
               {streak}
             </span>
-            <span className="t-label">DAY{streak === 1 ? "" : "S"}</span>
+            <span className="mono">day{streak === 1 ? "" : "s"}</span>
           </div>
-          <span className="t-micro" style={{ opacity: 0.55 }}>
-            {store.activeDays.length} ACTIVE DAY{store.activeDays.length === 1 ? "" : "S"} TOTAL
+          <span className="micro muted">
+            {store.activeDays.length} active day
+            {store.activeDays.length === 1 ? "" : "s"} total
           </span>
         </StatCard>
 
-        <StatCard label="MARKS TO NEXT GRADE">
+        <StatCard label="Marks to next grade">
           {next ? (
             <>
               <div className="flex items-baseline gap-2">
-                <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
+                <span className="stat-card__big">
                   +{next.marksNeeded}
                 </span>
                 <GradeBadge grade={next.nextGrade} size="sm" />
               </div>
-              <span className="t-micro" style={{ opacity: 0.55 }}>
-                ON {component?.name.toUpperCase()}
-              </span>
+              <span className="micro muted">on {component?.name}</span>
             </>
           ) : (
-            <span className="t-subheading">TOP BAND</span>
+            <span className="sub">Top band</span>
           )}
         </StatCard>
 
-        <StatCard label="PAPERS SAT">
+        <StatCard label="Papers sat">
           <div className="flex items-baseline gap-2">
-            <span className="t-heading-sm t-mono" style={{ lineHeight: 0.8 }}>
+            <span className="stat-card__big">
               {attempts.length}
             </span>
-            <span className="t-label">OF {PAPERS.length}</span>
+            <span className="mono">of {PAPERS.length}</span>
           </div>
-          <span className="t-micro" style={{ opacity: 0.55 }}>
-            {totalMarks}/{totalAvailable} MARKS EARNED · BEST {best.grade}
+          <span className="micro muted">
+            {totalMarks}/{totalAvailable} marks earned · best {best.grade}
           </span>
         </StatCard>
-      </StaggerIn>
+      </div>
 
       {/* ------------------------------------------------------- charts */}
-      <StaggerIn className="grid lg:grid-cols-2 gap-4 mt-4">
+      <div className="panel-pair">
         <div className="panel">
-          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
-            <h2 className="t-subheading">Subject mastery</h2>
-            <span className="t-micro" style={{ opacity: 0.55 }}>
-              PERCENTAGE OF MARKS EARNED, BY TOPIC
-            </span>
+          <div className="panel__head">
+            <h2 className="sub">Subject mastery</h2>
+            <span className="mono muted">Percentage of marks earned, by topic</span>
           </div>
-          <div className="p-4" style={{ height: 340 }}>
+          <div className="panel__body" style={{ height: 340 }}>
             {radarData.length >= 3 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} outerRadius="72%">
@@ -574,10 +510,9 @@ function Loaded({
                   />
                   <Tooltip
                     contentStyle={{
-                      border: `1px solid ${CHART_RULE}`,
-                      borderRadius: 12,
-                      background: "#fff",
-                      boxShadow: "0 6px 18px -6px rgba(26,51,0,0.16)",
+                      border: `1px solid ${CHART_INK}`,
+                      borderRadius: 6,
+                      background: CHART_PAPER,
                       fontSize: 13,
                     }}
                     formatter={(value) => [`${value ?? 0}%`, "Marks earned"]}
@@ -585,21 +520,20 @@ function Loaded({
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="t-micro" style={{ opacity: 0.55 }}>
-                SIT A FULL PAPER TO PLOT THE RADAR — IT NEEDS AT LEAST THREE TOPICS.
+              <p className="body-sm muted">
+                Sit a full paper to plot the radar — it needs at least three
+                topics.
               </p>
             )}
           </div>
         </div>
 
         <div className="panel">
-          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
-            <h2 className="t-subheading">Grade projection</h2>
-            <span className="t-micro" style={{ opacity: 0.55 }}>
-              SCALED SCORE PER ATTEMPT, U THROUGH A*
-            </span>
+          <div className="panel__head">
+            <h2 className="sub">Grade projection</h2>
+            <span className="mono muted">Scaled score per attempt, U through A*</span>
           </div>
-          <div className="p-4" style={{ height: 340 }}>
+          <div className="panel__body" style={{ height: 340 }}>
             {trend.length >= 2 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend} margin={{ top: 8, right: 12, bottom: 4, left: -18 }}>
@@ -617,10 +551,9 @@ function Loaded({
                   />
                   <Tooltip
                     contentStyle={{
-                      border: `1px solid ${CHART_RULE}`,
-                      borderRadius: 12,
-                      background: "#fff",
-                      boxShadow: "0 6px 18px -6px rgba(26,51,0,0.16)",
+                      border: `1px solid ${CHART_INK}`,
+                      borderRadius: 6,
+                      background: CHART_PAPER,
                       fontSize: 13,
                     }}
                     formatter={(value, _name, item) => [
@@ -662,49 +595,33 @@ function Loaded({
             )}
           </div>
         </div>
-      </StaggerIn>
+      </div>
 
       {/* -------------------------------------------------- weakest topics */}
       {mastery.length > 0 && (
-        <div className="panel mt-4">
-          <div
-            className="px-5 py-4 flex items-baseline justify-between gap-4 flex-wrap"
-            style={{ borderBottom: "1px solid var(--color-rule)" }}
-          >
-            <h2 className="t-subheading">Work on these first</h2>
-            <span className="t-micro" style={{ opacity: 0.55 }}>
-              WEAKEST TOPICS BY MARKS EARNED
-            </span>
+        <div className="panel" style={{ marginTop: "var(--spacing-24)" }}>
+          <div className="panel__head panel__head--row">
+            <h2 className="sub">Work on these first</h2>
+            <span className="mono muted">Weakest topics by marks earned</span>
           </div>
-          <ul className="list-none p-0 m-0">
+          <ul className="weak-list">
             {mastery.slice(0, 6).map((row) => (
-              <li
-                key={row.topic}
-                className="px-5 py-3 flex items-center gap-4"
-                style={{ borderTop: "1px solid var(--color-rule)" }}
-              >
-                <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
-                <div
-                  className="hidden sm:block shrink-0"
-                  style={{ width: 200, height: 14, border: "1px solid var(--color-rule)" }}
-                >
-                  <div
+              <li key={row.topic}>
+                <span className="body-sm grow min-w-0 truncate">{row.topic}</span>
+                <div className="meter weak-list__meter">
+                  <i
                     style={{
                       width: `${row.percent}%`,
-                      height: "100%",
                       background:
                         row.percent >= 70
-                          ? "var(--color-acid-lime)"
+                          ? "var(--color-sticky-note-mint)"
                           : row.percent >= 40
-                            ? "var(--color-highlighter)"
-                            : "var(--color-signal-red)",
+                            ? "var(--color-highlighter-yellow)"
+                            : "var(--color-terracotta)",
                     }}
                   />
                 </div>
-                <span
-                  className="t-label t-mono shrink-0"
-                  style={{ minWidth: 84, textAlign: "right" }}
-                >
+                <span className="mono weak-list__value">
                   {row.awarded}/{row.marks} · {row.percent}%
                 </span>
               </li>
@@ -714,25 +631,16 @@ function Loaded({
       )}
 
       {/* ------------------------------------------------------- history */}
-      <div className="panel mt-4">
-        <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-rule)" }}>
-          <h2 className="t-subheading">Test history</h2>
+      <div className="panel" style={{ marginTop: "var(--spacing-24)" }}>
+        <div className="panel__head">
+          <h2 className="sub">Test history</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse" style={{ minWidth: 620 }}>
+        <div className="bt__scroll" style={{ border: 0, borderRadius: 0 }}>
+          <table className="bt" style={{ minWidth: 620 }}>
             <thead>
-              <tr style={{ background: "var(--color-ink)" }}>
-                {["DATE", "PAPER", "RAW", "SCALED", "TIME", "GRADE"].map((head, i) => (
-                  <th
-                    key={head}
-                    className="t-micro px-4 py-2"
-                    style={{
-                      color: "var(--color-canvas)",
-                      textAlign: i === 0 || i === 1 ? "left" : "right",
-                    }}
-                  >
-                    {head}
-                  </th>
+              <tr>
+                {["Date", "Paper", "Raw", "Scaled", "Time", "Grade"].map((head) => (
+                  <th key={head}>{head}</th>
                 ))}
               </tr>
             </thead>
@@ -746,18 +654,8 @@ function Loaded({
       </div>
 
       <div className="mt-6">
-        <Link
-          href="/library"
-          className="no-underline press-soft t-label inline-block"
-          style={{
-            background: "var(--color-highlighter)",
-            border: "1px solid var(--color-rule)",
-            boxShadow: "var(--shadow-card)",
-            padding: "12px 20px",
-            color: "var(--color-ink)",
-          }}
-        >
-          SIT ANOTHER PAPER →
+        <Link href="/library" className="btn btn--yellow">
+          <span className="btn__arrow">→</span>Sit another paper
         </Link>
       </div>
     </>
@@ -766,21 +664,17 @@ function Loaded({
 
 function AttemptRow({ attempt }: { attempt: Attempt }) {
   return (
-    <tr style={{ borderTop: "1px solid var(--color-rule)" }}>
-      <td className="px-4 py-3 text-[15px] t-mono">
-        {new Date(attempt.finishedAt).toLocaleDateString()}
-      </td>
-      <td className="px-4 py-3 text-[15px]">{attempt.paperTitle}</td>
-      <td className="px-4 py-3 text-[15px] t-mono text-right">
+    <tr>
+      <td>{new Date(attempt.finishedAt).toLocaleDateString()}</td>
+      <td>{attempt.paperTitle}</td>
+      <td>
         {attempt.rawMark}/{attempt.availableMarks}
       </td>
-      <td className="px-4 py-3 text-[15px] t-mono text-right">
+      <td>
         {attempt.scaledMark}/{attempt.componentMax}
       </td>
-      <td className="px-4 py-3 text-[15px] t-mono text-right">
-        {Math.floor(attempt.durationSeconds / 60)}m
-      </td>
-      <td className="px-4 py-3 text-right">
+      <td>{Math.floor(attempt.durationSeconds / 60)}m</td>
+      <td>
         <GradeBadge grade={attempt.grade} size="sm" />
       </td>
     </tr>
@@ -799,13 +693,8 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div
-      className="panel p-5 flex flex-col gap-2"
-      style={accent ? { background: "var(--color-highlighter)" } : undefined}
-    >
-      <span className="t-micro" style={{ opacity: 0.6 }}>
-        {label}
-      </span>
+    <div className={`card stat-card${accent ? " card--yellow" : " card--plain"}`}>
+      <span className="mono muted">{label}</span>
       {children}
     </div>
   );

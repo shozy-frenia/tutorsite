@@ -2,29 +2,28 @@ import type { Grade } from "@/data/grade-boundaries";
 import { gradeTone } from "@/lib/grading";
 
 /**
- * The grade plate — the same object as the 3D badges on the landing page,
- * flattened to 2D. Lime for A*, yellow for a pass, red for U.
+ * The grade plate.
  *
- * U is drawn rather than filled. At `xl` a solid signal-red square is the
- * loudest thing on the screen, and the exam workspace shows the projected
- * grade from the moment the paper opens — so a student who has not yet
- * answered anything was being met with a 96px red block. Red still carries
- * the meaning, as the rule and the letter.
+ * A grade is the one number a student came here for, so it is rendered as an
+ * object rather than as text: a rounded plate in the display face, coloured by
+ * band. The colours climb the sticky-note scale the way the grade ladder does
+ * — teal and blush in the middle, the highlighter reserved for the top grades,
+ * terracotta only for U — so a badge and a rung of the ladder always agree.
  */
 
 const SIZES = {
-  sm: { box: 32, font: 14, border: 2 },
-  md: { box: 44, font: 18, border: 2 },
-  lg: { box: 64, font: 28, border: 3 },
-  xl: { box: 96, font: 44, border: 3 },
+  sm: { box: 32, font: 14 },
+  md: { box: 44, font: 18 },
+  lg: { box: 60, font: 26 },
+  xl: { box: 92, font: 40 },
 } as const;
 
 const TONE_BACKGROUND: Record<ReturnType<typeof gradeTone>, string> = {
-  top: "var(--color-acid-lime)",
-  good: "var(--color-highlighter)",
-  mid: "var(--color-highlighter)",
-  low: "var(--color-paper)",
-  fail: "var(--color-sheet)",
+  top: "#ffd400",
+  good: "var(--color-highlighter-yellow)",
+  mid: "var(--color-sticky-note-mint)",
+  low: "var(--color-sticky-note-blush)",
+  fail: "var(--color-bad-bg)",
 };
 
 export default function GradeBadge({
@@ -34,8 +33,8 @@ export default function GradeBadge({
   grade: Grade;
   size?: keyof typeof SIZES;
 }) {
-  const { box, font, border } = SIZES[size];
-  const failing = gradeTone(grade) === "fail";
+  const { box, font } = SIZES[size];
+  const tone = gradeTone(grade);
 
   return (
     <span
@@ -43,12 +42,14 @@ export default function GradeBadge({
       style={{
         width: box,
         height: box,
-        background: TONE_BACKGROUND[gradeTone(grade)],
-        border: `${border}px solid ${failing ? "var(--color-signal-red)" : "var(--color-rule)"}`,
-        color: failing ? "var(--color-signal-red)" : "var(--color-ink)",
+        background: TONE_BACKGROUND[tone],
+        border: "1px solid var(--color-forest-ink)",
+        borderRadius: "var(--radius-md)",
+        color: tone === "fail" ? "var(--color-bad)" : "var(--color-forest-ink)",
+        fontFamily: "var(--font-display)",
         fontSize: font,
-        fontWeight: 700,
-        letterSpacing: "-0.03em",
+        fontWeight: 800,
+        letterSpacing: "0.02em",
         lineHeight: 1,
       }}
       title={`Grade ${grade}`}
