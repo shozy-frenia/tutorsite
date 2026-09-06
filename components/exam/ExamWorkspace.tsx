@@ -725,14 +725,30 @@ function QuestionSheet({
           className="px-5 py-4 rise"
           style={{
             borderTop: "1px solid var(--color-rule)",
+            borderLeft: `4px solid ${
+              correct
+                ? "var(--color-acid-lime)"
+                : wrong
+                  ? "var(--color-signal-red)"
+                  : "var(--color-highlighter-deep)"
+            }`,
             background: correct
-              ? "var(--color-acid-lime)"
+              ? "var(--color-acid-lime-wash)"
               : wrong
-                ? "var(--color-signal-red)"
-                : "var(--color-highlighter)",
+                ? "var(--color-signal-red-wash)"
+                : "var(--color-highlighter-wash)",
           }}
         >
-          <span className="t-label">
+          <span
+            className="t-label"
+            style={{
+              color: correct
+                ? "var(--color-acid-lime)"
+                : wrong
+                  ? "var(--color-signal-red)"
+                  : "var(--color-ink)",
+            }}
+          >
             {correct
               ? `CORRECT — ${question.marks} MARK${question.marks === 1 ? "" : "S"}`
               : "NOT THE ANSWER — 0 MARKS"}
@@ -763,8 +779,13 @@ function QuestionSheet({
                   <label
                     className="flex items-start gap-3 px-3 py-2 cursor-pointer press-soft"
                     style={{
-                      border: "1px solid var(--color-rule)",
-                      background: steps[i] ? "var(--color-acid-lime)" : "var(--color-sheet)",
+                      border: `1px solid ${
+                        steps[i] ? "var(--color-acid-lime)" : "var(--color-rule)"
+                      }`,
+                      borderRadius: "var(--radius-md)",
+                      background: steps[i]
+                        ? "var(--color-acid-lime-wash)"
+                        : "var(--color-sheet)",
                     }}
                   >
                     <input
@@ -813,8 +834,11 @@ function QuestionSheet({
 
           <p className="text-[16px] mt-3 mb-0">
             <span
-              className="t-micro px-1.5 py-0.5 mr-2"
-              style={{ background: "var(--color-acid-lime)" }}
+              className="t-micro px-2 py-0.5 mr-2"
+              style={{
+                background: "var(--color-acid-lime-wash)",
+                color: "var(--color-acid-lime)",
+              }}
             >
               ANSWER
             </span>
@@ -986,17 +1010,27 @@ function Results({
                 <span className="text-[16px] grow min-w-0 truncate">{row.topic}</span>
                 <div
                   className="hidden sm:block shrink-0"
-                  style={{ width: 180, height: 14, border: "1px solid var(--color-rule)" }}
+                  style={{
+                    width: 180,
+                    height: 10,
+                    background: "var(--color-paper)",
+                    borderRadius: "var(--radius-full)",
+                    overflow: "hidden",
+                  }}
                 >
                   <div
                     style={{
                       width: `${row.percent}%`,
                       height: "100%",
+                      borderRadius: "var(--radius-full)",
+                      /* Solid colour is right here and only here: a 10px bar
+                         is a data mark, not a surface, and it has no text on
+                         it to fight. */
                       background:
                         row.percent >= 70
                           ? "var(--color-acid-lime)"
                           : row.percent >= 40
-                            ? "var(--color-highlighter)"
+                            ? "var(--color-highlighter-deep)"
                             : "var(--color-signal-red)",
                     }}
                   />
