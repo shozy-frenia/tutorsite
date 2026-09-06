@@ -120,7 +120,37 @@ function messageFor(code: string): string {
   }
 }
 
+/**
+ * Fail a hung request rather than spinning forever.
+ *
+ * Firebase's SDK has no request timeout of its own: if `identitytoolkit`
+ * cannot be reached — a captive portal, a school firewall, a network that
+ * accepts the connection and never answers — the promise simply never
+ * settles. The button then sits on "Секунду…" indefinitely, which is
+ * indistinguishable from a broken button and is the same class of fault five
+ * pilots reported against the tutor ("отвечал долго или не ответил").
+ *
+ * Fifteen seconds is well past a slow-but-working sign-in and well short of
+ * the point where someone reloads the page. Applied to the three calls that
+ * are one round trip; the Google popup is excluded, and says why at its own
+ * call site.
+ */
+async function withTimeout<T>(work: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new AuthError("auth/network-request-failed")), 15_000);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 function wrap(error: unknown): AuthError {
+  if (error instanceof AuthError) return error;
   const code =
     typeof error === "object" && error !== null && "code" in error
       ? String((error as { code: unknown }).code)
@@ -141,6 +171,12 @@ export async function signInWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   try {
+    // Deliberately not wrapped in withTimeout. The other calls are a single
+    // round trip the student cannot influence; this one waits on a human
+    // choosing an account in a second window, which fairly takes longer than
+    // any timeout worth setting. Abandoning it also shows an error and then
+    // signs them in anyway when they finish, which is worse than waiting.
+    // A closed popup already reports itself as auth/popup-closed-by-user.
     await signInWithPopup(auth, provider);
   } catch (error) {
     const wrapped = wrap(error);
@@ -159,7 +195,9 @@ export async function registerWithEmail(
 ): Promise<void> {
   const auth = requireAuth();
   try {
-    const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+    const credential = await withTimeout(
+      createUserWithEmailAndPassword(auth, email.trim(), password)
+    );
     const displayName = name.trim();
     if (displayName) await updateProfile(credential.user, { displayName });
   } catch (error) {
@@ -170,7 +208,7 @@ export async function registerWithEmail(
 export async function signInWithEmail(email: string, password: string): Promise<void> {
   const auth = requireAuth();
   try {
-    await signInWithEmailAndPassword(auth, email.trim(), password);
+    await withTimeout(signInWithEmailAndPassword(auth, email.trim(), password));
   } catch (error) {
     throw wrap(error);
   }
@@ -179,7 +217,7 @@ export async function signInWithEmail(email: string, password: string): Promise<
 export async function sendReset(email: string): Promise<void> {
   const auth = requireAuth();
   try {
-    await sendPasswordResetEmail(auth, email.trim());
+    await withTimeout(sendPasswordResetEmail(auth, email.trim()));
   } catch (error) {
     throw wrap(error);
   }

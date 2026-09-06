@@ -232,12 +232,8 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
               maxLength={40}
               required
               placeholder="Aisha"
-              className="px-4 py-3 text-[18px]"
-              style={{
-                border: "1px solid var(--color-rule)",
-                background: "var(--color-sheet)",
-                boxShadow: "var(--shadow-card)",
-              }}
+              className="auth-input"
+              style={{ fontSize: 18, padding: "13px 16px" }}
             />
           </label>
 
@@ -251,14 +247,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={year}
                   type="button"
                   onClick={() => setGradeYear(year)}
-                  className="press-soft t-label grow py-3"
-                  style={{
-                    border: "1px solid var(--color-rule)",
-                    background:
-                      gradeYear === year ? "var(--color-highlighter)" : "var(--color-sheet)",
-                    boxShadow: gradeYear === year ? "var(--shadow-card)" : "none",
-                    cursor: "pointer",
-                  }}
+                  aria-pressed={gradeYear === year}
+                  className={`btn grow ${gradeYear === year ? "btn-mark" : "btn-outline"}`}
+                  style={gradeYear === year ? undefined : { background: "var(--color-sheet)" }}
                 >
                   {year}
                 </button>
@@ -279,11 +270,17 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={value}
                   type="button"
                   onClick={() => setParallel(value)}
+                  aria-pressed={parallel === value}
                   className="press-soft grow py-3 px-4 text-left"
                   style={{
-                    border: "1px solid var(--color-rule)",
+                    border: `1px solid ${
+                      parallel === value ? "var(--color-ink)" : "var(--color-rule)"
+                    }`,
+                    borderRadius: "var(--radius-md)",
                     background:
-                      parallel === value ? "var(--color-highlighter)" : "var(--color-sheet)",
+                      parallel === value
+                        ? "var(--color-highlighter-wash)"
+                        : "var(--color-sheet)",
                     boxShadow: parallel === value ? "var(--shadow-card)" : "none",
                     cursor: "pointer",
                   }}
@@ -344,11 +341,18 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   key={grade}
                   type="button"
                   onClick={() => setTargetGrade(grade)}
+                  aria-pressed={targetGrade === grade}
                   className="press-soft"
                   style={{
-                    border: "1px solid var(--color-rule)",
+                    border: `1px solid ${
+                      targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-rule)"
+                    }`,
+                    borderRadius: "var(--radius-md)",
                     background:
-                      targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-sheet)",
+                      targetGrade === grade
+                        ? "var(--color-acid-lime-wash)"
+                        : "var(--color-sheet)",
+                    color: targetGrade === grade ? "var(--color-acid-lime)" : "var(--color-ink)",
                     boxShadow: targetGrade === grade ? "var(--shadow-card)" : "none",
                     width: 46,
                     height: 42,
@@ -392,17 +396,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           <button
             type="submit"
             disabled={!ready}
-            className="press-soft t-label self-start"
-            style={{
-              background: ready ? "var(--color-ink)" : "var(--color-paper)",
-              color: ready ? "var(--color-canvas)" : "var(--color-ink)",
-              border: "1px solid var(--color-rule)",
-              boxShadow: "var(--shadow-card)",
-              padding: "12px 22px",
-              cursor: ready ? "pointer" : "not-allowed",
-            }}
+            className={`btn self-start ${ready ? "btn-primary" : "btn-outline"}`}
           >
-            START TRACKING →
+            Start tracking →
           </button>
         </form>
       </div>
