@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import LocaleSwitcher from "@/components/i18n/LocaleSwitcher";
-import AuthDialog from "@/components/auth/AuthDialog";
 import { useSession } from "@/components/auth/SessionProvider";
 import { useT } from "@/components/i18n/LocaleProvider";
 
@@ -95,7 +94,6 @@ export default function Nav({
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
   // Close the sheet on navigation, or a student taps a link and lands on the
@@ -199,13 +197,12 @@ export default function Nav({
                   {t("nav.signOut")}
                 </button>
               ) : (
-                <button
-                  type="button"
+                <Link
+                  href={`/auth?next=${encodeURIComponent(pathname ?? "/dashboard")}`}
                   className="btn btn--outline btn--sm nav__account"
-                  onClick={() => setAuthOpen(true)}
                 >
                   {t("nav.signIn")}
-                </button>
+                </Link>
               ))}
 
             <Link className="btn btn--primary btn--sm nav__cta" href="/library">
@@ -249,9 +246,6 @@ export default function Nav({
         </Link>
       </div>
 
-      {enabled && (
-        <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-      )}
     </>
   );
 }

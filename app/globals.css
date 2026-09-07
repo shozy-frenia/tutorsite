@@ -756,6 +756,48 @@ html[data-filter-year] .paper-card {
   border-top: 1px solid var(--color-pencil-gray);
 }
 
+/* ---- Sign in ---------------------------------------------------------- */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  padding: var(--spacing-32);
+}
+
+.auth-card__tabs {
+  align-self: flex-start;
+}
+
+.auth-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  margin-top: var(--spacing-8);
+}
+
+.auth-card__message {
+  margin: 0;
+}
+
+.auth-card__back {
+  margin-top: var(--spacing-8);
+}
+
+/* Underlines size to their text, not to the column. */
+.auth-card__link {
+  align-self: flex-start;
+  background: none;
+  cursor: pointer;
+}
+
 .account {
   display: flex;
   align-items: flex-start;

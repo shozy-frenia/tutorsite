@@ -107,6 +107,16 @@ export default function Dashboard() {
       <main style={{ minHeight: "100vh" }}>
         <Nav />
         <Register onDone={(profile) => setStore(saveProfile(profile))} />
+        {/* The account belongs here too, not only once a tracker exists.
+            "Set up your tracker" is a local profile — no email, no password —
+            and a student who wants their work to follow them to another device
+            would otherwise have nothing on this page to tell them an account
+            is even possible. */}
+        <section className="shell" style={{ paddingBottom: "var(--spacing-48)" }}>
+          <div style={{ maxWidth: 720, marginInline: "auto" }}>
+            <AccountPanel onCleared={setStore} />
+          </div>
+        </section>
       </main>
     );
   }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "@/components/auth/SessionProvider";
-import AuthDialog from "@/components/auth/AuthDialog";
+import Link from "next/link";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { deleteEverything } from "@/lib/supabase/sync";
 import { clearStore, type Store } from "@/lib/storage";
@@ -31,7 +31,6 @@ export default function AccountPanel({
 }) {
   const t = useT();
   const { user, enabled, syncState, mergedCount, signOut } = useSession();
-  const [authOpen, setAuthOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -57,23 +56,16 @@ export default function AccountPanel({
 
   if (!user) {
     return (
-      <>
-        <div className="panel account">
-          <div className="account__body">
-            <span className="mono muted">{t("auth.guestTitle")}</span>
-            <p className="body-sm">{t("auth.guestPitch")}</p>
-          </div>
-          <button
-            type="button"
-            className="btn btn--yellow btn--sm shrink-0"
-            onClick={() => setAuthOpen(true)}
-          >
-            <span className="btn__arrow">→</span>
-            {t("auth.title")}
-          </button>
+      <div className="panel account">
+        <div className="account__body">
+          <span className="mono muted">{t("auth.guestTitle")}</span>
+          <p className="body-sm">{t("auth.guestPitch")}</p>
         </div>
-        <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-      </>
+        <Link href="/auth" className="btn btn--yellow btn--sm shrink-0">
+          <span className="btn__arrow">→</span>
+          {t("auth.title")}
+        </Link>
+      </div>
     );
   }
 
