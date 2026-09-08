@@ -198,7 +198,7 @@ export default async function Library() {
                     className="mono muted"
                     style={{ marginTop: "var(--spacing-16)" }}
                   >
-                    {stage.compulsory}
+                    {t(`stage.${stage.year}.compulsory`)}
                   </p>
                   <ul className="coverage__list">
                     {[

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useState } from "react";
 import type { Question } from "@/lib/exam-types";
 
@@ -54,6 +56,7 @@ export default function ExtendedAnswer({
   onChange,
   onMarked,
 }: Props) {
+  const t = useT();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [marking, setMarking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,14 +85,14 @@ export default function ExtendedAnswer({
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? "Could not mark this answer.");
+        setError(payload.error ?? t("extended.markFailed"));
         return;
       }
 
       setAssessment(payload);
       onMarked(payload.total);
     } catch {
-      setError("Could not reach the examiner. Check your connection.");
+      setError(t("extended.examinerUnreachable"));
     } finally {
       setMarking(false);
     }
@@ -152,7 +155,7 @@ export default function ExtendedAnswer({
           onChange={(event) => onChange(event.target.value)}
           rows={14}
           maxLength={12_000}
-          placeholder="Write your answer here…"
+          placeholder={t("extended.placeholder")}
           className="px-4 py-3 text-[16px]"
           style={{
             border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
@@ -176,7 +179,7 @@ export default function ExtendedAnswer({
             cursor: marking ? "wait" : count >= floor ? "pointer" : "not-allowed",
           }}
         >
-          {marking ? "EXAMINER IS READING…" : "MARK MY ANSWER"}
+          {marking ? t("extended.examinerReading") : t("extended.markMyAnswer")}
         </button>
         {count < floor && (
           <span className="t-micro" style={{ opacity: 0.55 }}>
@@ -202,7 +205,9 @@ export default function ExtendedAnswer({
             style={{ border: "1px solid var(--color-forest-ink)", borderRadius: "var(--radius-md)", background: "var(--color-highlighter)" }}
           >
             <span className="t-label">
-              {assessment.mode === "offline" ? "SELF-MARK GUIDE" : "EXAMINER'S MARK"}
+              {assessment.mode === "offline"
+                ? t("extended.selfMarkGuide")
+                : t("extended.examinersMark")}
             </span>
             {assessment.mode !== "offline" && (
               <span style={{ fontSize: 28, fontWeight: 800, lineHeight: 1 }}>

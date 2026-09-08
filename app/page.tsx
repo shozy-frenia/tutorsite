@@ -407,8 +407,11 @@ export default async function Home() {
               </div>
 
               <TutorDemo
-                subjectLine="Talap · Grade 10 · KZ"
-                paperLine={`Maths · ${component1?.name ?? "Component 1"}`}
+                subjectLine={t("landing.tutor.demoBar", { year: 10 })}
+                paperLine={t("landing.ladder.caption", {
+                  component: component1?.name ?? "Component 1",
+                  max: component1?.maxMark ?? 80,
+                })}
                 mark={demoMark}
                 maxMark={demoMax}
                 grade={demoGrade}

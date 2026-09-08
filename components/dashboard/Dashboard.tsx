@@ -49,6 +49,8 @@ import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
 import AccountPanel from "@/components/auth/AccountPanel";
+import { useT, useLocale } from "@/components/i18n/LocaleProvider";
+import { subjectName } from "@/lib/i18n";
 
 /**
  * Personal tracking dashboard.
@@ -72,6 +74,7 @@ const CHART_RULE = "#e4e0d2";
 const CHART_YELLOW_DEEP = "#c8a600";
 
 export default function Dashboard() {
+  const t = useT();
   const [store, setStore] = useState<Store>({ profile: null, attempts: [], activeDays: [] });
   const [hydrated, setHydrated] = useState(false);
 
@@ -96,7 +99,7 @@ export default function Dashboard() {
       <main style={{ minHeight: "100vh" }}>
         <Nav />
         <div className="shell section-tight">
-          <span className="mono muted">Loading your record…</span>
+          <span className="mono muted">{t("dash.loading")}</span>
         </div>
       </main>
     );
@@ -129,13 +132,13 @@ export default function Dashboard() {
         {/* ------------------------------------------------------ header */}
         <div className="dash-head">
           <div>
-            <span className="tag">Grade {store.profile.gradeYear}</span>
+            <span className="tag">{t("nav.grade", { year: store.profile.gradeYear })}</span>
             <h1 className="h" style={{ marginTop: "var(--spacing-16)" }}>
               {store.profile.name}
             </h1>
           </div>
           <div className="text-right">
-            <span className="mono muted">Target</span>
+            <span className="mono muted">{t("dash.target")}</span>
             <GradeBadge grade={store.profile.targetGrade} size="lg" />
           </div>
         </div>
@@ -151,13 +154,13 @@ export default function Dashboard() {
         <div className="dash-reset">
           <button
             onClick={() => {
-              if (window.confirm("Delete your profile and all saved attempts on this device?")) {
+              if (window.confirm(t("dash.resetConfirm"))) {
                 setStore(clearStore());
               }
             }}
             className="btn btn--outline btn--sm"
           >
-            Reset this device
+            {t("dash.reset")}
           </button>
         </div>
       </section>
@@ -168,6 +171,8 @@ export default function Dashboard() {
 /* ============================================================== registration */
 
 function Register({ onDone }: { onDone: (profile: Profile) => void }) {
+  const t = useT();
+  const { locale } = useLocale();
   const [name, setName] = useState("");
   const [gradeYear, setGradeYear] = useState<GradeYear>(10);
   const [parallel, setParallel] = useState<Parallel>("kazakh");
@@ -201,14 +206,12 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
     <section className="shell section-tight">
       <div className="card card--plain register rise">
         <div className="register__intro">
-          <span className="tag">Demo registration</span>
+          <span className="tag">{t("dash.demoRegistration")}</span>
           <h1 className="sub" style={{ marginTop: "var(--spacing-16)" }}>
-            Set up your tracker
+            {t("profile.title")}
           </h1>
           <p className="body-sm" style={{ marginTop: 8 }}>
-            No email, no password. This stays on your device. We ask for your
-            parallel and profile subjects so you only ever see papers for exams
-            you will actually sit.
+            {t("profile.sub")}
           </p>
         </div>
 
@@ -228,19 +231,19 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           }}
         >
           <label>
-            <span className="field-label">Your name</span>
+            <span className="field-label">{t("profile.name")}</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={40}
               required
-              placeholder="Aisha"
+              placeholder={t("profile.namePlaceholder")}
               className="field"
             />
           </label>
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">Grade</legend>
+            <legend className="field-label">{t("profile.year")}</legend>
             <div className="choice-row">
               {([10, 11, 12] as const).map((year) => (
                 <button
@@ -256,14 +259,12 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
               ))}
             </div>
             <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
-              {stageFor(gradeYear)?.compulsory}
+              {t(`stage.${gradeYear}.compulsory`)}
             </span>
           </fieldset>
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">
-              Parallel — language of instruction
-            </legend>
+            <legend className="field-label">{t("profile.parallel")}</legend>
             <div className="choice-grid">
               {(["kazakh", "russian"] as Parallel[]).map((value) => (
                 <button
@@ -274,11 +275,21 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                   className="choice"
                 >
                   <span className="body-sm" style={{ fontWeight: 600 }}>
-                    {PARALLEL_LABEL[value]}
+                    {t(`profile.parallel.${value}`)}
                   </span>
                   <span className="micro muted" style={{ display: "block", marginTop: 4 }}>
-                    Я1 {subjectById(firstLanguageFor(value))?.name.split(" (")[0]} · Я2{" "}
-                    {subjectById(secondLanguageFor(value))?.name.split(" (")[0]}
+                    {(() => {
+                      const first = subjectById(firstLanguageFor(value));
+                      const second = subjectById(secondLanguageFor(value));
+                      // The names already carry their own Я1 / Я2 marker in
+                      // Russian and Kazakh, so prefixing one would repeat it.
+                      return [first, second]
+                        .map((subject) =>
+                          subject ? subjectName(subject, locale) : ""
+                        )
+                        .filter(Boolean)
+                        .join(" · ");
+                    })()}
                   </span>
                 </button>
               ))}
@@ -288,7 +299,9 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
           {needed > 0 && (
             <fieldset className="border-0 p-0 m-0">
               <legend className="field-label">
-                Profile {needed === 1 ? "subject" : "subjects"} — pick {needed}
+                {needed === 1
+                  ? t("profile.profileSubjectsOne")
+                  : t("profile.profileSubjectsTwo")}
               </legend>
               <div className="choice-grid">
                 {profileOptions.map((subject) => {
@@ -303,22 +316,24 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
                       style={{ display: "flex", alignItems: "center", gap: 12 }}
                     >
                       <span style={{ fontSize: 20 }}>{subject.glyph}</span>
-                      <span className="body-sm">{subject.name}</span>
+                      <span className="body-sm">
+                        {subjectName(subject, locale)}
+                      </span>
                     </button>
                   );
                 })}
               </div>
               <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
-                {profileIds.length} of {needed} chosen
+                {t("dash.chosen", { count: profileIds.length, needed })}
                 {needed === 2 && profileIds.length === 2
-                  ? " — picking a third replaces the oldest"
+                  ? t("dash.replacesOldest")
                   : ""}
               </span>
             </fieldset>
           )}
 
           <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">Target grade</legend>
+            <legend className="field-label">{t("profile.target")}</legend>
             <div className="choice-row">
               {[...GRADE_ORDER].reverse().map((grade) => (
                 <button
@@ -336,18 +351,16 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 
           {/* Live preview of what this student will actually sit */}
           <div className="card card--tint">
-            <span className="mono muted">You will sit</span>
+            <span className="mono muted">{t("dash.youWillSit")}</span>
             {subjects.length === 0 ? (
               <p className="body-sm muted" style={{ marginTop: 8 }}>
-                Pick your{" "}
-                {needed === 1 ? "profile subject" : "profile subjects"} to see
-                the list.
+                {t("dash.pickToSee")}
               </p>
             ) : (
               <ul className="filter-bar__subjects">
                 {subjects.map((subject) => (
                   <li key={subject.id} className="tag tag--outline">
-                    {subject.glyph} {subject.name}
+                    {subject.glyph} {subjectName(subject, locale)}
                   </li>
                 ))}
               </ul>
@@ -359,7 +372,8 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
             disabled={!ready}
             className="btn btn--primary self-start"
           >
-            <span className="btn__arrow">→</span>Start tracking
+            <span className="btn__arrow">→</span>
+            {t("profile.submit")}
           </button>
         </form>
       </div>
@@ -370,17 +384,19 @@ function Register({ onDone }: { onDone: (profile: Profile) => void }) {
 /* ================================================================ empty */
 
 function EmptyState() {
+  const t = useT();
   return (
     <div className="card card--plain empty-state rise">
-      <span className="tag">Nothing recorded yet</span>
-      <h2 className="sub measure-sm">Sit one paper and this page fills up</h2>
+      <span className="tag">{t("dash.empty.title")}</span>
+      <h2 className="sub measure-sm">{t("dash.empty.body")}</h2>
       <p className="body measure">
         Mastery by topic, your grade trend, and how many marks separate you from
         the next band — all of it comes from real attempts, so there is nothing
         to show until you make one.
       </p>
       <Link href="/library" className="btn btn--primary">
-        <span className="btn__arrow">→</span>Choose a paper
+        <span className="btn__arrow">→</span>
+        {t("dash.empty.cta")}
       </Link>
     </div>
   );
@@ -397,6 +413,7 @@ function Loaded({
   streak: number;
   mastery: Array<{ topic: string; percent: number; marks: number; awarded: number }>;
 }) {
+  const t = useT();
   const attempts = store.attempts;
   const latest = attempts[0];
   const best = attempts.reduce((a, b) => (gradeRank(b.grade) > gradeRank(a.grade) ? b : a));
@@ -433,12 +450,12 @@ function Loaded({
     <>
       {/* ------------------------------------------------------ stat row */}
       <div className="stat-row">
-        <StatCard label="Current grade" accent>
+        <StatCard label={t("dash.currentGrade")} accent>
           <div className="flex items-center gap-3">
             <GradeBadge grade={latest.grade} size="lg" />
             <div>
               <span className="mono muted" style={{ display: "block" }}>
-                Latest paper
+                {t("dash.latestPaper")}
               </span>
               <span className="mono">
                 {latest.scaledMark}/{latest.componentMax}
@@ -447,20 +464,19 @@ function Loaded({
           </div>
         </StatCard>
 
-        <StatCard label="Study streak">
+        <StatCard label={t("dash.studyStreak")}>
           <div className="flex items-baseline gap-2">
             <span className="stat-card__big">
               {streak}
             </span>
-            <span className="mono">day{streak === 1 ? "" : "s"}</span>
+            <span className="mono">{t("dash.daysInARow")}</span>
           </div>
           <span className="micro muted">
-            {store.activeDays.length} active day
-            {store.activeDays.length === 1 ? "" : "s"} total
+            {t("dash.activeDaysTotal", { count: store.activeDays.length })}
           </span>
         </StatCard>
 
-        <StatCard label="Marks to next grade">
+        <StatCard label={t("dash.marksToNext")}>
           {next ? (
             <>
               <div className="flex items-baseline gap-2">
@@ -469,22 +485,28 @@ function Loaded({
                 </span>
                 <GradeBadge grade={next.nextGrade} size="sm" />
               </div>
-              <span className="micro muted">on {component?.name}</span>
+              <span className="micro muted">
+                {t("dash.onComponent", { component: component?.name ?? "" })}
+              </span>
             </>
           ) : (
-            <span className="sub">Top band</span>
+            <span className="sub">{t("dash.topBand")}</span>
           )}
         </StatCard>
 
-        <StatCard label="Papers sat">
+        <StatCard label={t("dash.papersSat")}>
           <div className="flex items-baseline gap-2">
             <span className="stat-card__big">
               {attempts.length}
             </span>
-            <span className="mono">of {PAPERS.length}</span>
+            <span className="mono">{t("dash.ofPapers", { count: PAPERS.length })}</span>
           </div>
           <span className="micro muted">
-            {totalMarks}/{totalAvailable} marks earned · best {best.grade}
+            {t("dash.marksEarnedBest", {
+              earned: totalMarks,
+              total: totalAvailable,
+              grade: best.grade,
+            })}
           </span>
         </StatCard>
       </div>
@@ -493,8 +515,8 @@ function Loaded({
       <div className="panel-pair">
         <div className="panel">
           <div className="panel__head">
-            <h2 className="sub">Subject mastery</h2>
-            <span className="mono muted">Percentage of marks earned, by topic</span>
+            <h2 className="sub">{t("dash.mastery")}</h2>
+            <span className="mono muted">{t("dash.masterySub")}</span>
           </div>
           <div className="panel__body" style={{ height: 340 }}>
             {radarData.length >= 3 ? (
@@ -525,23 +547,20 @@ function Loaded({
                       background: CHART_PAPER,
                       fontSize: 13,
                     }}
-                    formatter={(value) => [`${value ?? 0}%`, "Marks earned"]}
+                    formatter={(value) => [`${value ?? 0}%`, t("dash.marksEarned")]}
                   />
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="body-sm muted">
-                Sit a full paper to plot the radar — it needs at least three
-                topics.
-              </p>
+              <p className="body-sm muted">{t("dash.radarNeedsMore")}</p>
             )}
           </div>
         </div>
 
         <div className="panel">
           <div className="panel__head">
-            <h2 className="sub">Grade projection</h2>
-            <span className="mono muted">Scaled score per attempt, U through A*</span>
+            <h2 className="sub">{t("dash.projection")}</h2>
+            <span className="mono muted">{t("dash.projectionSub")}</span>
           </div>
           <div className="panel__body" style={{ height: 340 }}>
             {trend.length >= 2 ? (
@@ -611,8 +630,8 @@ function Loaded({
       {mastery.length > 0 && (
         <div className="panel" style={{ marginTop: "var(--spacing-24)" }}>
           <div className="panel__head panel__head--row">
-            <h2 className="sub">Work on these first</h2>
-            <span className="mono muted">Weakest topics by marks earned</span>
+            <h2 className="sub">{t("dash.weakest")}</h2>
+            <span className="mono muted">{t("dash.weakestSub")}</span>
           </div>
           <ul className="weak-list">
             {mastery.slice(0, 6).map((row) => (
@@ -643,13 +662,20 @@ function Loaded({
       {/* ------------------------------------------------------- history */}
       <div className="panel" style={{ marginTop: "var(--spacing-24)" }}>
         <div className="panel__head">
-          <h2 className="sub">Test history</h2>
+          <h2 className="sub">{t("dash.history")}</h2>
         </div>
         <div className="bt__scroll" style={{ border: 0, borderRadius: 0 }}>
           <table className="bt" style={{ minWidth: 620 }}>
             <thead>
               <tr>
-                {["Date", "Paper", "Raw", "Scaled", "Time", "Grade"].map((head) => (
+                {[
+                  t("dash.col.date"),
+                  t("dash.col.paper"),
+                  t("dash.col.raw"),
+                  t("dash.col.scaled"),
+                  t("dash.col.time"),
+                  t("common.grade"),
+                ].map((head) => (
                   <th key={head}>{head}</th>
                 ))}
               </tr>
@@ -665,7 +691,8 @@ function Loaded({
 
       <div className="mt-6">
         <Link href="/library" className="btn btn--yellow">
-          <span className="btn__arrow">→</span>Sit another paper
+          <span className="btn__arrow">→</span>
+          {t("dash.sitAnother")}
         </Link>
       </div>
     </>

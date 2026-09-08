@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useEffect, useRef, useState } from "react";
 import { evaluate, formatResult, toThreeSigFigs, type AngleMode } from "@/lib/calculator";
 
@@ -79,6 +81,7 @@ const KEYS: Array<Array<{ label: string; insert?: string; action?: "clear" | "ba
   ];
 
 export default function CalculatorPanel() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [expression, setExpression] = useState("");
   const [history, setHistory] = useState<Entry[]>([]);
@@ -157,7 +160,7 @@ export default function CalculatorPanel() {
               cursor: "pointer",
               color: "var(--color-ink)",
             }}
-            title="Switch between degrees and radians"
+            title={t("calc.switchMode")}
           >
             {mode.toUpperCase()}
           </button>
@@ -165,7 +168,7 @@ export default function CalculatorPanel() {
             onClick={() => setOpen(false)}
             className="btn btn--inverse btn--sm"
           >
-            Hide ✕
+            {t("calc.hide")} ✕
           </button>
         </div>
       </div>
@@ -204,7 +207,7 @@ export default function CalculatorPanel() {
             </>
           ) : (
             <span className="t-micro" style={{ opacity: 0.4 }}>
-              {mode === "deg" ? "ANGLES IN DEGREES" : "ANGLES IN RADIANS"}
+              {mode === "deg" ? t("calc.degrees") : t("calc.radians")}
             </span>
           )}
         </div>
@@ -260,7 +263,7 @@ export default function CalculatorPanel() {
                 cursor: "pointer",
                 opacity: i === 0 ? 1 : 0.6,
               }}
-              title="Put this expression back in the display"
+              title={t("calc.reuse")}
             >
               {entry.expression} = {entry.result}
             </button>
