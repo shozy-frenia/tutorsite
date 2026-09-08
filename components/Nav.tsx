@@ -28,42 +28,25 @@ interface NavGroup {
  * A module-level constant would be resolved once, in whatever language the
  * first render happened to use, and would then survive every switch — which is
  * exactly how the header used to end up in English under a Kazakh page.
+ *
+ * Every entry leads somewhere of its own. The previous shape had three items —
+ * Grade 10, Grade 11, Grade 12 — that all pointed at `/#grades`, which is a
+ * menu promising three destinations and delivering one, and it left the
+ * papers, tutor and features sections with no way in at all.
  */
 function menu(
   t: (key: string, vars?: Record<string, string | number>) => string
 ): NavGroup[] {
   return [
-    {
-      label: t("nav.practise"),
-      items: [
-        {
-          label: t("nav.mockPapers"),
-          hint: t("nav.mockPapersHint"),
-          href: "/library",
-        },
-        {
-          label: t("nav.dashboard"),
-          hint: t("nav.dashboardHint"),
-          href: "/dashboard",
-        },
-      ],
-    },
+    // A plain link, because the library is the thing most people came for and
+    // burying it under a dropdown costs a click for no reason.
+    { label: t("nav.mockPapers"), href: "/library" },
     {
       label: t("nav.theExam"),
       items: [
         {
-          label: t("nav.grade", { year: 10 }),
-          hint: t("nav.grade10Hint"),
-          href: "/#grades",
-        },
-        {
-          label: t("nav.grade", { year: 11 }),
-          hint: t("nav.grade11Hint"),
-          href: "/#grades",
-        },
-        {
-          label: t("nav.grade", { year: 12 }),
-          hint: t("nav.grade12Hint"),
+          label: t("nav.threeYears"),
+          hint: t("nav.threeYearsHint"),
           href: "/#grades",
         },
         {
@@ -73,7 +56,26 @@ function menu(
         },
       ],
     },
-    { label: t("nav.whatItDoes"), href: "/#features" },
+    {
+      label: t("nav.features"),
+      items: [
+        {
+          label: t("nav.featuresItem"),
+          hint: t("nav.featuresHint"),
+          href: "/#features",
+        },
+        {
+          label: t("nav.allPapers"),
+          hint: t("nav.allPapersHint"),
+          href: "/#papers",
+        },
+        {
+          label: t("nav.aiTutor"),
+          hint: t("nav.aiTutorHint"),
+          href: "/#tutor",
+        },
+      ],
+    },
   ];
 }
 
@@ -187,7 +189,12 @@ export default function Nav({
           <nav className="nav__links" aria-label={t("nav.menu")}>
             {groups.map((group) =>
               group.href ? (
-                <Link key={group.label} href={group.href} className="nav__link">
+                <Link
+                  key={group.label}
+                  href={group.href}
+                  className="nav__link"
+                  aria-current={pathname === group.href ? "page" : undefined}
+                >
                   {group.label}
                 </Link>
               ) : (
@@ -279,18 +286,51 @@ export default function Nav({
       <div className="mnav" aria-hidden={!menuOpen}>
         {groups.map((group) => (
           <div className="mnav__grp" key={group.label}>
-            <h4>{group.label}</h4>
             {group.href ? (
-              <Link href={group.href}>{group.label}</Link>
+              // A group that is itself a link needs no heading above its own
+              // name — the old sheet printed the label twice.
+              <Link href={group.href} className="mnav__lead">
+                {group.label}
+              </Link>
             ) : (
-              group.items?.map((item) => (
-                <Link key={item.label} href={item.href}>
-                  {item.label}
-                </Link>
-              ))
+              <>
+                <h4>{group.label}</h4>
+                {group.items?.map((item) => (
+                  <Link key={item.label} href={item.href}>
+                    {item.label}
+                  </Link>
+                ))}
+              </>
             )}
           </div>
         ))}
+
+        {/* The avatar menu is the only route to these on a phone, and it
+            shrinks to an icon there — so the sheet carries them too. */}
+        {(user || profile) && (
+          <div className="mnav__grp">
+            <h4>{t("nav.account.group")}</h4>
+            <Link href="/dashboard">{t("nav.progress")}</Link>
+            <Link href="/settings">{t("nav.settings")}</Link>
+            {user && (
+              <button
+                type="button"
+                className="mnav__signout"
+                onClick={() => void signOut()}
+              >
+                {t("nav.signOut")}
+              </button>
+            )}
+          </div>
+        )}
+
+        {!user && !profile && enabled && (
+          <div className="mnav__grp">
+            <h4>{t("nav.account.group")}</h4>
+            <Link href="/auth">{t("nav.signIn")}</Link>
+          </div>
+        )}
+
         <Link className="btn btn--primary btn--block" href="/library">
           <span className="btn__arrow">→</span>
           {t("nav.start")}

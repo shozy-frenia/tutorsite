@@ -1277,6 +1277,28 @@ html[data-filter-year] .paper-card {
   opacity: 0.6;
 }
 
+.footer__scale {
+  margin-top: var(--spacing-12);
+  padding-block: 4px;
+}
+
+.mnav__lead {
+  font-size: 22px;
+  font-weight: var(--fw-semibold);
+}
+
+.mnav__signout {
+  display: block;
+  padding-block: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: var(--fw-semibold);
+  color: var(--color-bad);
+  text-align: left;
+}
+
 .footer__bottom {
   margin-top: var(--spacing-56);
   padding-top: var(--spacing-24);

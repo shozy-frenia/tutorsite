@@ -61,7 +61,24 @@ export default function ScrollReveal() {
       { rootMargin: "0px 0px -12% 0px", threshold: 0.12 }
     );
 
+    // Arriving on a deep link is the one case where "reveal when scrolled to"
+    // is not enough. The browser jumps to the section before or around the
+    // moment this mounts, and anything inside it that is still waiting to be
+    // revealed would leave the reader looking at empty paper. So the hash
+    // target and everything inside it is shown outright, no transition.
+    const hash = window.location.hash.slice(1);
+    const target = hash ? document.getElementById(hash) : null;
+    if (target) {
+      const inside = [target, ...Array.from(target.querySelectorAll<HTMLElement>(selector))];
+      inside.forEach((node) => {
+        stagger(node);
+        node.classList.add("is-in");
+      });
+    }
+
     nodes.forEach((node) => {
+      if (node.classList.contains("is-in")) return;
+
       const box = node.getBoundingClientRect();
       const alreadyVisible = box.top < window.innerHeight && box.bottom > 0;
       if (alreadyVisible) {
