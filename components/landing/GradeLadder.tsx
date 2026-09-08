@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export interface LadderBand {
   grade: string;
@@ -39,6 +40,7 @@ export default function GradeLadder({
   initialMark,
   label,
 }: Props) {
+  const t = useT();
   // Best-first is how a boundary table is printed and how `gradeFor` walks it.
   const ordered = useMemo(
     () => [...bands].sort((a, b) => b.min - a.min),
@@ -112,7 +114,7 @@ export default function GradeLadder({
     <div className="ladder" data-reveal>
       <div className="ladder__top">
         <div>
-          <span className="eyebrow">The grade ladder</span>
+          <span className="eyebrow">{t("landing.ladder.title")}</span>
           <div className="mono muted" style={{ marginTop: 4 }}>
             {caption}
           </div>
@@ -139,7 +141,7 @@ export default function GradeLadder({
               type="button"
               className={`rung${band.grade === current.grade ? " is-on" : ""}`}
               onClick={() => setMark(band.min)}
-              aria-label={`${band.grade}: from ${band.min} marks`}
+              aria-label={`${band.grade}: ${band.min}+`}
             >
               <span className="rung__g">{band.grade}</span>
               <span className="rung__bar">
@@ -169,7 +171,7 @@ export default function GradeLadder({
         aria-valuemin={0}
         aria-valuemax={maxMark}
         aria-valuenow={mark}
-        aria-valuetext={`${mark} of ${maxMark}, grade ${current.grade}`}
+        aria-valuetext={`${mark}/${maxMark} — ${current.grade}`}
         onKeyDown={onKeyDown}
         onPointerDown={(event) => {
           setDragging(true);
@@ -198,9 +200,12 @@ export default function GradeLadder({
       </div>
 
       <div className="ladder__hint">
-        <span className="mono muted">Drag · click a grade · arrow keys</span>
+        <span className="mono muted">{t("landing.ladder.hintKeys")}</span>
         <span className="mono muted">
-          {ordered[0]?.grade} down to {ordered[ordered.length - 1]?.grade}
+          {t("landing.ladder.range", {
+            top: ordered[0]?.grade ?? "",
+            bottom: ordered[ordered.length - 1]?.grade ?? "",
+          })}
         </span>
       </div>
     </div>

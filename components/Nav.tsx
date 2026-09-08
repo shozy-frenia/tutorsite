@@ -20,37 +20,62 @@ interface NavGroup {
   items?: DropItem[];
 }
 
-const GROUPS: NavGroup[] = [
-  {
-    label: "Practise",
-    items: [
-      { label: "Mock papers", hint: "Every sitting we have", href: "/library" },
-      {
-        label: "Dashboard",
-        hint: "Mastery, streaks, projection",
-        href: "/dashboard",
-      },
-    ],
-  },
-  {
-    label: "The exam",
-    items: [
-      { label: "Grade 10", hint: "Core + one profile", href: "/#grades" },
-      {
-        label: "Grade 11",
-        hint: "English + second language",
-        href: "/#grades",
-      },
-      { label: "Grade 12", hint: "Core + two profiles", href: "/#grades" },
-      {
-        label: "Boundary tables",
-        hint: "Minimum mark per grade",
-        href: "/#boundaries",
-      },
-    ],
-  },
-  { label: "What it does", href: "/#features" },
-];
+/**
+ * The menu, built per render because every label is a dictionary lookup.
+ *
+ * A module-level constant would be resolved once, in whatever language the
+ * first render happened to use, and would then survive every switch — which is
+ * exactly how the header used to end up in English under a Kazakh page.
+ */
+function menu(
+  t: (key: string, vars?: Record<string, string | number>) => string
+): NavGroup[] {
+  return [
+    {
+      label: t("nav.practise"),
+      items: [
+        {
+          label: t("nav.mockPapers"),
+          hint: t("nav.mockPapersHint"),
+          href: "/library",
+        },
+        {
+          label: t("nav.dashboard"),
+          hint: t("nav.dashboardHint"),
+          href: "/dashboard",
+        },
+      ],
+    },
+    {
+      label: t("nav.theExam"),
+      items: [
+        {
+          label: t("nav.grade", { year: 10 }),
+          hint: t("nav.grade10Hint"),
+          href: "/#grades",
+        },
+        {
+          label: t("nav.grade", { year: 11 }),
+          hint: t("nav.grade11Hint"),
+          href: "/#grades",
+        },
+        {
+          label: t("nav.grade", { year: 12 }),
+          hint: t("nav.grade12Hint"),
+          href: "/#grades",
+        },
+        {
+          label: t("nav.boundaryTables"),
+          hint: t("nav.boundaryTablesHint"),
+          href: "/#boundaries",
+        },
+      ],
+    },
+    { label: t("nav.whatItDoes"), href: "/#features" },
+  ];
+}
+
+
 
 const CHEVRON = (
   <svg
@@ -92,6 +117,7 @@ export default function Nav({
   const t = useT();
   const { user, enabled, signOut } = useSession();
 
+  const groups = menu(t);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -136,13 +162,13 @@ export default function Nav({
           <Link
             href="/"
             className="logo no-underline shrink-0"
-            aria-label="Talap — home"
+            aria-label="Talap"
           >
             <BrandMark height={24} />
           </Link>
 
-          <nav className="nav__links" aria-label="Primary">
-            {GROUPS.map((group) =>
+          <nav className="nav__links" aria-label={t("nav.menu")}>
+            {groups.map((group) =>
               group.href ? (
                 <Link key={group.label} href={group.href} className="nav__link">
                   {group.label}
@@ -206,13 +232,14 @@ export default function Nav({
               ))}
 
             <Link className="btn btn--primary btn--sm nav__cta" href="/library">
-              <span className="btn__arrow">→</span>Start a mock
+              <span className="btn__arrow">→</span>
+              {t("nav.start")}
             </Link>
 
             <button
               type="button"
               className="burger"
-              aria-label={menuOpen ? "Close menu" : "Menu"}
+              aria-label={menuOpen ? t("common.close") : t("nav.menu")}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
             >
@@ -227,7 +254,7 @@ export default function Nav({
       <div className="nav__spacer" aria-hidden="true" />
 
       <div className="mnav" aria-hidden={!menuOpen}>
-        {GROUPS.map((group) => (
+        {groups.map((group) => (
           <div className="mnav__grp" key={group.label}>
             <h4>{group.label}</h4>
             {group.href ? (
@@ -242,7 +269,8 @@ export default function Nav({
           </div>
         ))}
         <Link className="btn btn--primary btn--block" href="/library">
-          <span className="btn__arrow">→</span>Start a mock
+          <span className="btn__arrow">→</span>
+          {t("nav.start")}
         </Link>
       </div>
 

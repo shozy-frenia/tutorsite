@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useEffect, useRef, useState } from "react";
 import Thinking from "@/components/motion/Thinking";
 import type { Question } from "@/lib/exam-types";
@@ -44,6 +46,7 @@ export default function TutorDrawer({
   question,
   studentAnswer,
 }: Props) {
+  const t = useT();
   const [tab, setTab] = useState<Tab>("explain");
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -148,8 +151,8 @@ export default function TutorDrawer({
       });
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({ error: "Request failed." }));
-        setError(payload.error ?? "Request failed.");
+        const payload = await response.json().catch(() => ({ error: t("tutor.requestFailed") }));
+        setError(payload.error ?? t("tutor.requestFailed"));
         setStreaming(false);
         return;
       }
@@ -158,7 +161,7 @@ export default function TutorDrawer({
 
       const reader = response.body?.getReader();
       if (!reader) {
-        setError("No response body.");
+        setError(t("tutor.noBody"));
         setStreaming(false);
         return;
       }
@@ -176,7 +179,7 @@ export default function TutorDrawer({
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        setError("Could not reach the tutor. Check your connection.");
+        setError(t("tutor.unreachable"));
       }
     } finally {
       clearWatchdogs();
@@ -201,7 +204,7 @@ export default function TutorDrawer({
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? "Could not generate a question.");
+        setError(payload.error ?? t("tutor.generateFailed"));
         return;
       }
 
@@ -213,7 +216,7 @@ export default function TutorDrawer({
         );
       }
     } catch {
-      setError("Could not reach the generator.");
+      setError(t("tutor.generatorUnreachable"));
     } finally {
       setVariantLoading(false);
     }
@@ -224,7 +227,7 @@ export default function TutorDrawer({
   return (
     <>
       <button
-        aria-label="Close tutor"
+        aria-label={t("tutor.close")}
         onClick={onClose}
         className="fixed inset-0 z-40 cursor-default"
         style={{ background: "rgba(21,21,21,0.35)", border: 0 }}
@@ -246,7 +249,7 @@ export default function TutorDrawer({
           style={{ borderBottom: "1px solid var(--color-pencil-gray)", background: "var(--color-ink)" }}
         >
           <div className="flex items-center gap-2">
-            <span className="mark">AI tutor</span>
+            <span className="mark">{t("tutor.title")}</span>
             {mode === "offline" && (
               <span className="tag tag--outline" style={{ color: "inherit" }}>
                 offline
@@ -282,7 +285,7 @@ export default function TutorDrawer({
                 color: "var(--color-ink)",
               }}
             >
-              {value === "explain" ? "EXPLAIN THIS" : "GIVE ME ANOTHER"}
+              {value === "explain" ? t("tutor.explainThis") : t("tutor.giveAnother")}
             </button>
           ))}
         </div>
@@ -322,7 +325,7 @@ export default function TutorDrawer({
                       cursor: "pointer",
                     }}
                   >
-                    {studentAnswer.trim() ? "Mark my working" : "Get me started"}
+                    {studentAnswer.trim() ? t("tutor.markMyWorking") : t("tutor.getStarted")}
                   </button>
                 </div>
               )}
@@ -356,7 +359,7 @@ export default function TutorDrawer({
 
               {streaming && messages.length === 0 && (
                 <Thinking
-                  label="Tutor is thinking"
+                  label={t("tutor.thinking")}
                   slow={slow}
                   slowNote="Первый ответ занимает больше обычного. Ещё несколько секунд."
                 />
@@ -388,7 +391,7 @@ export default function TutorDrawer({
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 maxLength={600}
-                placeholder="Ask a follow-up…"
+                placeholder={t("tutor.followUp")}
                 className="grow px-3 py-2 text-[15px]"
                 style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-cream-paper)" }}
               />
@@ -427,7 +430,7 @@ export default function TutorDrawer({
                   cursor: variantLoading ? "wait" : "pointer",
                 }}
               >
-                {variantLoading ? "Writing a question…" : "Generate a question →"}
+                {variantLoading ? t("tutor.thinking") : `${t("tutor.generate")} →`}
               </button>
             </div>
 

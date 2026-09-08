@@ -16,6 +16,8 @@ import TutorDrawer from "./TutorDrawer";
 import ExtendedAnswer from "./ExtendedAnswer";
 import CalculatorPanel from "./CalculatorPanel";
 import GradeBadge from "@/components/GradeBadge";
+import { useT, useLocale } from "@/components/i18n/LocaleProvider";
+import { subjectName } from "@/lib/i18n";
 import BrandMark from "@/components/BrandMark";
 
 /**
@@ -39,6 +41,7 @@ type AnswerState = Record<string, string>;
 type ResultState = Record<string, { awarded: number; checked: boolean; selfMarked: boolean }>;
 
 export default function ExamWorkspace({ paper, availableMarks }: Props) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerState>({});
   const [results, setResults] = useState<ResultState>({});
@@ -215,27 +218,31 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               cursor mid-paper is a trap, and EXIT already offers the way out. */}
           <BrandMark height={20} iconOnly className="shrink-0" />
           <Link href="/library" className="mono no-underline exam-bar__exit">
-            ↳ Exit
+            ↳ {t("exam.exit")}
           </Link>
           <span className="body-sm truncate" style={{ fontWeight: 600 }}>
             {paper.title}
           </span>
           <span className="mono hidden md:inline exam-bar__meta">
-            Grade {paper.gradeYear} · {paper.sitting} ·{" "}
-            {paper.calculator ? "calculator" : "no calculator"}
+            {t("nav.grade", { year: paper.gradeYear })} · {paper.sitting} ·{" "}
+            {paper.calculator
+              ? t("library.calculator")
+              : t("library.noCalculator")}
           </span>
           <span
             className="mono hidden lg:inline shrink-0 exam-bar__flag"
             title={paper.provenanceNote}
           >
-            {paper.provenance === "transcribed" ? "past paper" : "practice"}
+            {paper.provenance === "transcribed"
+              ? t("library.pastPaper")
+              : t("library.practice")}
           </span>
         </div>
 
         <div className="flex items-center gap-3 md:gap-5">
           <div className="text-right">
             <span className="mono block exam-bar__meta">
-              {overtime ? "Overtime" : "Time left"}
+              {overtime ? t("exam.overtime") : t("exam.timeLeft")}
             </span>
             <span
               className="mono t-mono"
@@ -251,7 +258,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
           </div>
 
           <div className="text-right">
-            <span className="mono block exam-bar__meta">Marked</span>
+            <span className="mono block exam-bar__meta">{t("exam.marked")}</span>
             <span className="mono t-mono">
               {rawMark}/{markedMarks || 0}
             </span>
@@ -260,14 +267,14 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
           <GradeBadge grade={grade} size="sm" />
 
           <button onClick={submit} className="btn btn--yellow btn--sm">
-            Submit
+            {t("exam.submitPaper")}
           </button>
         </div>
       </div>
 
       <div className="exam-grid">
         {/* -------------------------------------------------------- rail */}
-        <nav className="qrail" aria-label="Question navigation">
+        <nav className="qrail" aria-label={t("exam.questionNav")}>
           {paper.questions.map((q, i) => {
             const result = results[q.id];
             const answered = (answers[q.id] ?? "").trim().length > 0;
@@ -326,7 +333,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               disabled={index === 0}
               className="btn btn--outline btn--sm"
             >
-              ← Previous
+              ← {t("common.previous")}
             </button>
 
             <span className="mono muted qnav__count">
@@ -340,7 +347,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               disabled={index === paper.questions.length - 1}
               className="btn btn--outline btn--sm"
             >
-              Next →
+              {t("common.next")} →
             </button>
           </div>
         </main>
@@ -348,7 +355,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
         {/* ------------------------------------------------------- score */}
         <aside className="exam-aside">
           <div className="card card--plain flex flex-col gap-3">
-            <span className="mono muted">Live score</span>
+            <span className="mono muted">{t("exam.liveScore")}</span>
 
             <div className="flex items-end gap-2">
               <span className="stat-card__big">{rawMark}</span>
@@ -359,7 +366,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
               <>
                 <div className="pt-3" style={{ borderTop: "1px solid var(--color-pencil-gray)" }}>
                   <span className="t-micro block" style={{ opacity: 0.6 }}>
-                    ON THE {component.name.toUpperCase()} SCALE
+                    {t("exam.onScale", { component: component.name })}
                   </span>
                   <span className="t-subheading t-mono">
                     <span key={scaled.scaledMark} className="tick">
@@ -375,12 +382,12 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
                     {next ? (
                       <>
                         <span className="t-micro block" style={{ opacity: 0.6 }}>
-                          TO {next.nextGrade}
+                          {t("exam.toGrade", { grade: next.nextGrade })}
                         </span>
                         <span className="t-subheading t-mono">+{next.marksNeeded}</span>
                       </>
                     ) : (
-                      <span className="t-micro">TOP BAND</span>
+                      <span className="micro">{t("exam.topBand")}</span>
                     )}
                   </div>
                 </div>
@@ -388,14 +395,22 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             )}
 
             <div className="pt-3 flex flex-col gap-1" style={{ borderTop: "1px solid var(--color-pencil-gray)" }}>
-              <Stat label="ANSWERED" value={`${answeredCount} / ${paper.questions.length}`} />
-              <Stat label="MARKED" value={`${checkedCount} / ${paper.questions.length}`} />
-              <Stat label="ELAPSED" value={formatClock(elapsed)} />
+              <Stat
+                label={t("exam.answered")}
+                value={`${answeredCount} / ${paper.questions.length}`}
+              />
+              <Stat
+                label={t("exam.marked")}
+                value={`${checkedCount} / ${paper.questions.length}`}
+              />
+              <Stat label={t("exam.elapsed")} value={formatClock(elapsed)} />
             </div>
 
             <p className="t-micro" style={{ opacity: 0.55, lineHeight: 1.4 }}>
-              Marks scale from the {availableMarks} available here onto the official{" "}
-              {component?.maxMark ?? "—"}-mark component scale before the grade is read.
+              {t("exam.scaleNote", {
+                available: availableMarks,
+                max: component?.maxMark ?? "—",
+              })}
             </p>
           </div>
 
@@ -404,7 +419,7 @@ export default function ExamWorkspace({ paper, availableMarks }: Props) {
             className="btn btn--yellow btn--sm btn--block"
             style={{ marginTop: "var(--spacing-12)" }}
           >
-            Ask the AI tutor
+            {t("exam.askTutorFull")}
           </button>
 
           {/* The paper says whether a calculator is allowed; offering one on a
@@ -456,6 +471,7 @@ function QuestionSheet({
   onSelfMark,
   onAskTutor,
 }: SheetProps) {
+  const t = useT();
   const [steps, setSteps] = useState<boolean[]>(() =>
     question.markScheme.map(() => false)
   );
@@ -483,7 +499,9 @@ function QuestionSheet({
           </div>
         </div>
         <span className="tag tag--outline shrink-0">
-          {question.marks} {question.marks === 1 ? "mark" : "marks"}
+          {question.marks === 1
+            ? t("exam.markSuffix", { count: question.marks })
+            : t("exam.marksSuffix", { count: question.marks })}
         </span>
       </div>
 
@@ -515,7 +533,7 @@ function QuestionSheet({
             >
               <Image
                 src={question.figure}
-                alt={question.figureAlt ?? "Question diagram"}
+                alt={question.figureAlt ?? t("exam.questionDiagram")}
                 width={420}
                 height={280}
                 style={{ height: "auto", width: "100%", maxWidth: 420 }}
@@ -523,7 +541,7 @@ function QuestionSheet({
               />
             </div>
             <figcaption className="t-micro mt-1" style={{ opacity: 0.55 }}>
-              FIGURE AS PRINTED ON THE PAPER
+              {t("exam.figureAsPrinted")}
             </figcaption>
           </figure>
         )}
@@ -531,7 +549,7 @@ function QuestionSheet({
         {question.promptKk && (
           <details>
             <summary className="t-micro cursor-pointer" style={{ opacity: 0.6 }}>
-              ↳ ORIGINAL (KAZAKH)
+              ↳ {t("exam.originalKazakh")}
             </summary>
             <p className="text-[15px] mt-2 m-0" style={{ lineHeight: 1.35, opacity: 0.8 }}>
               {question.promptKk}
@@ -557,7 +575,7 @@ function QuestionSheet({
               onClick={onAskTutor}
               className="btn btn--yellow btn--sm"
             >
-              Ask the tutor
+              {t("exam.askTutor")}
             </button>
           </div>
         </div>
@@ -569,7 +587,7 @@ function QuestionSheet({
         {question.marking === "auto" && question.answerKind === "choice" ? (
           <fieldset className="border-0 p-0 m-0 flex flex-col gap-2">
             <legend className="t-micro mb-2" style={{ opacity: 0.6 }}>
-              YOUR ANSWER
+              {t("exam.yourAnswer")}
             </legend>
             {question.options?.map((option) => {
               const selected = value === option;
@@ -611,14 +629,14 @@ function QuestionSheet({
         ) : question.marking === "auto" ? (
           <label className="flex flex-col gap-2">
             <span className="t-micro" style={{ opacity: 0.6 }}>
-              YOUR ANSWER {question.unit ? `(${question.unit})` : ""}
+              {t("exam.yourAnswer")} {question.unit ? `(${question.unit})` : ""}
             </span>
             <input
               value={value}
               onChange={(event) => onChange(event.target.value)}
               disabled={result?.checked}
               maxLength={220}
-              placeholder="Type your answer…"
+              placeholder={t("exam.answerPlaceholder")}
               className="px-4 py-3 text-[18px] t-mono"
               style={{
                 border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
@@ -636,7 +654,7 @@ function QuestionSheet({
               onChange={(event) => onChange(event.target.value)}
               rows={5}
               maxLength={2000}
-              placeholder="Set out your working, one step per line…"
+              placeholder={t("exam.workingPlaceholder")}
               className="px-4 py-3 text-[16px]"
               style={{
                 border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
@@ -655,7 +673,7 @@ function QuestionSheet({
               disabled={!value.trim()}
               className="btn btn--primary btn--sm"
             >
-              Check answer
+              {t("exam.checkAnswer")}
             </button>
           )}
 
@@ -664,7 +682,7 @@ function QuestionSheet({
               onClick={onReveal}
               className="btn btn--primary btn--sm"
             >
-              Reveal mark scheme
+              {t("exam.revealScheme")}
             </button>
           )}
 
@@ -672,7 +690,7 @@ function QuestionSheet({
               onClick={onAskTutor}
               className="btn btn--yellow btn--sm"
             >
-              Ask the tutor
+              {t("exam.askTutor")}
             </button>
 
         </div>
@@ -811,7 +829,9 @@ function QuestionSheet({
                   cursor: "pointer",
                 }}
               >
-                {result?.checked ? `Recorded — ${result.awarded}` : "Record my marks"}
+                {result?.checked
+                  ? t("exam.recorded", { count: result.awarded })
+                  : t("exam.recordMarks")}
               </button>
             </div>
           )}
@@ -822,6 +842,7 @@ function QuestionSheet({
 }
 
 function HintBlock({ hint }: { hint: string }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <div>
@@ -830,14 +851,14 @@ function HintBlock({ hint }: { hint: string }) {
           onClick={() => setOpen(true)}
           className="btn btn--quiet btn--sm"
         >
-          ↳ Show hint
+          ↳ {t("exam.showHint")}
         </button>
       ) : (
         <div
           className="p-3 rise"
           style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-highlighter)" }}
         >
-          <span className="t-micro block mb-1">HINT</span>
+          <span className="micro block mb-1">{t("exam.hint")}</span>
           <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
             {hint}
           </p>
@@ -870,6 +891,7 @@ function Results({
   results: ResultState;
   saved: boolean;
 }) {
+  const t = useT();
   const byTopic = useMemo(() => {
     const totals = new Map<string, { marks: number; awarded: number }>();
     for (const q of paper.questions) {
@@ -903,7 +925,7 @@ function Results({
       </div>
 
       <div className="px-4 md:px-10 pt-8 max-w-[1100px]">
-        <span className="mark t-label">PAPER COMPLETE</span>
+        <span className="mark">{t("exam.paperComplete")}</span>
         <h1 className="t-heading mt-4" style={{ maxWidth: "16ch" }}>
           {paper.title}
         </h1>
@@ -911,31 +933,39 @@ function Results({
         <div className="grid md:grid-cols-4 gap-4 mt-8">
           <div className="panel p-5 flex flex-col justify-between md:col-span-1">
             <span className="t-micro" style={{ opacity: 0.6 }}>
-              GRADE
+              {t("common.grade")}
             </span>
             <GradeBadge grade={grade} size="xl" />
             {next && (
               <span className="t-micro mt-2">
-                +{next.marksNeeded} MARKS TO {next.nextGrade}
+                {t("exam.marksToGrade", { count: next.marksNeeded, grade: next.nextGrade })}
               </span>
             )}
           </div>
 
           <div className="panel p-5 md:col-span-3 grid sm:grid-cols-3 gap-4">
-            <Metric label="RAW MARK" value={`${rawMark}`} sub={`of ${availableMarks} available`} />
             <Metric
-              label="SCALED"
+              label={t("exam.rawMark")}
+              value={`${rawMark}`}
+              sub={t("exam.ofAvailable", { count: availableMarks })}
+            />
+            <Metric
+              label={t("exam.scaled")}
               value={`${scaledMark}`}
               sub={`of ${componentMax} on ${component?.name ?? "the paper"}`}
             />
-            <Metric label="TIME" value={formatClock(elapsed)} sub={`of ${paper.durationMinutes}:00 allowed`} />
+            <Metric
+              label={t("exam.time")}
+              value={formatClock(elapsed)}
+              sub={t("exam.ofAllowed", { allowed: `${paper.durationMinutes}:00` })}
+            />
           </div>
         </div>
 
         {/* topic breakdown */}
         <div className="swiss mt-4">
           <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-pencil-gray)" }}>
-            <h2 className="t-subheading">Where the marks went</h2>
+            <h2 className="sub">{t("exam.whereMarksWent")}</h2>
           </div>
           <ul className="list-none p-0 m-0">
             {byTopic.map((row) => (
@@ -977,7 +1007,7 @@ function Results({
         {/* question list */}
         <div className="swiss mt-4">
           <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--color-pencil-gray)" }}>
-            <h2 className="t-subheading">Question by question</h2>
+            <h2 className="sub">{t("exam.questionByQuestion")}</h2>
           </div>
           <ul className="list-none p-0 m-0">
             {paper.questions.map((q) => {
@@ -1043,11 +1073,11 @@ function Results({
               color: "var(--color-ink)",
             }}
           >
-            Another paper
+            {t("exam.anotherPaper")}
           </Link>
           {saved && (
             <span className="t-micro" style={{ opacity: 0.6 }}>
-              ✓ SAVED TO THIS DEVICE
+              ✓ {t("exam.savedToDevice")}
             </span>
           )}
         </div>

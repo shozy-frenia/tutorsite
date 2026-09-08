@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -55,6 +57,7 @@ const MOVE_MS = 520;
  * real link to the paper.
  */
 export default function PaperCoverflow({ papers }: Props) {
+  const t = useT();
   const n = papers.length;
   const [active, setActive] = useState(0);
   const lockRef = useRef(false);
@@ -92,7 +95,7 @@ export default function PaperCoverflow({ papers }: Props) {
       <div
         role="group"
         aria-roledescription="carousel"
-        aria-label="Mock papers"
+        aria-label={t("nav.mockPapers")}
         tabIndex={0}
         onKeyDown={onKeyDown}
         style={{
@@ -170,7 +173,7 @@ export default function PaperCoverflow({ papers }: Props) {
                   }}
                 >
                   <span className="mono">
-                    Grade {paper.gradeYear} · {paper.subject}
+                    {t("nav.grade", { year: paper.gradeYear })} · {paper.subject}
                   </span>
                   <h3 className="sub mt-1">{paper.title}</h3>
                 </div>
@@ -180,9 +183,9 @@ export default function PaperCoverflow({ papers }: Props) {
 
                   <dl className="grid grid-cols-3 m-0">
                     {[
-                      ["Questions", paper.questions],
-                      ["Marks", paper.marks],
-                      ["Minutes", paper.minutes],
+                      [t("common.questions"), paper.questions],
+                      [t("common.marks"), paper.marks],
+                      [t("common.minutes"), paper.minutes],
                     ].map(([label, value], index) => (
                       <div
                         key={label}
@@ -211,14 +214,18 @@ export default function PaperCoverflow({ papers }: Props) {
 
                   <div className="flex flex-wrap gap-2 mt-auto">
                     <span className="tag chip-strong">
-                      {paper.calculator ? "calculator" : "no calculator"}
+                      {paper.calculator
+                        ? t("library.calculator")
+                        : t("library.noCalculator")}
                     </span>
                     <span
                       className={
                         paper.pastPaper ? "tag tag--mint" : "tag tag--outline"
                       }
                     >
-                      {paper.pastPaper ? "past paper" : "practice"}
+                      {paper.pastPaper
+                        ? t("library.pastPaper")
+                        : t("library.practice")}
                     </span>
                   </div>
                 </div>
@@ -237,7 +244,7 @@ export default function PaperCoverflow({ papers }: Props) {
                     transition: "background 200ms ease, color 200ms ease",
                   }}
                 >
-                  {isActive ? "Sit this paper →" : "Bring to front"}
+                  {isActive ? t("library.sit") : t("library.bringToFront")}
                 </div>
 
                 {/* Everything off-centre recedes rather than competing.

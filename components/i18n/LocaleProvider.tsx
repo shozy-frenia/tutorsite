@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -42,18 +43,30 @@ export function LocaleProvider({
   children: React.ReactNode;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initial);
+  const router = useRouter();
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    try {
-      // One year, site-wide, lax — this is a preference, not a credential.
-      document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
-    } catch {
-      /* cookies blocked — the choice still holds for this session */
-    }
-    document.documentElement.lang = LOCALE_TAG[next];
-    window.dispatchEvent(new CustomEvent("talap:locale", { detail: next }));
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      setLocaleState(next);
+      try {
+        // One year, site-wide, lax — this is a preference, not a credential.
+        document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+      } catch {
+        /* cookies blocked — the choice still holds for this session */
+      }
+      document.documentElement.lang = LOCALE_TAG[next];
+      window.dispatchEvent(new CustomEvent("talap:locale", { detail: next }));
+
+      // Client components re-render from the state above, but half this site
+      // is server-rendered — the landing copy, the library, every page title.
+      // Those were produced from the cookie on the server and will not change
+      // until the server is asked again. Without this refresh the switcher
+      // translates the header and leaves the page under it in the old
+      // language, which is the bug it looks like it has.
+      router.refresh();
+    },
+    [router]
+  );
 
   // Keep <html lang> honest for screen readers and for Intl on first mount.
   useEffect(() => {

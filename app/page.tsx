@@ -9,6 +9,8 @@ import PaperCoverflow from "@/components/motion/PaperCoverflow";
 import { GRADE_STAGES, examSubjectsFor, subjectById } from "@/data/curriculum";
 import { allBoundarySets, boundariesFor } from "@/data/grade-boundaries";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
+import { getT } from "@/lib/i18n/server";
+import { subjectName } from "@/lib/i18n";
 
 /**
  * Landing page.
@@ -21,45 +23,9 @@ import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
  * the fastest way to lose a student on their second visit.
  */
 
-const FEATURES = [
-  {
-    tag: "NIS specific",
-    title: "Real papers, not approximations",
-    body: "Two full Grade 10 Mathematics Paper 1 sittings, transcribed question by question with the mark scheme that earns each mark.",
-    tone: "card--mint",
-  },
-  {
-    tag: "Official scale",
-    title: "The actual boundary table",
-    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 44/90. We use the published tables, never a flat percentage.",
-    tone: "card--plain",
-  },
-  {
-    tag: "AI powered",
-    title: "A tutor that reads your working",
-    body: "It starts from the step you missed, quotes the mark scheme wording, and answers in Kazakh, Russian or English — whichever you wrote in.",
-    tone: "card--teal",
-  },
-  {
-    tag: "Infinite drill",
-    title: "Same topic, same tariff, new numbers",
-    body: "Ask for another question at this level and get one: same syllabus strand, same mark count, same number of reasoning steps.",
-    tone: "card--plain",
-  },
-  {
-    tag: "Tracked",
-    title: "Every attempt, plotted",
-    body: "Mastery by topic, grade projection from U to A*, and the streak counter that makes you open it tomorrow.",
-    tone: "card--blush",
-    wide: true,
-  },
-];
 
-const TUTOR_POINTS = [
-  ["On every page", "Ask Talap floats over the library and the dashboard."],
-  ["Inside a question", "The workspace drawer marks your working step by step."],
-  ["Without a key", "It still answers, from the real tables in this repo."],
-];
+
+
 
 /** A real exchange, replayed. See the note in TutorDemo. */
 const DEMO_CHAT = [
@@ -75,6 +41,17 @@ const DEMO_CHAT = [
   },
 ];
 
+/** Feature cards, in the order the page shows them. */
+const FEATURES = [
+  { key: "papers", tone: "card--mint" },
+  { key: "scale", tone: "card--plain" },
+  { key: "tutor", tone: "card--teal" },
+  { key: "drill", tone: "card--plain" },
+  { key: "tracked", tone: "card--blush", wide: true },
+] as const;
+
+const TUTOR_POINTS = ["everywhere", "inQuestion", "noKey"] as const;
+
 function Divider() {
   return (
     <div className="divider" data-reveal aria-hidden="true">
@@ -85,7 +62,8 @@ function Divider() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const { t, locale } = await getT();
   const totalQuestions = PAPERS.reduce((sum, p) => sum + p.questions.length, 0);
   const totalMarks = PAPERS.reduce((sum, p) => sum + availableMarks(p), 0);
 
@@ -112,13 +90,13 @@ export default function Home() {
     .filter((min) => min > 0);
 
   const ticker = [
-    `${PAPERS.length} full mock papers`,
-    `${totalQuestions} questions`,
-    `${totalMarks} marks`,
-    `${allBoundarySets().length} official boundary tables`,
-    "no calculator",
-    "90 minutes",
-    "A* to U",
+    t("landing.ticker.papers", { count: PAPERS.length }),
+    t("landing.ticker.questions", { count: totalQuestions }),
+    t("landing.ticker.marks", { count: totalMarks }),
+    t("landing.ticker.tables", { count: allBoundarySets().length }),
+    t("landing.ticker.noCalculator"),
+    t("landing.ticker.minutes"),
+    t("landing.ticker.scale"),
   ];
 
   // Flattened for the coverflow, which is a client component and so can only
@@ -131,7 +109,7 @@ export default function Home() {
       return {
         id: paper.id,
         title: paper.title,
-        subject: subject?.name ?? paper.subjectId,
+        subject: subject ? subjectName(subject, locale) : paper.subjectId,
         glyph: subject?.glyph ?? "",
         gradeYear: paper.gradeYear,
         sitting: paper.sitting,
@@ -168,16 +146,16 @@ export default function Home() {
           <div className="shell hero__grid">
             <div>
               <span className="tag" data-reveal>
-                МЭСК · NIS · Cambridge
+                {t("landing.eyebrow")}
               </span>
               <h1
                 className="display"
                 style={{ marginTop: "var(--spacing-24)" }}
                 data-hl
               >
-                Ace Cambridge exams{" "}
+                {t("landing.title.a")}{" "}
                 <span className="hl">
-                  <span>without the burnout</span>
+                  <span>{t("landing.title.b")}</span>
                 </span>
               </h1>
               <p
@@ -185,39 +163,39 @@ export default function Home() {
                 style={{ marginTop: "var(--spacing-32)" }}
                 data-reveal
               >
-                Mock papers taken from the real thing, marked against the real
-                boundary table, with a tutor that explains the one step you
-                actually got wrong.
+                {t("landing.sub")}
               </p>
               <p
                 className="body-sm measure muted"
                 style={{ marginTop: "var(--spacing-16)" }}
                 data-reveal
               >
-                Built for students sitting the Cambridge International
-                Examination at Nazarbayev Intellectual Schools. Grades 10, 11
-                and 12.
+                {t("landing.builtFor")}
               </p>
               <div className="hero__cta" data-reveal>
                 <Link className="btn btn--primary" href="/library">
-                  <span className="btn__arrow">→</span>Sit a mock exam
+                  <span className="btn__arrow">→</span>
+                  {t("landing.cta.primary")}
                 </Link>
                 <Link className="btn btn--outline" href="/dashboard">
-                  See the dashboard
+                  {t("landing.cta.secondary")}
                 </Link>
               </div>
               <p className="caption muted hero__note" data-reveal>
-                no account needed for the first paper.
+                {t("landing.noAccount")}
               </p>
             </div>
 
             {ladderBands.length > 0 && component1 && (
               <GradeLadder
-                caption={`Maths · ${component1.name} · /${component1.maxMark}`}
+                caption={t("landing.ladder.caption", {
+                  component: component1.name,
+                  max: component1.maxMark,
+                })}
                 maxMark={component1.maxMark}
                 bands={ladderBands}
                 initialMark={demoMark}
-                label={`Marks out of ${component1.maxMark}`}
+                label={t("landing.ladder.aria", { max: component1.maxMark })}
               />
             )}
           </div>
@@ -244,31 +222,34 @@ export default function Home() {
           <div className="shell">
             <div className="head">
               <span className="eyebrow" data-reveal>
-                ↳ Five things, done properly
+                ↳ {t("landing.does.eyebrow")}
               </span>
               <h2 className="h measure-mx" data-hl>
-                What it{" "}
                 <span className="hl hl--mint">
-                  <span>actually does</span>
+                  <span>{t("landing.does.title")}</span>
                 </span>
               </h2>
             </div>
             <div className="feats" data-stagger>
               {FEATURES.map((feature) => (
                 <article
-                  key={feature.tag}
+                  key={feature.key}
                   className={`card ${feature.tone} card--tilt feat${
-                    feature.wide ? " feat--wide" : ""
+                    "wide" in feature && feature.wide ? " feat--wide" : ""
                   }`}
                 >
                   <span
                     className={`tag${feature.tone === "card--plain" ? "" : " tag--outline"}`}
                     style={{ alignSelf: "flex-start" }}
                   >
-                    {feature.tag}
+                    {t(`landing.feature.${feature.key}.tag`)}
                   </span>
-                  <h3 className="feat__t">{feature.title}</h3>
-                  <p className="body-sm">{feature.body}</p>
+                  <h3 className="feat__t">
+                    {t(`landing.feature.${feature.key}.title`)}
+                  </h3>
+                  <p className="body-sm">
+                    {t(`landing.feature.${feature.key}.body`)}
+                  </p>
                 </article>
               ))}
             </div>
@@ -282,12 +263,11 @@ export default function Home() {
           <div className="shell">
             <div className="head">
               <span className="eyebrow" data-reveal>
-                ↳ Click a card · arrow keys work
+                ↳ {t("landing.papers.eyebrow")}
               </span>
               <h2 className="h measure-mx" data-hl>
-                Every paper we have,{" "}
                 <span className="hl hl--teal">
-                  <span>right now</span>
+                  <span>{t("landing.papers.title")}</span>
                 </span>
               </h2>
             </div>
@@ -302,12 +282,11 @@ export default function Home() {
           <div className="shell">
             <div className="head">
               <span className="eyebrow" data-reveal>
-                ↳ The architecture
+                ↳ {t("landing.architecture.eyebrow")}
               </span>
               <h2 className="h measure-mx" data-hl>
-                Three years,{" "}
                 <span className="hl hl--teal">
-                  <span>three different exams</span>
+                  <span>{t("landing.architecture.title")}</span>
                 </span>
               </h2>
             </div>
@@ -322,11 +301,13 @@ export default function Home() {
                 >
                   <div className="grade__num">
                     <b>{stage.year}</b>
-                    <span className="mono muted">grade</span>
+                    <span className="mono muted">{t("stage.gradeWord")}</span>
                   </div>
-                  <h3 className="feat__t">{stage.title}</h3>
-                  <span className="mono muted">{stage.standard}</span>
-                  <p className="body-sm">{stage.summary}</p>
+                  <h3 className="feat__t">{t(`stage.${stage.year}.title`)}</h3>
+                  <span className="mono muted">
+                    {t(`stage.${stage.year}.standard`)}
+                  </span>
+                  <p className="body-sm">{t(`stage.${stage.year}.summary`)}</p>
 
                   <ul className="grade__list">
                     {examSubjectsFor({
@@ -336,18 +317,22 @@ export default function Home() {
                     }).map((subject) => (
                       <li key={subject.id}>
                         <b>{subject.glyph}</b>
-                        {subject.name}
+                        {subjectName(subject, locale)}
                       </li>
                     ))}
                     {stage.year !== 11 && (
                       <li>
                         <b>+</b>
-                        {stage.year === 12 ? "2 profiles" : "1 profile"}
+                        {stage.year === 12
+                          ? t("stage.profileTwo")
+                          : t("stage.profileOne")}
                       </li>
                     )}
                   </ul>
 
-                  <div className="grade__foot">{stage.load}</div>
+                  <div className="grade__foot">
+                    {t(`stage.${stage.year}.load`)}
+                  </div>
                 </article>
               ))}
             </div>
@@ -361,12 +346,11 @@ export default function Home() {
           <div className="shell">
             <div className="head">
               <span className="eyebrow" data-reveal>
-                Minimum mark per grade
+                {t("landing.boundaries.eyebrow")}
               </span>
               <h2 className="h measure-mx" data-hl>
-                The boundaries we{" "}
                 <span className="hl">
-                  <span>grade against</span>
+                  <span>{t("landing.boundaries.title")}</span>
                 </span>
               </h2>
             </div>
@@ -381,12 +365,11 @@ export default function Home() {
           <div className="shell">
             <div className="head head--left">
               <span className="eyebrow" data-reveal>
-                Kazakh · Russian · English
+                {t("landing.tutor.eyebrow")}
               </span>
               <h2 className="h" data-hl>
-                It answers in the{" "}
                 <span className="hl hl--blush">
-                  <span>language you asked in</span>
+                  <span>{t("landing.tutor.title")}</span>
                 </span>
               </h2>
             </div>
@@ -394,23 +377,22 @@ export default function Home() {
             <div className="tutor">
               <div>
                 <h3 className="sub" data-reveal>
-                  A tutor that has read the mark scheme.
+                  {t("landing.tutor.lead")}
                 </h3>
                 <p
                   className="body"
                   style={{ marginTop: "var(--spacing-16)" }}
                   data-reveal
                 >
-                  Ask it what a grade needs and it answers from the published
-                  boundary table, not a percentage it made up. Ask it about your
-                  working and it starts at the step you actually lost the mark
-                  on.
+                  {t("landing.tutor.body")}
                 </p>
                 <ul className="tutor__points" data-stagger>
-                  {TUTOR_POINTS.map(([title, body]) => (
-                    <li key={title}>
-                      <b>{title}</b>
-                      <span className="body-sm">{body}</span>
+                  {TUTOR_POINTS.map((point) => (
+                    <li key={point}>
+                      <b>{t(`landing.tutorPoint.${point}.title`)}</b>
+                      <span className="body-sm">
+                        {t(`landing.tutorPoint.${point}.body`)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -419,13 +401,17 @@ export default function Home() {
                   style={{ marginTop: "var(--spacing-32)" }}
                   href="/library"
                 >
-                  <span className="btn__arrow">→</span>Try it on a real paper
+                  <span className="btn__arrow">→</span>
+                  {t("landing.tutor.cta")}
                 </Link>
               </div>
 
               <TutorDemo
-                subjectLine="Talap · Grade 10 · KZ"
-                paperLine={`Maths · ${component1?.name ?? "Component 1"}`}
+                subjectLine={t("landing.tutor.demoBar", { year: 10 })}
+                paperLine={t("landing.ladder.caption", {
+                  component: component1?.name ?? "Component 1",
+                  max: component1?.maxMark ?? 80,
+                })}
                 mark={demoMark}
                 maxMark={demoMax}
                 grade={demoGrade}
@@ -440,9 +426,8 @@ export default function Home() {
         <section className="final" id="start">
           <div className="shell">
             <h2 className="h measure-mx" data-hl>
-              Start with{" "}
               <span className="hl">
-                <span>one paper</span>
+                <span>{t("landing.final.title")}</span>
               </span>
             </h2>
             <p
@@ -450,15 +435,15 @@ export default function Home() {
               style={{ marginTop: "var(--spacing-24)" }}
               data-reveal
             >
-              90 minutes, 18 questions, no calculator. You will know your grade
-              the second you submit.
+              {t("landing.final.sub")}
             </p>
             <div style={{ marginTop: "var(--spacing-40)" }} data-reveal>
               <Link className="btn btn--primary" href="/library">
-                <span className="btn__arrow">→</span>Choose a mock
+                <span className="btn__arrow">→</span>
+                {t("landing.final.cta")}
               </Link>
               <p className="caption muted" style={{ marginTop: 12 }}>
-                no account needed for the first paper.
+                {t("landing.noAccount")}
               </p>
             </div>
           </div>
@@ -477,31 +462,29 @@ export default function Home() {
                 className="caption muted"
                 style={{ marginTop: "var(--spacing-16)", maxWidth: 300 }}
               >
-                МЭСК preparation for NIS students. Real papers, real boundaries,
-                a tutor that reads your working.
+                {t("footer.blurb")}
               </p>
             </div>
 
             <div className="footer__col">
-              <h4>Practise</h4>
-              <Link href="/library">↳ Mock papers</Link>
-              <Link href="/dashboard">↳ Dashboard</Link>
-              <Link href="/#boundaries">↳ Boundary tables</Link>
+              <h4>{t("footer.practise")}</h4>
+              <Link href="/library">↳ {t("nav.mockPapers")}</Link>
+              <Link href="/dashboard">↳ {t("nav.dashboard")}</Link>
+              <Link href="/#boundaries">↳ {t("nav.boundaryTables")}</Link>
             </div>
 
             <div className="footer__col">
-              <h4>Scale</h4>
+              <h4>{t("footer.scale")}</h4>
               <ul>
                 <li className="mono">↳ A* A B C D E U</li>
-                <li className="caption muted">↳ Official boundaries</li>
+                <li className="caption muted">↳ {t("footer.officialBoundaries")}</li>
               </ul>
             </div>
           </div>
 
           <div className="footer__bottom">
             <p className="micro muted">
-              Demo build. Question content transcribed from NIS past papers for
-              study use. Grade boundaries from the published МЭСК table.
+              {t("footer.demo")}
             </p>
           </div>
         </div>

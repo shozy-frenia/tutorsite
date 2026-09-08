@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 /**
  * Site-wide study assistant.
@@ -19,16 +20,6 @@ interface Message {
   content: string;
 }
 
-const CHIPS = [
-  "What do I sit in Grade 10?",
-  "Сколько нужно на A по математике?",
-  "How are the grade boundaries set?",
-  "How should I revise for Paper 1?",
-];
-
-const OPENING =
-  "I am the Talap study assistant. Ask me what you sit this year, what a grade actually needs, or anything on the syllabus — in Kazakh, Russian or English.";
-
 /** Render **bold** spans; everything else stays plain text. */
 function renderText(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((chunk, i) =>
@@ -41,6 +32,8 @@ function renderText(text: string) {
 }
 
 export default function AskTalap() {
+  const t = useT();
+  const chips = [t("ask.chip1"), t("ask.chip2"), t("ask.chip3"), t("ask.chip4")];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -90,8 +83,7 @@ export default function AskTalap() {
           {
             role: "assistant",
             content:
-              payload?.error ??
-              "I could not reach the assistant just now. Try again in a moment.",
+              payload?.error ?? t("ask.unreachable"),
           },
         ]);
         return;
@@ -104,8 +96,7 @@ export default function AskTalap() {
         ...history,
         {
           role: "assistant",
-          content:
-            "I could not reach the assistant — check your connection and try again. The mock papers and their mark schemes work offline.",
+          content: t("ask.offlineNote"),
         },
       ]);
     } finally {
@@ -117,11 +108,11 @@ export default function AskTalap() {
     return (
       <button
         onClick={() => setOpen(true)}
-        aria-label="Open the study assistant"
+        aria-label={t("ask.open")}
         className="ask"
       >
         <i aria-hidden="true" />
-        Ask Talap ↗
+        {t("ask.open")} ↗
       </button>
     );
   }
@@ -129,7 +120,7 @@ export default function AskTalap() {
   return (
     <aside
       role="dialog"
-      aria-label="Talap study assistant"
+      aria-label={t("ask.open")}
       className="fixed z-50 flex flex-col rise"
       style={{
         right: "20px",
@@ -151,22 +142,22 @@ export default function AskTalap() {
         }}
       >
         <div className="flex items-center gap-2">
-          <span className="mono">Ask Talap</span>
+          <span className="mono">{t("ask.open")}</span>
           {mode === "offline" && (
-            <span className="tag tag--outline">offline</span>
+            <span className="tag tag--outline">{t("tutor.offline")}</span>
           )}
         </div>
         <button
           onClick={() => setOpen(false)}
           className="btn btn--outline btn--sm"
-          aria-label="Close the study assistant"
+          aria-label={t("common.close")}
         >
-          Close ✕
+          {t("common.close")} ✕
         </button>
       </div>
 
       <div ref={logRef} className="grow overflow-y-auto p-3 flex flex-col gap-2.5">
-        <p className="msg msg--ai">{OPENING}</p>
+        <p className="msg msg--ai">{t("ask.opening")}</p>
 
         {messages.map((message, i) => (
           <p
@@ -191,7 +182,7 @@ export default function AskTalap() {
 
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
-            {CHIPS.map((chip) => (
+            {chips.map((chip) => (
               <button
                 key={chip}
                 onClick={() => void ask(chip)}
@@ -221,7 +212,7 @@ export default function AskTalap() {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           maxLength={600}
-          placeholder="Ask about the exam…"
+          placeholder={t("tutor.placeholder")}
           className="field grow"
         />
         <button
@@ -229,7 +220,7 @@ export default function AskTalap() {
           disabled={busy || !draft.trim()}
           className="btn btn--primary btn--sm"
         >
-          Send
+          {t("tutor.send")}
         </button>
       </form>
     </aside>

@@ -10,11 +10,16 @@ import {
   subjectById,
 } from "@/data/curriculum";
 import { boundariesFor } from "@/data/grade-boundaries";
+import { getT } from "@/lib/i18n/server";
+import { subjectName } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Mock papers — Talap",
-  description: "Full NIS / МЭСК mock papers with official grade boundaries.",
-};
+export async function generateMetadata() {
+  const { t } = await getT();
+  return {
+    title: `${t("nav.mockPapers")} — Talap`,
+    description: t("library.hint"),
+  };
+}
 
 /**
  * Paper library.
@@ -23,7 +28,8 @@ export const metadata = {
  * explicitly not-yet-seeded rather than shown as a dead link, so the shape of
  * the full product is visible without pretending the content is there.
  */
-export default function Library() {
+export default async function Library() {
+  const { t, locale } = await getT();
   const seededSubjects = new Set(
     PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`)
   );
@@ -38,12 +44,11 @@ export default function Library() {
           <div className="shell">
             <div className="head head--left">
               <span className="eyebrow" data-reveal>
-                ↳ {PAPERS.length} ready to sit
+                ↳ {t("library.readyToSit", { count: PAPERS.length })}
               </span>
               <h1 className="h" data-hl>
-                Mock{" "}
                 <span className="hl">
-                  <span>papers</span>
+                  <span>{t("nav.mockPapers")}</span>
                 </span>
               </h1>
             </div>
@@ -77,7 +82,8 @@ export default function Library() {
                       <div className="paper-card__top">
                         <div>
                           <span className="mono muted">
-                            Grade {paper.gradeYear} · {subject?.name}
+                            {t("nav.grade", { year: paper.gradeYear })} ·{" "}
+                            {subject ? subjectName(subject, locale) : paper.subjectId}
                           </span>
                           <h2 className="sub" style={{ marginTop: 4 }}>
                             {paper.title}
@@ -86,7 +92,9 @@ export default function Library() {
                         </div>
                         <div className="paper-card__flags">
                           <span className="tag tag--plain">
-                            {paper.calculator ? "calculator" : "no calculator"}
+                            {paper.calculator
+                              ? t("library.calculator")
+                              : t("library.noCalculator")}
                           </span>
                           <span
                             className={
@@ -96,8 +104,8 @@ export default function Library() {
                             }
                           >
                             {paper.provenance === "transcribed"
-                              ? "past paper"
-                              : "practice"}
+                              ? t("library.pastPaper")
+                              : t("library.practice")}
                           </span>
                         </div>
                       </div>
@@ -107,11 +115,14 @@ export default function Library() {
                       <dl className="paper-card__stats">
                         {[
                           {
-                            label: "Questions",
+                            label: t("common.questions"),
                             value: `${paper.questions.length}`,
                           },
-                          { label: "Marks", value: `${marks}` },
-                          { label: "Minutes", value: `${paper.durationMinutes}` },
+                          { label: t("common.marks"), value: `${marks}` },
+                          {
+                            label: t("common.minutes"),
+                            value: `${paper.durationMinutes}`,
+                          },
                         ].map((stat) => (
                           <div key={stat.label}>
                             <dt className="mono muted">{stat.label}</dt>
@@ -121,7 +132,7 @@ export default function Library() {
                       </dl>
 
                       <div>
-                        <span className="mono muted">Topics</span>
+                        <span className="mono muted">{t("library.topics")}</span>
                         <ul className="paper-card__topics">
                           {topics.map((topic) => (
                             <li key={topic} className="tag tag--plain">
@@ -134,7 +145,10 @@ export default function Library() {
                       {component && (
                         <div className="paper-card__bands">
                           <span className="mono muted">
-                            Graded on {component.name} / {component.maxMark}
+                            {t("library.gradedOn", {
+                              component: component.name,
+                              max: component.maxMark,
+                            })}
                           </span>
                           <span className="paper-card__band-list">
                             {component.bands
@@ -152,7 +166,8 @@ export default function Library() {
                         href={`/exam/${paper.id}`}
                         className="btn btn--primary btn--sm paper-card__cta"
                       >
-                        <span className="btn__arrow">→</span>Sit this paper
+                        <span className="btn__arrow">→</span>
+                        {t("library.sit")}
                       </Link>
                     </article>
                   );
@@ -166,12 +181,11 @@ export default function Library() {
           <div className="shell">
             <div className="head head--left">
               <span className="eyebrow" data-reveal>
-                ↳ Not yet seeded
+                ↳ {t("library.notSeeded")}
               </span>
               <h2 className="h-sm" data-hl>
-                The rest of the{" "}
                 <span className="hl hl--teal">
-                  <span>curriculum</span>
+                  <span>{t("library.restOfCurriculum")}</span>
                 </span>
               </h2>
             </div>
@@ -179,12 +193,12 @@ export default function Library() {
             <div className="coverage" data-stagger>
               {GRADE_STAGES.map((stage) => (
                 <div key={stage.year} className="card card--plain">
-                  <span className="tag">Grade {stage.year}</span>
+                  <span className="tag">{t("nav.grade", { year: stage.year })}</span>
                   <p
                     className="mono muted"
                     style={{ marginTop: "var(--spacing-16)" }}
                   >
-                    {stage.compulsory}
+                    {t(`stage.${stage.year}.compulsory`)}
                   </p>
                   <ul className="coverage__list">
                     {[
@@ -201,12 +215,12 @@ export default function Library() {
                       return (
                         <li key={subject.id}>
                           <span>
-                            {subject.glyph} {subject.name}
+                            {subject.glyph} {subjectName(subject, locale)}
                           </span>
                           <span
                             className={`tag ${ready ? "tag--mint" : "tag--plain"}`}
                           >
-                            {ready ? "ready" : "soon"}
+                            {ready ? t("library.ready") : t("common.soon")}
                           </span>
                         </li>
                       );
@@ -222,8 +236,7 @@ export default function Library() {
       <footer className="footer">
         <div className="shell">
           <p className="micro muted">
-            Talap® · question content transcribed from NIS past papers for study
-            use.
+            {t("footer.studyUse")}
           </p>
         </div>
       </footer>

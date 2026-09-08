@@ -160,3 +160,19 @@ export function pickContent<T>(value: Localised<T>, locale: Locale): T {
 export function hasLocale<T>(value: Localised<T>, locale: Locale): boolean {
   return isLocalisedRecord(value) ? value[locale] !== undefined : false;
 }
+
+/**
+ * A subject's name in the reader's language.
+ *
+ * Subject names are content, not chrome, so they live beside the curriculum
+ * rather than in the dictionary — one entry per subject, not one per subject
+ * per string. Falls back to English, which is also what the papers print.
+ */
+export function subjectName(
+  subject: { name: string; nameKk?: string; nameRu?: string },
+  locale: Locale
+): string {
+  if (locale === "kk") return subject.nameKk ?? subject.name;
+  if (locale === "ru") return subject.nameRu ?? subject.name;
+  return subject.name;
+}
