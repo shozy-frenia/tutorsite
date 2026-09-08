@@ -28,6 +28,7 @@ export interface Subject {
   id: string;
   name: string;
   nameKk?: string;
+  nameRu?: string;
   track: Track;
   /** Syllabus strands, used to tag questions and drive the mastery radar. */
   topics: string[];
@@ -45,6 +46,7 @@ export const SUBJECTS: Subject[] = [
     id: "mathematics",
     name: "Mathematics",
     nameKk: "Математика",
+    nameRu: "Математика",
     track: "core",
     topics: [
       "Vectors",
@@ -79,6 +81,7 @@ export const SUBJECTS: Subject[] = [
     id: "history-kazakhstan",
     name: "History of Kazakhstan",
     nameKk: "Қазақстан тарихы",
+    nameRu: "История Казахстана",
     track: "core",
     topics: [
       "Ancient & Medieval",
@@ -97,6 +100,7 @@ export const SUBJECTS: Subject[] = [
     id: "kazakh-l1",
     name: "Kazakh Language (L1)",
     nameKk: "Қазақ тілі Я1",
+    nameRu: "Казахский язык Я1",
     track: "language",
     topics: ["Grammar", "Lexicology", "Text Analysis", "Composition", "Stylistics"],
     glyph: "Ә",
@@ -106,6 +110,7 @@ export const SUBJECTS: Subject[] = [
     id: "russian-l1",
     name: "Russian Language (L1)",
     nameKk: "Орыс тілі Я1",
+    nameRu: "Русский язык Я1",
     track: "language",
     topics: ["Grammar", "Lexicology", "Text Analysis", "Composition", "Stylistics"],
     glyph: "Я",
@@ -115,6 +120,7 @@ export const SUBJECTS: Subject[] = [
     id: "kazakh-l2",
     name: "Kazakh Language & Literature (L2)",
     nameKk: "Қазақ тілі мен әдебиеті Я2",
+    nameRu: "Казахский язык и литература Я2",
     track: "language",
     topics: ["Grammar", "Reading", "Literature", "Writing", "Speaking"],
     glyph: "Ң",
@@ -124,6 +130,7 @@ export const SUBJECTS: Subject[] = [
     id: "russian-l2",
     name: "Russian Language & Literature (L2)",
     nameKk: "Орыс тілі мен әдебиеті Я2",
+    nameRu: "Русский язык и литература Я2",
     track: "language",
     topics: ["Grammar", "Reading", "Literature", "Writing", "Speaking"],
     glyph: "Ж",
@@ -133,6 +140,7 @@ export const SUBJECTS: Subject[] = [
     id: "english",
     name: "English",
     nameKk: "Ағылшын тілі",
+    nameRu: "Английский язык",
     track: "cambridge",
     topics: ["Reading", "Writing", "Listening", "Speaking", "Use of English"],
     glyph: "✎",
@@ -144,6 +152,7 @@ export const SUBJECTS: Subject[] = [
     id: "physics",
     name: "Physics",
     nameKk: "Физика",
+    nameRu: "Физика",
     track: "profile",
     topics: ["Mechanics", "Waves", "Electricity", "Thermodynamics", "Fields", "Nuclear"],
     glyph: "⚛",
@@ -153,6 +162,7 @@ export const SUBJECTS: Subject[] = [
     id: "chemistry",
     name: "Chemistry",
     nameKk: "Химия",
+    nameRu: "Химия",
     track: "profile",
     topics: [
       "Stoichiometry",
@@ -173,6 +183,7 @@ export const SUBJECTS: Subject[] = [
     id: "biology",
     name: "Biology",
     nameKk: "Биология",
+    nameRu: "Биология",
     track: "profile",
     topics: ["Cells", "Genetics", "Physiology", "Ecology", "Evolution", "Biotechnology"],
     glyph: "❖",
@@ -182,6 +193,7 @@ export const SUBJECTS: Subject[] = [
     id: "computer-science",
     name: "Computer Science",
     nameKk: "Информатика",
+    nameRu: "Информатика",
     track: "profile",
     topics: ["Algorithms", "Data Structures", "Databases", "Networks", "Programming"],
     glyph: "⌨",
@@ -191,6 +203,7 @@ export const SUBJECTS: Subject[] = [
     id: "geography",
     name: "Geography",
     nameKk: "География",
+    nameRu: "География",
     track: "profile",
     topics: [
       "Physical Geography",
