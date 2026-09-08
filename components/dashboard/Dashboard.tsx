@@ -49,6 +49,7 @@ import { PAPERS } from "@/data/exams";
 import GradeBadge from "@/components/GradeBadge";
 import Nav from "@/components/Nav";
 import AccountPanel from "@/components/auth/AccountPanel";
+import ProfileForm from "@/components/profile/ProfileForm";
 import { useT, useLocale } from "@/components/i18n/LocaleProvider";
 import { subjectName } from "@/lib/i18n";
 
@@ -109,7 +110,11 @@ export default function Dashboard() {
     return (
       <main style={{ minHeight: "100vh" }}>
         <Nav />
-        <Register onDone={(profile) => setStore(saveProfile(profile))} />
+        <section className="shell section-tight">
+          <div style={{ maxWidth: 720, marginInline: "auto" }}>
+            <ProfileForm onDone={(profile) => setStore(saveProfile(profile))} />
+          </div>
+        </section>
         {/* The account belongs here too, not only once a tracker exists.
             "Set up your tracker" is a local profile — no email, no password —
             and a student who wants their work to follow them to another device
@@ -149,235 +154,15 @@ export default function Dashboard() {
           <Loaded store={store} streak={streak} mastery={mastery} />
         )}
 
-        <AccountPanel onCleared={setStore} />
-
+        {/* The account panel and the device reset moved to /settings: this
+            page is the record, that page is the controls. */}
         <div className="dash-reset">
-          <button
-            onClick={() => {
-              if (window.confirm(t("dash.resetConfirm"))) {
-                setStore(clearStore());
-              }
-            }}
-            className="btn btn--outline btn--sm"
-          >
-            {t("dash.reset")}
-          </button>
+          <Link href="/settings" className="btn btn--outline btn--sm">
+            {t("nav.settings")}
+          </Link>
         </div>
       </section>
     </main>
-  );
-}
-
-/* ============================================================== registration */
-
-function Register({ onDone }: { onDone: (profile: Profile) => void }) {
-  const t = useT();
-  const { locale } = useLocale();
-  const [name, setName] = useState("");
-  const [gradeYear, setGradeYear] = useState<GradeYear>(10);
-  const [parallel, setParallel] = useState<Parallel>("kazakh");
-  const [profileIds, setProfileIds] = useState<string[]>([]);
-  const [targetGrade, setTargetGrade] = useState<Grade>("A");
-
-  const profileOptions = profileOptionsFor(gradeYear);
-  const needed = profileCountFor(gradeYear);
-
-  // Changing year changes how many profiles are allowed, and Grade 11 has
-  // none at all — drop anything that no longer applies rather than carrying
-  // a stale choice into the saved profile.
-  useEffect(() => {
-    const allowed = new Set(profileOptionsFor(gradeYear).map((s) => s.id));
-    setProfileIds((prev) => prev.filter((id) => allowed.has(id)).slice(0, profileCountFor(gradeYear)));
-  }, [gradeYear]);
-
-  const toggleProfile = (id: string) => {
-    setProfileIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (needed === 1) return [id];
-      if (prev.length >= needed) return [...prev.slice(1), id];
-      return [...prev, id];
-    });
-  };
-
-  const subjects = examSubjectsFor({ gradeYear, parallel, profileSubjectIds: profileIds });
-  const ready = name.trim().length > 0 && profileIds.length === needed;
-
-  return (
-    <section className="shell section-tight">
-      <div className="card card--plain register rise">
-        <div className="register__intro">
-          <span className="tag">{t("dash.demoRegistration")}</span>
-          <h1 className="sub" style={{ marginTop: "var(--spacing-16)" }}>
-            {t("profile.title")}
-          </h1>
-          <p className="body-sm" style={{ marginTop: 8 }}>
-            {t("profile.sub")}
-          </p>
-        </div>
-
-        <form
-          className="register__form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!ready) return;
-            onDone({
-              name: name.trim().slice(0, 40),
-              gradeYear,
-              parallel,
-              profileSubjectIds: profileIds,
-              targetGrade,
-              joinedAt: new Date().toISOString(),
-            });
-          }}
-        >
-          <label>
-            <span className="field-label">{t("profile.name")}</span>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={40}
-              required
-              placeholder={t("profile.namePlaceholder")}
-              className="field"
-            />
-          </label>
-
-          <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">{t("profile.year")}</legend>
-            <div className="choice-row">
-              {([10, 11, 12] as const).map((year) => (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => setGradeYear(year)}
-                  aria-pressed={gradeYear === year}
-                  className="choice grow"
-                  style={{ textAlign: "center" }}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-            <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
-              {t(`stage.${gradeYear}.compulsory`)}
-            </span>
-          </fieldset>
-
-          <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">{t("profile.parallel")}</legend>
-            <div className="choice-grid">
-              {(["kazakh", "russian"] as Parallel[]).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setParallel(value)}
-                  aria-pressed={parallel === value}
-                  className="choice"
-                >
-                  <span className="body-sm" style={{ fontWeight: 600 }}>
-                    {t(`profile.parallel.${value}`)}
-                  </span>
-                  <span className="micro muted" style={{ display: "block", marginTop: 4 }}>
-                    {(() => {
-                      const first = subjectById(firstLanguageFor(value));
-                      const second = subjectById(secondLanguageFor(value));
-                      // The names already carry their own Я1 / Я2 marker in
-                      // Russian and Kazakh, so prefixing one would repeat it.
-                      return [first, second]
-                        .map((subject) =>
-                          subject ? subjectName(subject, locale) : ""
-                        )
-                        .filter(Boolean)
-                        .join(" · ");
-                    })()}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          {needed > 0 && (
-            <fieldset className="border-0 p-0 m-0">
-              <legend className="field-label">
-                {needed === 1
-                  ? t("profile.profileSubjectsOne")
-                  : t("profile.profileSubjectsTwo")}
-              </legend>
-              <div className="choice-grid">
-                {profileOptions.map((subject) => {
-                  const picked = profileIds.includes(subject.id);
-                  return (
-                    <button
-                      key={subject.id}
-                      type="button"
-                      onClick={() => toggleProfile(subject.id)}
-                      aria-pressed={picked}
-                      className="choice choice--mint"
-                      style={{ display: "flex", alignItems: "center", gap: 12 }}
-                    >
-                      <span style={{ fontSize: 20 }}>{subject.glyph}</span>
-                      <span className="body-sm">
-                        {subjectName(subject, locale)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="mono muted" style={{ display: "block", marginTop: 8 }}>
-                {t("dash.chosen", { count: profileIds.length, needed })}
-                {needed === 2 && profileIds.length === 2
-                  ? t("dash.replacesOldest")
-                  : ""}
-              </span>
-            </fieldset>
-          )}
-
-          <fieldset className="border-0 p-0 m-0">
-            <legend className="field-label">{t("profile.target")}</legend>
-            <div className="choice-row">
-              {[...GRADE_ORDER].reverse().map((grade) => (
-                <button
-                  key={grade}
-                  type="button"
-                  onClick={() => setTargetGrade(grade)}
-                  aria-pressed={targetGrade === grade}
-                  className="choice choice--grade choice--mint"
-                >
-                  {grade}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          {/* Live preview of what this student will actually sit */}
-          <div className="card card--tint">
-            <span className="mono muted">{t("dash.youWillSit")}</span>
-            {subjects.length === 0 ? (
-              <p className="body-sm muted" style={{ marginTop: 8 }}>
-                {t("dash.pickToSee")}
-              </p>
-            ) : (
-              <ul className="filter-bar__subjects">
-                {subjects.map((subject) => (
-                  <li key={subject.id} className="tag tag--outline">
-                    {subject.glyph} {subjectName(subject, locale)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!ready}
-            className="btn btn--primary self-start"
-          >
-            <span className="btn__arrow">→</span>
-            {t("profile.submit")}
-          </button>
-        </form>
-      </div>
-    </section>
   );
 }
 

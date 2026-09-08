@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import LocaleSwitcher from "@/components/i18n/LocaleSwitcher";
 import { useSession } from "@/components/auth/SessionProvider";
+import { ProfileMenu } from "@/components/ui/ProfileMenu";
+import { readStore, type Profile } from "@/lib/storage";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 interface DropItem {
@@ -118,6 +120,21 @@ export default function Nav({
   const { user, enabled, signOut } = useSession();
 
   const groups = menu(t);
+  // The header shows the account menu to anyone with something to show: a
+  // signed-in user, or a guest who has set up a local profile. Both have a
+  // name, settings and progress; only the first has anything to sign out of.
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => {
+    const load = () => setProfile(readStore().profile);
+    load();
+    window.addEventListener("talap:store", load);
+    window.addEventListener("storage", load);
+    return () => {
+      window.removeEventListener("talap:store", load);
+      window.removeEventListener("storage", load);
+    };
+  }, []);
+
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -213,23 +230,29 @@ export default function Nav({
           <div className="nav__right">
             <LocaleSwitcher />
 
-            {enabled &&
-              (user ? (
-                <button
-                  type="button"
-                  className="btn btn--outline btn--sm nav__account"
-                  onClick={() => void signOut()}
-                >
-                  {t("nav.signOut")}
-                </button>
-              ) : (
+            {user || profile ? (
+              <ProfileMenu
+                person={{
+                  name: profile?.name ?? user?.email?.split("@")[0] ?? "—",
+                  subtitle:
+                    user?.email ??
+                    (profile
+                      ? t("nav.grade", { year: profile.gradeYear })
+                      : t("nav.guest")),
+                  canSignOut: Boolean(user),
+                }}
+                onSignOut={() => void signOut()}
+              />
+            ) : (
+              enabled && (
                 <Link
                   href={`/auth?next=${encodeURIComponent(pathname ?? "/dashboard")}`}
                   className="btn btn--outline btn--sm nav__account"
                 >
                   {t("nav.signIn")}
                 </Link>
-              ))}
+              )
+            )}
 
             <Link className="btn btn--primary btn--sm nav__cta" href="/library">
               <span className="btn__arrow">→</span>
