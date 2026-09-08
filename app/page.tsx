@@ -469,16 +469,21 @@ export default async function Home() {
             <div className="footer__col">
               <h4>{t("footer.practise")}</h4>
               <Link href="/library">↳ {t("nav.mockPapers")}</Link>
-              <Link href="/dashboard">↳ {t("nav.dashboard")}</Link>
-              <Link href="/#boundaries">↳ {t("nav.boundaryTables")}</Link>
+              <Link href="/dashboard">↳ {t("nav.progress")}</Link>
+              <Link href="/settings">↳ {t("nav.settings")}</Link>
             </div>
 
             <div className="footer__col">
-              <h4>{t("footer.scale")}</h4>
-              <ul>
-                <li className="mono">↳ A* A B C D E U</li>
-                <li className="caption muted">↳ {t("footer.officialBoundaries")}</li>
-              </ul>
+              <h4>{t("footer.aboutExam")}</h4>
+              <Link href="/#grades">↳ {t("nav.threeYears")}</Link>
+              <Link href="/#boundaries">↳ {t("nav.boundaryTables")}</Link>
+              <Link href="/#tutor">↳ {t("nav.aiTutor")}</Link>
+              {/* The grade scale is a fact about the product, not a
+                  destination — so it reads as text and drops the arrow that
+                  made the old list look clickable. */}
+              <p className="mono muted footer__scale">
+                {t("footer.scale")}: A* A B C D E U
+              </p>
             </div>
           </div>
 
