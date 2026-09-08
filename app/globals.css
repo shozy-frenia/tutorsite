@@ -756,6 +756,208 @@ html[data-filter-year] .paper-card {
   border-top: 1px solid var(--color-pencil-gray);
 }
 
+/* ---- Settings ---------------------------------------------------------- */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-48);
+  max-width: 720px;
+}
+
+.settings__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+.settings__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: var(--spacing-12);
+  border-bottom: 1px solid var(--color-whisper-gray);
+}
+
+.settings__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Inside settings the form is already in a titled block, so it drops the
+   card frame it wears on the first-run screen. */
+.settings .register {
+  margin-inline: 0;
+  max-width: none;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+
+.settings .register__form {
+  padding: 0;
+}
+
+.profile-form__save {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-16);
+  flex-wrap: wrap;
+}
+
+.settings .account {
+  margin-top: 0;
+}
+
+/* ---- Profile menu ------------------------------------------------------ */
+
+.pm__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px 5px 5px;
+  border: 1px solid var(--color-pencil-gray);
+  border-radius: var(--radius-full);
+  background: var(--color-cream-paper);
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.pm__trigger:hover,
+.pm__trigger[data-state="open"] {
+  border-color: var(--color-forest-ink);
+  background: var(--color-whisper-gray);
+}
+
+.pm__avatar {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--color-highlighter-yellow);
+  color: var(--color-forest-ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.pm__who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.pm__name {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm__sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm__chevron {
+  flex: none;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.pm__trigger[data-state="open"] .pm__chevron {
+  transform: rotate(180deg);
+}
+
+.pm__menu {
+  min-width: 232px;
+  padding: 6px;
+  background: var(--color-cream-paper);
+  border: 1px solid var(--color-pencil-gray);
+  border-radius: var(--radius-cards);
+  box-shadow: var(--shadow-lifted);
+  z-index: 210;
+  animation: pm-in 0.18s var(--ease-out);
+}
+
+@keyframes pm-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.pm__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+  font-size: var(--text-caption);
+  font-weight: var(--fw-medium);
+  color: var(--color-forest-ink);
+  text-align: left;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+/* Radix moves focus with the keyboard and marks it here, so hover and
+   keyboard selection have to look identical — otherwise arrow keys walk an
+   invisible cursor. */
+.pm__item:hover,
+.pm__item[data-highlighted] {
+  background: var(--color-highlighter-yellow);
+}
+
+.pm__item--danger {
+  color: var(--color-bad);
+}
+
+.pm__item--danger:hover,
+.pm__item--danger[data-highlighted] {
+  background: var(--color-bad-bg);
+}
+
+.pm__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.pm__rule {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--color-whisper-gray);
+}
+
+/* On a phone the header keeps the avatar and drops the words beside it. */
+@media (max-width: 900px) {
+  .pm__who,
+  .pm__chevron {
+    display: none;
+  }
+  .pm__trigger {
+    padding: 4px;
+  }
+}
+
 /* ---- Sign in ---------------------------------------------------------- */
 
 .auth-page {
