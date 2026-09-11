@@ -1,8 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope, Roboto_Mono } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Inter,
+  Roboto_Mono,
+  Unbounded,
+} from "next/font/google";
+import { cookies, headers } from "next/headers";
 import AskTalap from "@/components/AskTalap";
-import PageTransition from "@/components/motion/PageTransition";
-import ScrollProgress from "@/components/motion/ScrollProgress";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import SessionProvider from "@/components/auth/SessionProvider";
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
+  LOCALE_TAG,
+  isLocale,
+  localeFromAcceptLanguage,
+  translate,
+  type Locale,
+} from "@/lib/i18n";
 import "./globals.css";
 
 /**
@@ -16,66 +31,141 @@ import "./globals.css";
  * and cyrillic-ext, so it takes the display role instead.
  */
 const inter = Inter({
-  subsets: ["latin", "cyrillic"],
+  // "latin-ext" and "cyrillic-ext" carry the Kazakh letters — ә ғ қ ң ө ұ ү һ і.
+  // Without cyrillic-ext the Kazakh locale falls back to a system face mid-word,
+  // which is visible and ugly.
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   display: "swap",
   variable: "--font-inter",
 });
 
-const manrope = Manrope({
-  subsets: ["latin", "cyrillic"],
-  weight: ["700", "800"],
+/**
+ * Display type is a two-font stack, and the reason is the alphabet.
+ *
+ * Bricolage Grotesque is the face the design is drawn in, but Google serves it
+ * in latin, latin-ext and vietnamese only — it has no Cyrillic at all. Left on
+ * its own it would hand every Kazakh and Russian heading to a system face, and
+ * 21 of 26 pilots are in the Kazakh stream.
+ *
+ * So Unbounded sits behind it in the stack (see --font-display in globals.css).
+ * It carries cyrillic and cyrillic-ext, which between them cover ә ғ қ ң ө ұ ү
+ * һ і, and it is the same species of heavy geometric display face. The browser
+ * resolves per glyph run, so Latin gets Bricolage, Cyrillic gets Unbounded, and
+ * neither alphabet is ever split across two faces inside one word.
+ */
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "600", "700", "800"],
   display: "swap",
-  variable: "--font-manrope",
+  variable: "--font-bricolage",
 });
 
+const unbounded = Unbounded({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-unbounded",
+});
+
+/** Mono carries the labels, tickers and every tabular number. */
 const robotoMono = Roboto_Mono({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   weight: ["400", "500"],
   display: "swap",
   variable: "--font-roboto-mono",
 });
 
-export const metadata: Metadata = {
-  title: "Talap — Ace Cambridge Exams Without the Burnout",
-  description:
-    "Mock exams, real NIS grade boundaries and an AI tutor for students sitting the Cambridge International Examination (МЭСК) at Nazarbayev Intellectual Schools.",
-  keywords: ["NIS", "МЭСК", "Cambridge", "Nazarbayev Intellectual Schools", "exam prep"],
-};
+/**
+ * The public origin, used for canonical and hreflang URLs.
+ *
+ * It is a variable rather than a constant because the deployed site
+ * canonicalises to www — talap.online 308s to www.talap.online — and pointing
+ * canonical at the address that redirects tells crawlers the wrong thing. Set
+ * NEXT_PUBLIC_SITE_URL if that ever flips to the apex.
+ */
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.talap.online"
+).replace(/\/$/, "");
 
-export const viewport: Viewport = {
-  themeColor: "#fcfaf5",
-  colorScheme: "light",
-};
+const fontVariables = [
+  inter.variable,
+  bricolage.variable,
+  unbounded.variable,
+  robotoMono.variable,
+].join(" ");
 
 /**
- * Arms the entrance animations before the first paint.
+ * Resolve the locale before the first byte goes out.
  *
- * The `.enter*` rules in globals.css only hide anything once `js-motion` is on
- * the root element, and this is the only place that can add it early enough:
- * a class set from a React effect lands after paint, so the hero would flash
- * fully composed and then jump back to its start position.
- *
- * The timeout is the safety net. HeroIntro stamps `data-motion-ready` as soon
- * as it mounts; if it never does — the chunk 404s, GSAP throws, the component
- * is removed from the page — the gate is dropped and everything it was hiding
- * becomes visible. A missing animation is a shrug; a blank hero is not.
+ * Cookie beats header beats default, so a student who has chosen Kazakh once
+ * never sees a flash of Russian on the next visit.
  */
-const ARM_MOTION = `(function(){try{
-if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-var d=document.documentElement;d.classList.add('js-motion');
-setTimeout(function(){if(!d.dataset.motionReady)d.classList.remove('js-motion');},2500);
-}catch(e){}})();`;
+async function resolveLocale(): Promise<Locale> {
+  const store = await cookies();
+  const saved = store.get(LOCALE_COOKIE)?.value;
+  if (isLocale(saved)) return saved;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const h = await headers();
+  return localeFromAcceptLanguage(h.get("accept-language")) ?? DEFAULT_LOCALE;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const t = (key: string) => translate(locale, key);
+
+  return {
+    title: `Talap — ${t("landing.title.a")} ${t("landing.title.b")}`,
+    description: t("landing.sub"),
+    keywords: [
+      "NIS",
+      "МЭСК",
+      "Cambridge",
+      "Nazarbayev Intellectual Schools",
+      "exam prep",
+      "ҰБТ",
+      "сынақ",
+    ],
+    // The site is one URL per page in all three locales — the locale is a
+    // cookie, not a path — so alternates point at the same href with different
+    // hreflang, which is what tells crawlers the page is multilingual.
+    alternates: {
+      canonical: `${SITE_URL}/`,
+      languages: {
+        kk: `${SITE_URL}/`,
+        ru: `${SITE_URL}/`,
+        en: `${SITE_URL}/`,
+      },
+    },
+  };
+}
+
+export const viewport: Viewport = {
+  // Matches the cream paper canvas, so the browser chrome agrees with the page.
+  themeColor: "#fcfaf5",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+  // Never lock zoom on a study tool — students pinch into diagrams constantly,
+  // and 14 of 26 pilots were on a phone.
+  maximumScale: 5,
+};
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const locale = await resolveLocale();
+
   return (
-    <html lang="ru" className={`${inter.variable} ${manrope.variable} ${robotoMono.variable}`}>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: ARM_MOTION }} />
-      </head>
+    <html lang={LOCALE_TAG[locale]} className={fontVariables}>
       <body>
-        <ScrollProgress />
-        <PageTransition>{children}</PageTransition>
-        <AskTalap />
+        <LocaleProvider initial={locale}>
+          <SessionProvider>
+            {children}
+            <AskTalap />
+          </SessionProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

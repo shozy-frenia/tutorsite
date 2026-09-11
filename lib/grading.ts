@@ -182,3 +182,280 @@ export function validateBoundarySet(set: BoundarySet): string[] {
   }
   return errors;
 }
+
+/* -------------------------------------------------------- answer matching */
+
+/**
+ * Answer comparison.
+ *
+ * Three pilots reported a correct answer marked wrong. The cause was a
+ * straight string comparison: `2x-6` and `-6+2x` are the same expression and
+ * compared unequal. Marking a student wrong for the order they wrote a sum in
+ * teaches them nothing about the syllabus, so equivalence is decided on the
+ * meaning of the answer rather than its spelling:
+ *
+ *   - whitespace, brackets and multiplication signs carry no meaning here;
+ *   - a sum is a set, not a sequence — terms are sorted before comparing;
+ *   - `6,25` and `6.25` are the same number written by different keyboards;
+ *   - `0.5`, `1/2`, `2/4` and `½` are one value;
+ *   - `10 2/3` is `32/3`.
+ *
+ * What normalisation cannot reach — rearranged equations, alternative valid
+ * phrasings — belongs in the question's `acceptedAnswers`, not here. Widening
+ * these rules to cover those would start marking wrong answers correct.
+ */
+
+/** Unicode vulgar fractions, spelled out. Leading space keeps `2½` = `2 1/2`. */
+const VULGAR_FRACTIONS: Record<string, string> = {
+  "½": " 1/2",
+  "⅓": " 1/3",
+  "⅔": " 2/3",
+  "¼": " 1/4",
+  "¾": " 3/4",
+  "⅕": " 1/5",
+  "⅖": " 2/5",
+  "⅗": " 3/5",
+  "⅘": " 4/5",
+  "⅙": " 1/6",
+  "⅚": " 5/6",
+  "⅛": " 1/8",
+  "⅜": " 3/8",
+  "⅝": " 5/8",
+  "⅞": " 7/8",
+};
+
+const OPENERS = "([{";
+const CLOSERS = ")]}";
+
+/**
+ * Scientific notation hides a `+`/`-` that is not a term separator: splitting
+ * `1e-5` on signs would produce `1e` and `5`. Expressions carrying it are left
+ * whole and compared numerically instead.
+ */
+const SCIENTIFIC = /\de[-+]?\d/;
+const hasScientific = (text: string) => SCIENTIFIC.test(text);
+
+/** Characters after which a `+`/`-` is a sign on the next term, not an operator. */
+const PRECEDES_SIGN = new Set(["+", "-", "^", "/", "=", ",", ...OPENERS]);
+
+/**
+ * Split on the given characters, ignoring any that sit inside brackets.
+ * `(-16,-9)` is one coordinate pair, not two items.
+ */
+function splitTop(expr: string, separators: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (OPENERS.includes(ch)) depth++;
+    else if (CLOSERS.includes(ch)) depth = Math.max(0, depth - 1);
+    else if (depth === 0 && separators.includes(ch)) {
+      parts.push(expr.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(expr.slice(start));
+  return parts;
+}
+
+/** The additive terms of an expression, each carrying its own sign. */
+function splitTerms(expr: string): string[] {
+  const terms: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (OPENERS.includes(ch)) depth++;
+    else if (CLOSERS.includes(ch)) depth = Math.max(0, depth - 1);
+    else if (
+      (ch === "+" || ch === "-") &&
+      depth === 0 &&
+      i > start && // a sign opening the term is part of it
+      !PRECEDES_SIGN.has(expr[i - 1]) &&
+      // ...and not the sign of an exponent: the "-" in "1.5e-3" binds tighter
+      // than any addition and must stay inside the number.
+      !(expr[i - 1] === "e" && /\d/.test(expr[i - 2] ?? ""))
+    ) {
+      terms.push(expr.slice(start, i));
+      start = i;
+    }
+  }
+  terms.push(expr.slice(start));
+  return terms.filter((t) => t !== "");
+}
+
+const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+
+/** `2/4` -> `1/2`. Left alone unless the whole term is an integer fraction. */
+function reduceFraction(term: string): string {
+  const match = /^([+-]?)(\d+)\/(\d+)$/.exec(term);
+  if (!match) return term;
+  const [, sign, top, bottom] = match;
+  const divisor = gcd(Number(top), Number(bottom));
+  if (divisor <= 1) return term;
+  return `${sign}${Number(top) / divisor}/${Number(bottom) / divisor}`;
+}
+
+/** Canonical form of one expression: brackets dropped, terms sorted. */
+function canonicalExpression(expr: string): string {
+  const terms = splitTerms(expr)
+    .map((term) => {
+      const bare = term.replace(/[(){}[\]]/g, "");
+      return reduceFraction(/^[+-]/.test(bare) ? bare : `+${bare}`);
+    })
+    .sort();
+  return terms.join("").replace(/^\+/, "");
+}
+
+/**
+ * Canonical form of a whole answer — each side of `=`, each item of a list.
+ *
+ * A list whose every item is an equation is a solution set: `x=2,x=3` and
+ * `x=3,x=2` are the same pair of roots, so the items are sorted. A list that
+ * is not all equations is left in the order it was written, because `(3,4)`
+ * and `(4,3)` are different points and sorting them would mark a wrong
+ * coordinate correct.
+ */
+function canonicalStatement(text: string): string {
+  const items = splitTop(text, ",");
+  if (items.length > 1 && items.every((item) => item.includes("="))) {
+    return items.map(canonicalSides).sort().join(",");
+  }
+  return items.map(canonicalSides).join(",");
+}
+
+/** Canonical form of one item: every side of its `=` sorted independently. */
+function canonicalSides(item: string): string {
+  return splitTop(item, "=").map(canonicalExpression).join("=");
+}
+
+/** Everything that is the same regardless of how the comma is read. */
+function prepare(raw: string): string {
+  let text = raw.toLowerCase();
+  text = text.replace(/[−–—]/g, "-"); // unicode minus and dashes
+  text = text.replace(/[×·∙]/g, "*");
+  text = text.replace(/±/g, "+-");
+  text = text.replace(/√/g, "sqrt");
+  text = text.replace(/π/g, "pi");
+  text = text.replace(/[°]/g, " deg");
+  text = text.replace(/degrees?/g, "deg");
+  text = text.replace(/[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/g, (ch) => VULGAR_FRACTIONS[ch] ?? ch);
+  // Mixed numbers: "10 2/3" is one value, and the space is about to be lost.
+  text = text.replace(
+    /(\d+)\s+(\d+)\/(\d+)/g,
+    (_, whole: string, top: string, bottom: string) =>
+      `${Number(whole) * Number(bottom) + Number(top)}/${bottom}`
+  );
+  return text;
+}
+
+/**
+ * A comma is either a decimal point or a list separator, and `8,5` is
+ * genuinely both ("8.5" and "8 and 5"). Rather than guess, read it both ways
+ * and let a match on either count — the ambiguity is the keyboard's, and the
+ * student should not lose the mark to it.
+ */
+function commaReadings(text: string): string[] {
+  const asList = text.replace(/;/g, ",");
+  const commas = (text.match(/,/g) ?? []).length;
+  if (commas === 1 && !text.includes(";") && /\d\s*,\s*\d/.test(text)) {
+    const asDecimal = text.replace(/(\d)\s*,\s*(\d)/, "$1.$2");
+    if (asDecimal !== asList) return [asList, asDecimal];
+  }
+  return [asList];
+}
+
+/** Every canonical form an answer can legitimately be read as. */
+export function answerForms(raw: string): string[] {
+  const forms = commaReadings(prepare(raw)).map((reading) =>
+    canonicalStatement(reading.replace(/\s+/g, "").replace(/\*/g, "")).replace(/,$/, "")
+  );
+  return [...new Set(forms)];
+}
+
+/**
+ * Canonical form of an answer. Two answers with the same one are the same
+ * answer; the converse does not hold, so compare with `answersMatch`.
+ */
+export function normaliseAnswer(raw: string): string {
+  return answerForms(raw)[0] ?? "";
+}
+
+/**
+ * Value of a single quantity, however the student wrote it.
+ *
+ * A mark scheme prints 0.5; a student types 1/2, or 50%, or 5e-1, and every
+ * one of them is the same answer. A comma or an `=` means this is a list or an
+ * equation rather than one value, so those fall through to exact matching.
+ */
+function numericValue(text: string): number | null {
+  if (!text || text.includes(",") || text.includes("=")) return null;
+
+  const percent = text.endsWith("%");
+  const body = percent ? text.slice(0, -1) : text;
+
+  const scalar = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+  const fraction = /^([+-]?(?:\d+\.?\d*|\.\d+))\/([+-]?(?:\d+\.?\d*|\.\d+))$/;
+
+  let value: number;
+  const asFraction = fraction.exec(body);
+  if (asFraction) {
+    const bottom = Number(asFraction[2]);
+    if (bottom === 0) return null;
+    value = Number(asFraction[1]) / bottom;
+  } else if (scalar.test(body)) {
+    value = Number(body);
+  } else {
+    return null;
+  }
+
+  if (!Number.isFinite(value)) return null;
+  return percent ? value / 100 : value;
+}
+
+/**
+ * Compare two numbers the way a marker would.
+ *
+ * A fixed epsilon is wrong across the range these papers cover — answers run
+ * from 0.002 mol to 1680 arrangements, and a tolerance sane for one is
+ * nonsense for the other. Relative above 1, absolute near zero.
+ */
+function closeEnough(a: number, b: number): boolean {
+  const scale = Math.max(Math.abs(a), Math.abs(b));
+  return Math.abs(a - b) <= (scale > 1 ? scale * 1e-9 : 1e-9);
+}
+
+/**
+ * Do a submitted answer and an answer key mean the same thing?
+ *
+ * `numeric` drops a trailing unit, so `16 cm` answers a key of `16`. It is
+ * only set for questions whose answer is a bare quantity.
+ */
+export function answersMatch(
+  submitted: string,
+  key: string,
+  options: { numeric?: boolean } = {}
+): boolean {
+  const submittedForms = answerForms(submitted);
+  const keyForms = answerForms(key);
+  if (submittedForms.some((form) => keyForms.includes(form))) return true;
+
+  // On a question whose answer is a bare quantity, a trailing unit is noise:
+  // "16 cm" answers a key of "16". Only a trailing run of letters is dropped,
+  // and never from a number in scientific notation — stripping every letter
+  // would turn "1.5e3" into "1.53".
+  const value = (form: string) => {
+    if (!options.numeric || hasScientific(form)) return numericValue(form);
+    return numericValue(form.replace(/[a-z]+$/, ""));
+  };
+  for (const form of submittedForms) {
+    const left = value(form);
+    if (left === null) continue;
+    for (const keyForm of keyForms) {
+      const right = value(keyForm);
+      if (right !== null && closeEnough(left, right)) return true;
+    }
+  }
+  return false;
+}

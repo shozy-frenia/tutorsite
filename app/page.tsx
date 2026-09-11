@@ -1,102 +1,103 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
-import HeroCanvas from "@/components/HeroCanvas";
+import BrandMark from "@/components/BrandMark";
+import ScrollReveal from "@/components/motion/ScrollReveal";
+import GradeLadder from "@/components/landing/GradeLadder";
+import TutorDemo from "@/components/landing/TutorDemo";
 import BoundaryExplorer from "@/components/landing/BoundaryExplorer";
-import PhoneShowcase from "@/components/landing/PhoneShowcase";
-import RevealButton from "@/components/motion/RevealButton";
-import SubjectRibbon from "@/components/motion/SubjectRibbon";
-import MaskedReveal from "@/components/motion/MaskedReveal";
-import PointerLift from "@/components/motion/PointerLift";
 import PaperCoverflow from "@/components/motion/PaperCoverflow";
-import HeroIntro from "@/components/motion/HeroIntro";
-import StaggerIn from "@/components/motion/StaggerIn";
-import Reveal from "@/components/motion/Reveal";
-import CountUp from "@/components/motion/CountUp";
 import { GRADE_STAGES, examSubjectsFor, subjectById } from "@/data/curriculum";
-import { allBoundarySets } from "@/data/grade-boundaries";
+import { allBoundarySets, boundariesFor } from "@/data/grade-boundaries";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
+import { getT } from "@/lib/i18n/server";
+import { subjectName } from "@/lib/i18n";
 
 /**
- * Landing page — neo-brutalist register, after the pilot.
+ * Landing page.
  *
- * Hard offset shadows, oversized display type and a ruled frame around the 3D
- * hero rather than a full bleed, so the printed-poster structure survives the
- * canvas. Two things changed when twenty-six testers scored the look 3.15/5
- * against 3.77 for usability: the highlighter stopped being the page's
- * labelling system (it now marks the headline and the one button that
- * matters), and the page grew an entrance — HeroIntro on load, StaggerIn and
- * CountUp on scroll. It had four scroll effects and still read as a still
- * image, because nothing moved in the seconds anyone actually watches.
+ * Everything with a number in it reads from the repository rather than from a
+ * constant typed into this file: the ladder is the published Grade 10
+ * Mathematics Component 1 table, the ticker counts the papers that actually
+ * exist, and the boundary section renders the same data the marker grades
+ * against. A landing page that quotes figures the product cannot reproduce is
+ * the fastest way to lose a student on their second visit.
  */
 
-/**
- * One note colour per grade year.
- *
- * The three stage cards used to share an identical solid-ink header, which
- * meant the header carried no information at all — you had to read the number
- * to tell the cards apart. Tinting them makes the year legible at a glance and
- * removes three dark fields from a page the pilot already called "броский".
- */
-const STAGE_TINTS = [
-  "var(--color-note-mint)",
-  "var(--color-note-teal)",
-  "var(--color-note-sky)",
+
+
+
+
+/** A real exchange, replayed. See the note in TutorDemo. */
+const DEMO_CHAT = [
+  { who: "me" as const, text: "Сколько нужно на A по математике?" },
+  {
+    who: "ai" as const,
+    text: "В 10 классе математика — 160 баллов за два компонента. A начинается с 114/160 на уровне предмета, а на Компоненте 1 — с 56/80.",
+  },
+  { who: "me" as const, text: "I got 44. What am I missing?" },
+  {
+    who: "ai" as const,
+    text: "44/80 is a C — 12 marks off an A. Your last two attempts both lost method marks on Circle Geometry. Start there.",
+  },
 ];
 
-// Short, decorative labels for the SubjectRibbon — not the official subject
-// names (those stay exact on the Grade 10/11/12 cards below, where they carry
-// real meaning). The ribbon is aria-hidden and unit length has to stay well
-// under the wave path's length or the loop overlaps into unreadable text.
-const SUBJECT_RIBBON = [
-  "MATHEMATICS",
-  "PHYSICS",
-  "CHEMISTRY",
-  "BIOLOGY",
-  "COMPUTER SCIENCE",
-  "HISTORY",
-  "ENGLISH",
-  "KAZAKH",
-  "RUSSIAN",
-  "GEOGRAPHY",
-];
-
+/** Feature cards, in the order the page shows them. */
 const FEATURES = [
-  {
-    badge: "NIS SPECIFIC",
-    title: "Real papers, not\napproximations",
-    body: "Two full Grade 10 Mathematics Paper 1 sittings, transcribed question by question with the mark scheme that earns each mark.",
-    span: "md:col-span-3 md:row-span-2",
-    accent: true,
-  },
-  {
-    badge: "OFFICIAL SCALE",
-    title: "The actual boundary table",
-    body: "A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 45/90. We use the published tables, never a flat percentage.",
-    span: "md:col-span-3",
-  },
-  {
-    badge: "AI POWERED",
-    title: "A tutor that reads your working",
-    body: "It starts from the step you missed, quotes the mark scheme wording, and answers in Kazakh, Russian or English — whichever you wrote in.",
-    span: "md:col-span-3",
-  },
-  {
-    badge: "INFINITE DRILL",
-    title: "Same topic, same tariff, new numbers",
-    body: "Ask for another question at this level and get one: same syllabus strand, same mark count, same number of reasoning steps.",
-    span: "md:col-span-3",
-  },
-  {
-    badge: "TRACKED",
-    title: "Every attempt, plotted",
-    body: "Mastery by topic, grade projection from U to A*, and the streak counter that makes you open it tomorrow.",
-    span: "md:col-span-3",
-  },
-];
+  { key: "papers", tone: "card--mint" },
+  { key: "scale", tone: "card--plain" },
+  { key: "tutor", tone: "card--teal" },
+  { key: "drill", tone: "card--plain" },
+  { key: "tracked", tone: "card--blush", wide: true },
+] as const;
 
-export default function Home() {
+const TUTOR_POINTS = ["everywhere", "inQuestion", "noKey"] as const;
+
+function Divider() {
+  return (
+    <div className="divider" data-reveal aria-hidden="true">
+      <svg viewBox="0 0 760 24" role="presentation">
+        <path d="M4 12c60-14 120 14 180 0s120-14 180 0 120 14 180 0 120-14 212 0" />
+      </svg>
+    </div>
+  );
+}
+
+export default async function Home() {
+  const { t, locale } = await getT();
   const totalQuestions = PAPERS.reduce((sum, p) => sum + p.questions.length, 0);
   const totalMarks = PAPERS.reduce((sum, p) => sum + availableMarks(p), 0);
+
+  // The ladder is Grade 10 Mathematics Component 1 — the paper nine of the
+  // twenty-six pilots actually sat, and the one every other number on this
+  // page is quoted against.
+  const maths10 = boundariesFor("mathematics", 10);
+  const component1 = maths10?.components[0];
+  const ladderBands = (component1?.bands ?? []).map((band) => ({
+    grade: band.grade,
+    min: band.min,
+    max: band.max,
+  }));
+
+  const demoMark = 44;
+  const demoMax = component1?.maxMark ?? 80;
+  const demoGrade =
+    [...(component1?.bands ?? [])]
+      .sort((a, b) => b.min - a.min)
+      .find((band) => demoMark >= band.min)?.grade ?? "U";
+  const demoTicks = [...(component1?.bands ?? [])]
+    .sort((a, b) => a.min - b.min)
+    .map((band) => band.min)
+    .filter((min) => min > 0);
+
+  const ticker = [
+    t("landing.ticker.papers", { count: PAPERS.length }),
+    t("landing.ticker.questions", { count: totalQuestions }),
+    t("landing.ticker.marks", { count: totalMarks }),
+    t("landing.ticker.tables", { count: allBoundarySets().length }),
+    t("landing.ticker.noCalculator"),
+    t("landing.ticker.minutes"),
+    t("landing.ticker.scale"),
+  ];
 
   // Flattened for the coverflow, which is a client component and so can only
   // be handed plain serialisable values — not whole Paper objects with their
@@ -108,7 +109,7 @@ export default function Home() {
       return {
         id: paper.id,
         title: paper.title,
-        subject: subject?.name ?? paper.subjectId,
+        subject: subject ? subjectName(subject, locale) : paper.subjectId,
         glyph: subject?.glyph ?? "",
         gradeYear: paper.gradeYear,
         sitting: paper.sitting,
@@ -117,369 +118,382 @@ export default function Home() {
         minutes: paper.durationMinutes,
         calculator: Boolean(paper.calculator),
         pastPaper: paper.provenance === "transcribed",
-        // Enough to show what the paper covers without spilling off a card
-        // that is only 320px wide.
         topics: paperTopics(paper).slice(0, 5),
       };
     });
 
   return (
-    <main>
+    <>
+      <ScrollReveal />
       <Nav />
 
-      {/* ---------------------------------------------------------------- HERO */}
-      <HeroIntro>
-        <section className="px-5 md:px-10">
-          <div className="card" style={{ boxShadow: "var(--shadow-lift)" }}>
-            <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="p-5 md:p-8 flex flex-col justify-between gap-8">
-                <div>
-                  {/* Demoted from a filled block: this is the fourth-most
-                      important thing in the hero and was wearing the loudest
-                      colour on the page. */}
-                  <span className="mark-quiet t-label enter-rise" data-enter="eyebrow">
-                    МЭСК · NIS · CAMBRIDGE
-                  </span>
-                  {/* Each line is its own clipping band so the headline can ride
-                      up out of the page rather than fading in flat. */}
-                  <h1 className="t-display mt-5">
-                    <span className="line-mask">
-                      <span>Ace Cambridge</span>
-                    </span>
-                    <span className="line-mask">
-                      <span>exams without</span>
-                    </span>
-                    <span className="line-mask">
-                      <span>
-                        the <span className="mark">burnout</span>
-                      </span>
-                    </span>
-                  </h1>
-                </div>
+      <main id="top">
+        {/* ------------------------------------------------------------ HERO */}
+        <section className="hero">
+          <span className="doodle doodle--a" aria-hidden="true">
+            <svg viewBox="0 0 140 120">
+              <path d="M8 98c12-42 30-66 50-72s32 6 28 24-28 24-40 10S58 20 88 12s44 10 46 32" />
+              <path d="M114 36l14-6-4 15" />
+            </svg>
+          </span>
+          <span className="doodle doodle--b" aria-hidden="true">
+            <svg viewBox="0 0 160 120">
+              <path d="M12 24h116a13 13 0 0 1 0 26H42a13 13 0 0 0 0 26h100" />
+              <circle cx="140" cy="94" r="11" />
+            </svg>
+          </span>
 
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <p className="enter-rise" data-enter="lede" style={{ maxWidth: "46ch" }}>
-                    Mock papers taken from the real thing, marked against the real boundary
-                    table, with a tutor that explains the one step you actually got wrong.
-                  </p>
-                  <p className="enter-rise" data-enter="lede" style={{ maxWidth: "46ch" }}>
-                    Built for students sitting the Cambridge International Examination at
-                    Nazarbayev Intellectual Schools. Grades 10, 11 and 12.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <RevealButton
-                    href="/library"
-                    className="enter-rise"
-                    data-enter="cta"
-                    fill="var(--color-ink)"
-                    textColor="var(--color-canvas)"
-                    hoverFill="var(--color-highlighter)"
-                    hoverTextColor="var(--color-ink)"
-                  >
-                    Sit a mock exam →
-                  </RevealButton>
-                  <RevealButton
-                    href="/dashboard"
-                    className="enter-rise"
-                    data-enter="cta"
-                    fill="var(--color-canvas)"
-                    textColor="var(--color-ink)"
-                    hoverFill="var(--color-ink)"
-                    hoverTextColor="var(--color-canvas)"
-                  >
-                    See the dashboard
-                  </RevealButton>
-                </div>
-              </div>
-
-              {/* 3D canvas, framed rather than full-bleed. Wipes up on arrival —
-                  a shutter rather than a fade, which is what a system built out
-                  of hard edges should do. */}
-              <div
-                className="relative min-h-[380px] lg:min-h-[560px] border-t lg:border-t-0 lg:border-l enter-wipe"
-                data-enter="panel"
-                style={{ borderColor: "var(--color-rule)" }}
+          <div className="shell hero__grid">
+            <div>
+              <span className="tag" data-reveal>
+                {t("landing.eyebrow")}
+              </span>
+              <h1
+                className="display"
+                style={{ marginTop: "var(--spacing-24)" }}
+                data-hl
               >
-                <HeroCanvas />
-                <div className="absolute left-4 top-4 pointer-events-none">
-                  <span className="mark-quiet t-micro">DRAG · HOVER · CLICK</span>
-                </div>
-                <div className="absolute right-4 bottom-4 pointer-events-none t-micro text-right">
-                  THE GRADE LADDER
-                  <br />
-                  A* DOWN TO U
-                </div>
+                {t("landing.title.a")}{" "}
+                <span className="hl">
+                  <span>{t("landing.title.b")}</span>
+                </span>
+              </h1>
+              <p
+                className="lead measure"
+                style={{ marginTop: "var(--spacing-32)" }}
+                data-reveal
+              >
+                {t("landing.sub")}
+              </p>
+              <p
+                className="body-sm measure muted"
+                style={{ marginTop: "var(--spacing-16)" }}
+                data-reveal
+              >
+                {t("landing.builtFor")}
+              </p>
+              <div className="hero__cta" data-reveal>
+                <Link className="btn btn--primary" href="/library">
+                  <span className="btn__arrow">→</span>
+                  {t("landing.cta.primary")}
+                </Link>
+                <Link className="btn btn--outline" href="/dashboard">
+                  {t("landing.cta.secondary")}
+                </Link>
               </div>
+              <p className="caption muted hero__note" data-reveal>
+                {t("landing.noAccount")}
+              </p>
             </div>
 
-            {/* Ticker strip. The counts moved out to the stat band below, where
-                they can be read; a marquee is the wrong place for a number. */}
-            <div
-              className="border-t border-b overflow-hidden enter-rise"
-              data-enter="ticker"
-              style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
-            >
-              <div className="flex whitespace-nowrap marquee-track">
-                {[0, 1].map((copy) => (
-                  <div key={copy} className="flex shrink-0">
-                    {[
-                      "REAL NIS PAST PAPERS",
-                      "OFFICIAL BOUNDARY TABLES",
-                      "MARKED LIKE THE EXAM",
-                      "NO CALCULATOR",
-                      "90 MINUTES",
-                      "A* TO U",
-                      "ҚАЗАҚША · РУССКИЙ · ENGLISH",
-                    ].map((item) => (
-                      <span
-                        key={`${copy}-${item}`}
-                        className="t-label px-6 py-3"
-                        style={{ color: "var(--color-canvas)" }}
-                      >
-                        {item} <span style={{ color: "var(--color-highlighter)" }}>✦</span>
-                      </span>
-                    ))}
-                  </div>
+            {ladderBands.length > 0 && component1 && (
+              <GradeLadder
+                caption={t("landing.ladder.caption", {
+                  component: component1.name,
+                  max: component1.maxMark,
+                })}
+                maxMark={component1.maxMark}
+                bands={ladderBands}
+                initialMark={demoMark}
+                label={t("landing.ladder.aria", { max: component1.maxMark })}
+              />
+            )}
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- TICKER */}
+        <div className="ticker" aria-hidden="true">
+          <div className="ticker__track">
+            {[0, 1].map((copy) => (
+              <div key={copy} style={{ display: "flex" }}>
+                {ticker.map((item) => (
+                  <span key={`${copy}-${item}`} className="ticker__item">
+                    {item}
+                    <span aria-hidden="true">✦</span>
+                  </span>
                 ))}
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------- FEATURES */}
+        <section className="section" id="features">
+          <div className="shell">
+            <div className="head">
+              <span className="eyebrow" data-reveal>
+                ↳ {t("landing.does.eyebrow")}
+              </span>
+              <h2 className="h measure-mx" data-hl>
+                <span className="hl hl--mint">
+                  <span>{t("landing.does.title")}</span>
+                </span>
+              </h2>
+            </div>
+            <div className="feats" data-stagger>
+              {FEATURES.map((feature) => (
+                <article
+                  key={feature.key}
+                  className={`card ${feature.tone} card--tilt feat${
+                    "wide" in feature && feature.wide ? " feat--wide" : ""
+                  }`}
+                >
+                  <span
+                    className={`tag${feature.tone === "card--plain" ? "" : " tag--outline"}`}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    {t(`landing.feature.${feature.key}.tag`)}
+                  </span>
+                  <h3 className="feat__t">
+                    {t(`landing.feature.${feature.key}.title`)}
+                  </h3>
+                  <p className="body-sm">
+                    {t(`landing.feature.${feature.key}.body`)}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
-      </HeroIntro>
 
-      {/* ----------------------------------------------------------- STAT BAND */}
-      <section className="px-5 md:px-10 mt-10 md:mt-12">
-        <StaggerIn className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
-            { figure: PAPERS.length, label: "FULL MOCK PAPERS", note: "Transcribed from the real sittings" },
-            { figure: totalQuestions, label: "QUESTIONS", note: "Each with the mark scheme that earns it" },
-            { figure: totalMarks, label: "MARKS AVAILABLE", note: "Scored the way the examiner scores" },
-            { figure: allBoundarySets().length, label: "BOUNDARY TABLES", note: "Published МЭСК grades, not percentages" },
-          ].map((stat) => (
-            <div key={stat.label} className="card p-5 flex flex-col gap-1">
-              <CountUp to={stat.figure} className="t-heading-sm" />
-              <span className="t-label">{stat.label}</span>
-              <span className="t-micro mt-1" style={{ opacity: 0.6, letterSpacing: 0 }}>
-                {stat.note}
+        <Divider />
+
+        {/* ------------------------------------------------------- COVERFLOW */}
+        <section className="section" id="papers">
+          <div className="shell">
+            <div className="head">
+              <span className="eyebrow" data-reveal>
+                ↳ {t("landing.papers.eyebrow")}
               </span>
+              <h2 className="h measure-mx" data-hl>
+                <span className="hl hl--teal">
+                  <span>{t("landing.papers.title")}</span>
+                </span>
+              </h2>
             </div>
-          ))}
-        </StaggerIn>
-      </section>
-
-      {/* ------------------------------------------------------------- FEATURES */}
-      <section className="px-5 md:px-10 mt-12 md:mt-14">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal as="h2" className="t-heading" style={{ maxWidth: "16ch" }} text="What it actually does" />
-          <span className="t-label pb-2">↳ FOUR THINGS, DONE PROPERLY</span>
-        </div>
-
-        <StaggerIn className="grid md:grid-cols-6 gap-5">
-          {FEATURES.map((feature) => (
-            <PointerLift
-              as="article"
-              key={feature.badge}
-              // No `.press` here: PointerLift owns box-shadow, and press's
-              // hover rule would outrank it and freeze the swing.
-              className={`card p-5 md:p-6 flex flex-col gap-3 ${feature.span}`}
-              style={
-                feature.accent
-                  ? { background: "var(--color-highlighter-wash)" }
-                  : undefined
-              }
-            >
-              <span
-                className={`t-micro self-start px-2 py-1 ${feature.accent ? "" : "mark-quiet"}`}
-                style={
-                  feature.accent
-                    ? { background: "var(--color-highlighter)", color: "var(--color-ink)" }
-                    : undefined
-                }
-              >
-                {feature.badge}
-              </span>
-              <h3 className="t-subheading whitespace-pre-line">{feature.title}</h3>
-              <p className="text-[16px]" style={{ lineHeight: 1.3 }}>
-                {feature.body}
-              </p>
-            </PointerLift>
-          ))}
-        </StaggerIn>
-      </section>
-
-      {/* ------------------------------------------------------------- SUBJECTS */}
-      <section className="px-5 md:px-10 mt-10 md:mt-12" aria-hidden="true">
-        <SubjectRibbon items={SUBJECT_RIBBON} />
-      </section>
-
-      {/* ------------------------------------------------------------ COVERFLOW */}
-      <section className="px-5 md:px-10 mt-10 md:mt-12">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal
-            as="h2"
-            className="t-heading"
-            style={{ maxWidth: "15ch" }}
-            text="Every paper we have, right now"
-          />
-          <span className="t-label pb-2">↳ CLICK A CARD · ARROW KEYS WORK</span>
-        </div>
-
-        <Reveal from="scale">
+          </div>
           <PaperCoverflow papers={coverflowPapers} />
-        </Reveal>
-      </section>
+        </section>
 
-      {/* ---------------------------------------------------------------- GRADES */}
-      <section className="px-5 md:px-10 mt-10 md:mt-12">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal
-            as="h2"
-            className="t-heading"
-            style={{ maxWidth: "14ch" }}
-            text="Three years, three different exams"
-          />
-          <span className="t-label pb-2">↳ THE ARCHITECTURE</span>
-        </div>
+        <Divider />
 
-        <StaggerIn className="grid lg:grid-cols-3 gap-5">
-          {GRADE_STAGES.map((stage, index) => (
-            <article key={stage.year} className="card flex flex-col overflow-hidden">
-              <div
-                className="flex items-baseline justify-between px-5 py-4 border-b"
-                style={{
-                  borderColor: "var(--color-rule)",
-                  background: STAGE_TINTS[index % STAGE_TINTS.length],
-                }}
-              >
-                <span className="t-heading-sm" style={{ lineHeight: 0.85 }}>
-                  {stage.year}
+        {/* ----------------------------------------------------------- GRADES */}
+        <section className="section" id="grades">
+          <div className="shell">
+            <div className="head">
+              <span className="eyebrow" data-reveal>
+                ↳ {t("landing.architecture.eyebrow")}
+              </span>
+              <h2 className="h measure-mx" data-hl>
+                <span className="hl hl--teal">
+                  <span>{t("landing.architecture.title")}</span>
                 </span>
-                <span className="t-micro" style={{ opacity: 0.65 }}>
-                  GRADE
-                </span>
-              </div>
+              </h2>
+            </div>
 
-              <div className="p-5 flex flex-col gap-3 grow">
-                <h3 className="t-subheading">{stage.title}</h3>
-                <span className="mark-quiet t-micro self-start">{stage.standard}</span>
-                <p className="text-[16px]" style={{ lineHeight: 1.3 }}>
-                  {stage.summary}
+            <div className="grades" data-stagger>
+              {GRADE_STAGES.map((stage, index) => (
+                <article
+                  key={stage.year}
+                  className={`card ${
+                    index === 1 ? "card--mint" : "card--plain"
+                  } card--tilt grade`}
+                >
+                  <div className="grade__num">
+                    <b>{stage.year}</b>
+                    <span className="mono muted">{t("stage.gradeWord")}</span>
+                  </div>
+                  <h3 className="feat__t">{t(`stage.${stage.year}.title`)}</h3>
+                  <span className="mono muted">
+                    {t(`stage.${stage.year}.standard`)}
+                  </span>
+                  <p className="body-sm">{t(`stage.${stage.year}.summary`)}</p>
+
+                  <ul className="grade__list">
+                    {examSubjectsFor({
+                      gradeYear: stage.year,
+                      parallel: "kazakh",
+                      profileSubjectIds: [],
+                    }).map((subject) => (
+                      <li key={subject.id}>
+                        <b>{subject.glyph}</b>
+                        {subjectName(subject, locale)}
+                      </li>
+                    ))}
+                    {stage.year !== 11 && (
+                      <li>
+                        <b>+</b>
+                        {stage.year === 12
+                          ? t("stage.profileTwo")
+                          : t("stage.profileOne")}
+                      </li>
+                    )}
+                  </ul>
+
+                  <div className="grade__foot">
+                    {t(`stage.${stage.year}.load`)}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ------------------------------------------------------- BOUNDARIES */}
+        <section className="section" id="boundaries">
+          <div className="shell">
+            <div className="head">
+              <span className="eyebrow" data-reveal>
+                {t("landing.boundaries.eyebrow")}
+              </span>
+              <h2 className="h measure-mx" data-hl>
+                <span className="hl">
+                  <span>{t("landing.boundaries.title")}</span>
+                </span>
+              </h2>
+            </div>
+            <BoundaryExplorer />
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ------------------------------------------------------------ TUTOR */}
+        <section className="section" id="tutor">
+          <div className="shell">
+            <div className="head head--left">
+              <span className="eyebrow" data-reveal>
+                {t("landing.tutor.eyebrow")}
+              </span>
+              <h2 className="h" data-hl>
+                <span className="hl hl--blush">
+                  <span>{t("landing.tutor.title")}</span>
+                </span>
+              </h2>
+            </div>
+
+            <div className="tutor">
+              <div>
+                <h3 className="sub" data-reveal>
+                  {t("landing.tutor.lead")}
+                </h3>
+                <p
+                  className="body"
+                  style={{ marginTop: "var(--spacing-16)" }}
+                  data-reveal
+                >
+                  {t("landing.tutor.body")}
                 </p>
-
-                <ul className="mt-auto pt-3 flex flex-wrap gap-2 list-none p-0">
-                  {examSubjectsFor({
-                    gradeYear: stage.year,
-                    parallel: "kazakh",
-                    profileSubjectIds: [],
-                  }).map((subject) => (
-                    <li key={subject.id} className="chip chip-quiet">
-                      {subject.glyph} {subject.name}
+                <ul className="tutor__points" data-stagger>
+                  {TUTOR_POINTS.map((point) => (
+                    <li key={point}>
+                      <b>{t(`landing.tutorPoint.${point}.title`)}</b>
+                      <span className="body-sm">
+                        {t(`landing.tutorPoint.${point}.body`)}
+                      </span>
                     </li>
                   ))}
-                  {stage.year !== 11 && (
-                    <li
-                      className="chip"
-                      style={{ background: "var(--color-highlighter-wash)", borderColor: "transparent" }}
-                    >
-                      + {stage.year === 12 ? "2 PROFILES" : "1 PROFILE"}
-                    </li>
-                  )}
                 </ul>
+                <Link
+                  className="btn btn--primary"
+                  style={{ marginTop: "var(--spacing-32)" }}
+                  href="/library"
+                >
+                  <span className="btn__arrow">→</span>
+                  {t("landing.tutor.cta")}
+                </Link>
               </div>
 
-              <div
-                className="px-5 py-3 border-t t-label"
-                style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
-              >
-                {stage.load}
-              </div>
-            </article>
-          ))}
-        </StaggerIn>
-      </section>
+              <TutorDemo
+                subjectLine={t("landing.tutor.demoBar", { year: 10 })}
+                paperLine={t("landing.ladder.caption", {
+                  component: component1?.name ?? "Component 1",
+                  max: component1?.maxMark ?? 80,
+                })}
+                mark={demoMark}
+                maxMark={demoMax}
+                grade={demoGrade}
+                ticks={demoTicks}
+                messages={DEMO_CHAT}
+              />
+            </div>
+          </div>
+        </section>
 
-      {/* -------------------------------------------------------------- BOUNDARY */}
-      <section className="px-5 md:px-10 mt-12 md:mt-14">
-        <Reveal>
-          <BoundaryExplorer />
-        </Reveal>
-      </section>
-
-      <PhoneShowcase />
-
-      {/* ------------------------------------------------------------------ CTA */}
-      <section className="px-5 md:px-10 mt-12 md:mt-14">
-        <div
-          className="card p-6 md:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8"
-          style={{ background: "var(--color-ink)", boxShadow: "var(--shadow-lift)" }}
-        >
-          <MaskedReveal
-            as="h2"
-            className="t-heading"
-            style={{ color: "var(--color-canvas)", maxWidth: "13ch" }}
-            text="Start with one paper"
-          />
-          <div className="flex flex-col gap-4">
-            <p style={{ color: "var(--color-canvas)", maxWidth: "40ch" }}>
-              90 minutes, 18 questions, no calculator. You will know your grade the second
-              you submit.
-            </p>
-            <RevealButton
-              href="/library"
-              className="self-start"
-              fill="var(--color-highlighter)"
-              textColor="var(--color-ink)"
-              hoverFill="var(--color-canvas)"
-              hoverTextColor="var(--color-ink)"
-              border="1px solid transparent"
-              shadow="0 6px 18px -6px rgba(0,0,0,0.4)"
+        {/* ------------------------------------------------------------ FINAL */}
+        <section className="final" id="start">
+          <div className="shell">
+            <h2 className="h measure-mx" data-hl>
+              <span className="hl">
+                <span>{t("landing.final.title")}</span>
+              </span>
+            </h2>
+            <p
+              className="body measure-mx"
+              style={{ marginTop: "var(--spacing-24)" }}
+              data-reveal
             >
-              Choose a mock →
-            </RevealButton>
+              {t("landing.final.sub")}
+            </p>
+            <div style={{ marginTop: "var(--spacing-40)" }} data-reveal>
+              <Link className="btn btn--primary" href="/library">
+                <span className="btn__arrow">→</span>
+                {t("landing.final.cta")}
+              </Link>
+              <p className="caption muted" style={{ marginTop: 12 }}>
+                {t("landing.noAccount")}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* --------------------------------------------------------------- FOOTER */}
-      <footer
-        className="mt-12 px-5 md:px-10 py-8"
-        style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
-      >
-        <div className="flex flex-wrap justify-between gap-8">
-          <div className="flex flex-col gap-2">
-            <span className="t-label">TALAP®</span>
-            <span className="t-micro" style={{ opacity: 0.7 }}>
-              МЭСК PREPARATION FOR NIS STUDENTS
-            </span>
+      {/* ----------------------------------------------------------- FOOTER */}
+      <footer className="footer">
+        <div className="shell">
+          <div className="footer__top">
+            <div className="footer__col">
+              <Link className="logo no-underline" href="/" aria-label="Talap — home">
+                <BrandMark height={26} />
+              </Link>
+              <p
+                className="caption muted"
+                style={{ marginTop: "var(--spacing-16)", maxWidth: 300 }}
+              >
+                {t("footer.blurb")}
+              </p>
+            </div>
+
+            <div className="footer__col">
+              <h4>{t("footer.practise")}</h4>
+              <Link href="/library">↳ {t("nav.mockPapers")}</Link>
+              <Link href="/dashboard">↳ {t("nav.progress")}</Link>
+              <Link href="/settings">↳ {t("nav.settings")}</Link>
+            </div>
+
+            <div className="footer__col">
+              <h4>{t("footer.aboutExam")}</h4>
+              <Link href="/#grades">↳ {t("nav.threeYears")}</Link>
+              <Link href="/#boundaries">↳ {t("nav.boundaryTables")}</Link>
+              <Link href="/#tutor">↳ {t("nav.aiTutor")}</Link>
+              {/* The grade scale is a fact about the product, not a
+                  destination — so it reads as text and drops the arrow that
+                  made the old list look clickable. */}
+              <p className="mono muted footer__scale">
+                {t("footer.scale")}: A* A B C D E U
+              </p>
+            </div>
           </div>
-          <div className="flex gap-10">
-            <div className="flex flex-col gap-2">
-              <span className="t-micro" style={{ opacity: 0.7 }}>
-                PRACTISE
-              </span>
-              <Link href="/library" className="t-label no-underline" style={{ color: "inherit" }}>
-                ↳ MOCK PAPERS
-              </Link>
-              <Link href="/dashboard" className="t-label no-underline" style={{ color: "inherit" }}>
-                ↳ DASHBOARD
-              </Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="t-micro" style={{ opacity: 0.7 }}>
-                SCALE
-              </span>
-              <span className="t-label">↳ A* A B C D E U</span>
-              <span className="t-label">↳ OFFICIAL BOUNDARIES</span>
-            </div>
+
+          <div className="footer__bottom">
+            <p className="micro muted">
+              {t("footer.demo")}
+            </p>
           </div>
         </div>
-        <p className="t-micro mt-8" style={{ opacity: 0.55, maxWidth: "70ch" }}>
-          DEMO BUILD. QUESTION CONTENT TRANSCRIBED FROM NIS PAST PAPERS FOR STUDY USE.
-          GRADE BOUNDARIES FROM THE PUBLISHED МЭСК TABLE.
-        </p>
       </footer>
-    </main>
+    </>
   );
 }

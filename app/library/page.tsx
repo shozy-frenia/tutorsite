@@ -1,17 +1,25 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import ScrollReveal from "@/components/motion/ScrollReveal";
 import PaperFilter from "@/components/library/PaperFilter";
-import MaskedReveal from "@/components/motion/MaskedReveal";
-import PointerLift from "@/components/motion/PointerLift";
-import StaggerIn from "@/components/motion/StaggerIn";
 import { PAPERS, availableMarks, paperTopics } from "@/data/exams";
-import { GRADE_STAGES, examSubjectsFor, profileOptionsFor, subjectById } from "@/data/curriculum";
+import {
+  GRADE_STAGES,
+  examSubjectsFor,
+  profileOptionsFor,
+  subjectById,
+} from "@/data/curriculum";
 import { boundariesFor } from "@/data/grade-boundaries";
+import { getT } from "@/lib/i18n/server";
+import { subjectName } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Mock papers — Talap",
-  description: "Full NIS / МЭСК mock papers with official grade boundaries.",
-};
+export async function generateMetadata() {
+  const { t } = await getT();
+  return {
+    title: `${t("nav.mockPapers")} — Talap`,
+    description: t("library.hint"),
+  };
+}
 
 /**
  * Paper library.
@@ -20,239 +28,218 @@ export const metadata = {
  * explicitly not-yet-seeded rather than shown as a dead link, so the shape of
  * the full product is visible without pretending the content is there.
  */
-export default function Library() {
-  const seededSubjects = new Set(PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`));
+export default async function Library() {
+  const { t, locale } = await getT();
+  const seededSubjects = new Set(
+    PAPERS.map((p) => `${p.gradeYear}:${p.subjectId}`)
+  );
 
   return (
-    <main>
+    <>
+      <ScrollReveal />
       <Nav />
 
-      <section className="px-5 md:px-10">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal as="h1" className="t-heading" style={{ maxWidth: "12ch" }} text="Mock papers" />
-          <span className="t-label pb-2">↳ {PAPERS.length} READY TO SIT</span>
-        </div>
-
-        <PaperFilter
-          available={PAPERS.map((p) => ({ gradeYear: p.gradeYear, subjectId: p.subjectId }))}
-        />
-
-        <StaggerIn className="grid lg:grid-cols-2 gap-5">
-          {[...PAPERS]
-            .sort((a, b) => a.gradeYear - b.gradeYear)
-            .map((paper) => {
-            const subject = subjectById(paper.subjectId);
-            const component = boundariesFor(paper.subjectId, paper.gradeYear)?.components[
-              paper.componentIndex
-            ];
-            const marks = availableMarks(paper);
-            const topics = paperTopics(paper);
-
-            return (
-              <PointerLift
-                as="article"
-                key={paper.id}
-                className="card flex flex-col paper-card overflow-hidden"
-                data-subject={paper.subjectId}
-                data-year={paper.gradeYear}
-              >
-                {/* The header used to be a solid highlighter field. With eight
-                    papers on screen that put eight yellow blocks in one
-                    viewport, which is precisely the thing the pilot called
-                    "бьёт в глаза". The header is paper now, and the yellow
-                    survives as the rule down its left edge — one mark per
-                    card instead of one field per card. */}
-                <div
-                  className="px-5 py-4 flex items-start justify-between gap-4"
-                  style={{
-                    borderBottom: "1px solid var(--color-rule)",
-                    borderLeft: "3px solid var(--color-highlighter)",
-                    background: "var(--color-paper)",
-                    borderTopLeftRadius: "inherit",
-                    borderTopRightRadius: "inherit",
-                  }}
-                >
-                  <div>
-                    <span className="t-micro t-muted">
-                      GRADE {paper.gradeYear} · {subject?.name.toUpperCase()}
-                    </span>
-                    <h2 className="t-subheading mt-1">{paper.title}</h2>
-                    <span className="t-label t-muted mt-1 block">{paper.sitting}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span
-                      className="t-micro px-2 py-1"
-                      style={{
-                        borderRadius: "var(--radius-full)",
-                        border: "1px solid var(--color-rule-strong)",
-                        color: "var(--color-muted)",
-                      }}
-                    >
-                      {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
-                    </span>
-                    <span
-                      className="t-micro px-2 py-1"
-                      style={{
-                        borderRadius: "var(--radius-full)",
-                        border: "1px solid transparent",
-                        background:
-                          paper.provenance === "transcribed"
-                            ? "var(--color-acid-lime-wash)"
-                            : "var(--color-canvas)",
-                        borderColor:
-                          paper.provenance === "transcribed"
-                            ? "transparent"
-                            : "var(--color-rule)",
-                      }}
-                    >
-                      {paper.provenance === "transcribed" ? "PAST PAPER" : "PRACTICE"}
-                    </span>
-                  </div>
-                </div>
-
-                <p
-                  className="px-5 py-3 text-[14px] m-0"
-                  style={{ borderBottom: "1px solid var(--color-rule)", lineHeight: 1.35 }}
-                >
-                  {paper.provenanceNote}
-                </p>
-
-                <dl className="grid grid-cols-3 ruled-none">
-                  {[
-                    { label: "QUESTIONS", value: `${paper.questions.length}` },
-                    { label: "MARKS", value: `${marks}` },
-                    { label: "MINUTES", value: `${paper.durationMinutes}` },
-                  ].map((stat, i) => (
-                    <div
-                      key={stat.label}
-                      className="px-5 py-4"
-                      style={{
-                        borderRight: i < 2 ? "1px solid var(--color-rule)" : undefined,
-                      }}
-                    >
-                      <dt className="t-micro" style={{ opacity: 0.6 }}>
-                        {stat.label}
-                      </dt>
-                      <dd className="t-subheading t-mono m-0">{stat.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-
-                <div
-                  className="px-5 py-4 border-t"
-                  style={{ borderColor: "var(--color-rule)" }}
-                >
-                  <span className="t-micro" style={{ opacity: 0.6 }}>
-                    TOPICS
-                  </span>
-                  <ul className="flex flex-wrap gap-1.5 mt-2 list-none p-0">
-                    {topics.map((topic) => (
-                      <li key={topic} className="chip chip-quiet">
-                        {topic}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {component && (
-                  <div
-                    className="px-5 py-3 border-t t-micro flex flex-wrap gap-x-4 gap-y-1"
-                    style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
-                  >
-                    <span style={{ opacity: 0.6 }}>GRADED ON {component.name.toUpperCase()} / {component.maxMark}:</span>
-                    {component.bands
-                      .filter((b) => b.grade !== "U")
-                      .map((band) => (
-                        <span key={band.grade}>
-                          {band.grade} ≥ {band.min}
-                        </span>
-                      ))}
-                  </div>
-                )}
-
-                <div className="p-5 mt-auto">
-                  <Link
-                    href={`/exam/${paper.id}`}
-                    className="no-underline press inline-block"
-                    style={{
-                      background: "var(--color-ink)",
-                      color: "var(--color-canvas)",
-                      border: "1px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-card)",
-                      padding: "12px 22px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    Sit this paper →
-                  </Link>
-                </div>
-              </PointerLift>
-            );
-          })}
-        </StaggerIn>
-      </section>
-
-      {/* Curriculum coverage — what exists and what does not */}
-      <section className="px-5 md:px-10 mt-12">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-6">
-          <MaskedReveal
-            as="h2"
-            className="t-heading-sm"
-            style={{ maxWidth: "16ch" }}
-            text="The rest of the curriculum"
-          />
-          <span className="t-label pb-2">↳ NOT YET SEEDED</span>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-5">
-          {GRADE_STAGES.map((stage) => (
-            <div key={stage.year} className="panel-flat p-5">
-              <span className="mark-quiet t-micro">GRADE {stage.year}</span>
-              <span className="t-micro block mt-3" style={{ opacity: 0.55 }}>
-                {stage.compulsory}
+      <main>
+        <section className="section-tight">
+          <div className="shell">
+            <div className="head head--left">
+              <span className="eyebrow" data-reveal>
+                ↳ {t("library.readyToSit", { count: PAPERS.length })}
               </span>
-              <ul className="mt-2 list-none p-0 flex flex-col gap-2">
-                {[
-                  ...examSubjectsFor({
-                    gradeYear: stage.year,
-                    parallel: "kazakh",
-                    profileSubjectIds: [],
-                  }),
-                  ...profileOptionsFor(stage.year),
-                ].map((subject) => {
-                  const ready = seededSubjects.has(`${stage.year}:${subject.id}`);
+              <h1 className="h" data-hl>
+                <span className="hl">
+                  <span>{t("nav.mockPapers")}</span>
+                </span>
+              </h1>
+            </div>
+
+            <PaperFilter
+              available={PAPERS.map((p) => ({
+                gradeYear: p.gradeYear,
+                subjectId: p.subjectId,
+              }))}
+            />
+
+            <div className="papers" data-stagger>
+              {[...PAPERS]
+                .sort((a, b) => a.gradeYear - b.gradeYear)
+                .map((paper) => {
+                  const subject = subjectById(paper.subjectId);
+                  const component = boundariesFor(
+                    paper.subjectId,
+                    paper.gradeYear
+                  )?.components[paper.componentIndex];
+                  const marks = availableMarks(paper);
+                  const topics = paperTopics(paper);
+
                   return (
-                    <li
-                      key={subject.id}
-                      className="flex items-center justify-between gap-3 text-[15px]"
+                    <article
+                      key={paper.id}
+                      className="card card--plain paper-card"
+                      data-subject={paper.subjectId}
+                      data-year={paper.gradeYear}
                     >
-                      <span>
-                        {subject.glyph} {subject.name}
-                      </span>
-                      <span
-                        className="t-micro px-2 py-0.5 shrink-0"
-                        style={
-                          ready
-                            ? { background: "var(--color-acid-lime)", border: "1px solid var(--color-rule)" }
-                            : { border: "1px solid var(--color-rule)", opacity: 0.55 }
-                        }
+                      <div className="paper-card__top">
+                        <div>
+                          <span className="mono muted">
+                            {t("nav.grade", { year: paper.gradeYear })} ·{" "}
+                            {subject ? subjectName(subject, locale) : paper.subjectId}
+                          </span>
+                          <h2 className="sub" style={{ marginTop: 4 }}>
+                            {paper.title}
+                          </h2>
+                          <span className="caption muted">{paper.sitting}</span>
+                        </div>
+                        <div className="paper-card__flags">
+                          <span className="tag tag--plain">
+                            {paper.calculator
+                              ? t("library.calculator")
+                              : t("library.noCalculator")}
+                          </span>
+                          <span
+                            className={
+                              paper.provenance === "transcribed"
+                                ? "tag tag--mint"
+                                : "tag tag--outline"
+                            }
+                          >
+                            {paper.provenance === "transcribed"
+                              ? t("library.pastPaper")
+                              : t("library.practice")}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="body-sm muted">{paper.provenanceNote}</p>
+
+                      <dl className="paper-card__stats">
+                        {[
+                          {
+                            label: t("common.questions"),
+                            value: `${paper.questions.length}`,
+                          },
+                          { label: t("common.marks"), value: `${marks}` },
+                          {
+                            label: t("common.minutes"),
+                            value: `${paper.durationMinutes}`,
+                          },
+                        ].map((stat) => (
+                          <div key={stat.label}>
+                            <dt className="mono muted">{stat.label}</dt>
+                            <dd className="paper-card__stat">{stat.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+
+                      <div>
+                        <span className="mono muted">{t("library.topics")}</span>
+                        <ul className="paper-card__topics">
+                          {topics.map((topic) => (
+                            <li key={topic} className="tag tag--plain">
+                              {topic}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {component && (
+                        <div className="paper-card__bands">
+                          <span className="mono muted">
+                            {t("library.gradedOn", {
+                              component: component.name,
+                              max: component.maxMark,
+                            })}
+                          </span>
+                          <span className="paper-card__band-list">
+                            {component.bands
+                              .filter((b) => b.grade !== "U")
+                              .map((band) => (
+                                <span key={band.grade} className="mono">
+                                  {band.grade} ≥ {band.min}
+                                </span>
+                              ))}
+                          </span>
+                        </div>
+                      )}
+
+                      <Link
+                        href={`/exam/${paper.id}`}
+                        className="btn btn--primary btn--sm paper-card__cta"
                       >
-                        {ready ? "READY" : "SOON"}
-                      </span>
-                    </li>
+                        <span className="btn__arrow">→</span>
+                        {t("library.sit")}
+                      </Link>
+                    </article>
                   );
                 })}
-              </ul>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <footer className="px-5 md:px-10 py-10 mt-12" style={{ background: "var(--color-ink)" }}>
-        <span className="t-micro" style={{ color: "var(--color-canvas)", opacity: 0.6 }}>
-          TALAP® · QUESTION CONTENT TRANSCRIBED FROM NIS PAST PAPERS FOR STUDY USE
-        </span>
+        {/* Curriculum coverage — what exists and what does not */}
+        <section className="section-tight">
+          <div className="shell">
+            <div className="head head--left">
+              <span className="eyebrow" data-reveal>
+                ↳ {t("library.notSeeded")}
+              </span>
+              <h2 className="h-sm" data-hl>
+                <span className="hl hl--teal">
+                  <span>{t("library.restOfCurriculum")}</span>
+                </span>
+              </h2>
+            </div>
+
+            <div className="coverage" data-stagger>
+              {GRADE_STAGES.map((stage) => (
+                <div key={stage.year} className="card card--plain">
+                  <span className="tag">{t("nav.grade", { year: stage.year })}</span>
+                  <p
+                    className="mono muted"
+                    style={{ marginTop: "var(--spacing-16)" }}
+                  >
+                    {t(`stage.${stage.year}.compulsory`)}
+                  </p>
+                  <ul className="coverage__list">
+                    {[
+                      ...examSubjectsFor({
+                        gradeYear: stage.year,
+                        parallel: "kazakh",
+                        profileSubjectIds: [],
+                      }),
+                      ...profileOptionsFor(stage.year),
+                    ].map((subject) => {
+                      const ready = seededSubjects.has(
+                        `${stage.year}:${subject.id}`
+                      );
+                      return (
+                        <li key={subject.id}>
+                          <span>
+                            {subject.glyph} {subjectName(subject, locale)}
+                          </span>
+                          <span
+                            className={`tag ${ready ? "tag--mint" : "tag--plain"}`}
+                          >
+                            {ready ? t("library.ready") : t("common.soon")}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div className="shell">
+          <p className="micro muted">
+            {t("footer.studyUse")}
+          </p>
+        </div>
       </footer>
-    </main>
+    </>
   );
 }

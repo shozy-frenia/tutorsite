@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useEffect, useRef, useState } from "react";
 import Thinking from "@/components/motion/Thinking";
 import { renderRichText } from "@/lib/rich-text";
@@ -45,6 +47,7 @@ export default function TutorDrawer({
   question,
   studentAnswer,
 }: Props) {
+  const t = useT();
   const [tab, setTab] = useState<Tab>("explain");
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -149,8 +152,8 @@ export default function TutorDrawer({
       });
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({ error: "Request failed." }));
-        setError(payload.error ?? "Request failed.");
+        const payload = await response.json().catch(() => ({ error: t("tutor.requestFailed") }));
+        setError(payload.error ?? t("tutor.requestFailed"));
         setStreaming(false);
         return;
       }
@@ -159,7 +162,7 @@ export default function TutorDrawer({
 
       const reader = response.body?.getReader();
       if (!reader) {
-        setError("No response body.");
+        setError(t("tutor.noBody"));
         setStreaming(false);
         return;
       }
@@ -177,7 +180,7 @@ export default function TutorDrawer({
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        setError("Could not reach the tutor. Check your connection.");
+        setError(t("tutor.unreachable"));
       }
     } finally {
       clearWatchdogs();
@@ -202,7 +205,7 @@ export default function TutorDrawer({
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? "Could not generate a question.");
+        setError(payload.error ?? t("tutor.generateFailed"));
         return;
       }
 
@@ -214,7 +217,7 @@ export default function TutorDrawer({
         );
       }
     } catch {
-      setError("Could not reach the generator.");
+      setError(t("tutor.generatorUnreachable"));
     } finally {
       setVariantLoading(false);
     }
@@ -225,7 +228,7 @@ export default function TutorDrawer({
   return (
     <>
       <button
-        aria-label="Close tutor"
+        aria-label={t("tutor.close")}
         onClick={onClose}
         className="fixed inset-0 z-40 cursor-default"
         style={{ background: "rgba(21,21,21,0.35)", border: 0 }}
@@ -235,8 +238,8 @@ export default function TutorDrawer({
         className="fixed right-0 top-0 bottom-0 z-50 flex flex-col drawer-in"
         style={{
           width: "min(520px, 100vw)",
-          background: "var(--color-sheet)",
-          borderLeft: "1px solid var(--color-rule)",
+          background: "var(--color-cream-paper)",
+          borderLeft: "1px solid var(--color-pencil-gray)",
         }}
         role="dialog"
         aria-label="AI tutor"
@@ -244,50 +247,46 @@ export default function TutorDrawer({
         {/* Header */}
         <div
           className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-          style={{ borderBottom: "1px solid var(--color-rule)", background: "var(--color-ink)" }}
+          style={{ borderBottom: "1px solid var(--color-pencil-gray)", background: "var(--color-ink)" }}
         >
           <div className="flex items-center gap-2">
-            <span className="mark t-micro">AI TUTOR</span>
+            <span className="mark">{t("tutor.title")}</span>
             {mode === "offline" && (
-              <span
-                className="t-micro px-2 py-1"
-                style={{ border: "1px solid var(--color-canvas)", color: "var(--color-canvas)" }}
-              >
-                OFFLINE
+              <span className="tag tag--outline" style={{ color: "inherit" }}>
+                offline
               </span>
             )}
           </div>
           <button
             onClick={onClose}
-            className="t-label press-soft"
-            style={{
-              background: "transparent",
-              border: "2px solid var(--color-canvas)",
-              color: "var(--color-canvas)",
-              padding: "4px 10px",
-              cursor: "pointer",
-            }}
+            className="btn btn--inverse btn--sm"
           >
-            CLOSE ✕
+            Close ✕
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "1px solid var(--color-rule)" }}>
+        <div className="grid grid-cols-2 shrink-0" style={{ borderBottom: "1px solid var(--color-pencil-gray)" }}>
           {(["explain", "practise"] as Tab[]).map((value) => (
             <button
               key={value}
               onClick={() => setTab(value)}
               className="t-label py-3"
               style={{
-                background: tab === value ? "var(--color-highlighter)" : "var(--color-sheet)",
+                background:
+                  tab === value
+                    ? "var(--color-highlighter-yellow)"
+                    : "var(--color-cream-paper)",
                 border: 0,
-                borderRight: value === "explain" ? "1px solid var(--color-rule)" : undefined,
+                borderRight:
+                  value === "explain"
+                    ? "1px solid var(--color-pencil-gray)"
+                    : undefined,
                 cursor: "pointer",
                 color: "var(--color-ink)",
               }}
             >
-              {value === "explain" ? "EXPLAIN THIS" : "GIVE ME ANOTHER"}
+              {value === "explain" ? t("tutor.explainThis") : t("tutor.giveAnother")}
             </button>
           ))}
         </div>
@@ -295,7 +294,7 @@ export default function TutorDrawer({
         {/* Question context strip */}
         <div
           className="px-4 py-3 shrink-0"
-          style={{ borderBottom: "1px solid var(--color-rule)", background: "var(--color-study)" }}
+          style={{ borderBottom: "1px solid var(--color-pencil-gray)", background: "var(--color-whisper-gray)" }}
         >
           <span className="t-micro" style={{ opacity: 0.65 }}>
             Q{question.number} · {question.topic} · {question.marks} MARK
@@ -321,14 +320,13 @@ export default function TutorDrawer({
                     className="press-soft mt-3"
                     style={{
                       background: "var(--color-highlighter)",
-                      border: "1px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-card)",
-                      padding: "10px 16px",
+                      border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+                                            padding: "10px 16px",
                       fontWeight: 700,
                       cursor: "pointer",
                     }}
                   >
-                    {studentAnswer.trim() ? "Mark my working" : "Get me started"}
+                    {studentAnswer.trim() ? t("tutor.markMyWorking") : t("tutor.getStarted")}
                   </button>
                 </div>
               )}
@@ -338,7 +336,7 @@ export default function TutorDrawer({
                   key={i}
                   className="p-3"
                   style={{
-                    border: "1px solid var(--color-rule)",
+                    border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                     background:
                       message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
                     alignSelf: message.role === "user" ? "flex-end" : "flex-start",
@@ -362,7 +360,7 @@ export default function TutorDrawer({
 
               {streaming && messages.length === 0 && (
                 <Thinking
-                  label="Tutor is thinking"
+                  label={t("tutor.thinking")}
                   slow={slow}
                   slowNote="Первый ответ занимает больше обычного. Ещё несколько секунд."
                 />
@@ -371,7 +369,7 @@ export default function TutorDrawer({
               {error && (
                 <div
                   className="p-3 t-label"
-                  style={{ border: "1px solid var(--color-rule)", background: "var(--color-signal-red)" }}
+                  style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-signal-red)" }}
                 >
                   {error}
                 </div>
@@ -381,7 +379,7 @@ export default function TutorDrawer({
             {/* Composer */}
             <form
               className="shrink-0 p-3 flex gap-2"
-              style={{ borderTop: "1px solid var(--color-rule)" }}
+              style={{ borderTop: "1px solid var(--color-pencil-gray)" }}
               onSubmit={(event) => {
                 event.preventDefault();
                 const text = draft.trim();
@@ -394,9 +392,9 @@ export default function TutorDrawer({
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 maxLength={600}
-                placeholder="Ask a follow-up…"
+                placeholder={t("tutor.followUp")}
                 className="grow px-3 py-2 text-[15px]"
-                style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
+                style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-cream-paper)" }}
               />
               <button
                 type="submit"
@@ -405,7 +403,7 @@ export default function TutorDrawer({
                 style={{
                   background: streaming ? "var(--color-paper)" : "var(--color-ink)",
                   color: "var(--color-canvas)",
-                  border: "1px solid var(--color-rule)",
+                  border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                   cursor: streaming ? "wait" : "pointer",
                 }}
               >
@@ -427,21 +425,20 @@ export default function TutorDrawer({
                 className="press-soft mt-3"
                 style={{
                   background: "var(--color-highlighter)",
-                  border: "1px solid var(--color-rule)",
-                  boxShadow: "var(--shadow-card)",
-                  padding: "10px 16px",
+                  border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+                                    padding: "10px 16px",
                   fontWeight: 700,
                   cursor: variantLoading ? "wait" : "pointer",
                 }}
               >
-                {variantLoading ? "Writing a question…" : "Generate a question →"}
+                {variantLoading ? t("tutor.thinking") : `${t("tutor.generate")} →`}
               </button>
             </div>
 
             {variantWarning && (
               <div
                 className="p-3 text-[14px]"
-                style={{ border: "1px solid var(--color-rule)", background: "var(--color-highlighter)" }}
+                style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-highlighter)" }}
               >
                 {variantWarning}
               </div>
@@ -459,7 +456,7 @@ export default function TutorDrawer({
 
                 <details
                   className="mt-3 pt-3"
-                  style={{ borderTop: "1px solid var(--color-rule)" }}
+                  style={{ borderTop: "1px solid var(--color-pencil-gray)" }}
                 >
                   <summary className="t-label cursor-pointer">↳ HINT</summary>
                   <p className="text-[15px] mt-2" style={{ lineHeight: 1.35 }}>
@@ -472,17 +469,16 @@ export default function TutorDrawer({
                     onClick={() => setVariantAnswerShown(true)}
                     className="press-soft mt-3 t-label"
                     style={{
-                      background: "var(--color-sheet)",
-                      border: "1px solid var(--color-rule)",
-                      boxShadow: "var(--shadow-card)",
-                      padding: "8px 14px",
+                      background: "var(--color-cream-paper)",
+                      border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+                                            padding: "8px 14px",
                       cursor: "pointer",
                     }}
                   >
                     REVEAL MARK SCHEME
                   </button>
                 ) : (
-                  <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--color-rule)" }}>
+                  <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--color-pencil-gray)" }}>
                     <span className="t-micro" style={{ opacity: 0.6 }}>
                       MARK SCHEME
                     </span>
@@ -516,7 +512,7 @@ export default function TutorDrawer({
             {error && (
               <div
                 className="p-3 t-label"
-                style={{ border: "1px solid var(--color-rule)", background: "var(--color-signal-red)" }}
+                style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-signal-red)" }}
               >
                 {error}
               </div>

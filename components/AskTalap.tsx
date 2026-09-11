@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Thinking from "@/components/motion/Thinking";
-import { renderRichText } from "@/lib/rich-text";
 import { usePathname } from "next/navigation";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { renderRichText } from "@/lib/rich-text";
 
 /**
  * Site-wide study assistant.
@@ -21,18 +21,10 @@ interface Message {
   content: string;
 }
 
-const CHIPS = [
-  "What do I sit in Grade 10?",
-  "Сколько нужно на A по математике?",
-  "How are the grade boundaries set?",
-  "How should I revise for Paper 1?",
-];
-
-const OPENING =
-  "I am the Talap study assistant. Ask me what you sit this year, what a grade actually needs, or anything on the syllabus — in Kazakh, Russian or English.";
-
 /** Render **bold** spans; everything else stays plain text. */
 export default function AskTalap() {
+  const t = useT();
+  const chips = [t("ask.chip1"), t("ask.chip2"), t("ask.chip3"), t("ask.chip4")];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -82,8 +74,7 @@ export default function AskTalap() {
           {
             role: "assistant",
             content:
-              payload?.error ??
-              "I could not reach the assistant just now. Try again in a moment.",
+              payload?.error ?? t("ask.unreachable"),
           },
         ]);
         return;
@@ -96,8 +87,7 @@ export default function AskTalap() {
         ...history,
         {
           role: "assistant",
-          content:
-            "I could not reach the assistant — check your connection and try again. The mock papers and their mark schemes work offline.",
+          content: t("ask.offlineNote"),
         },
       ]);
     } finally {
@@ -109,20 +99,11 @@ export default function AskTalap() {
     return (
       <button
         onClick={() => setOpen(true)}
-        aria-label="Open the study assistant"
-        className="press t-label fixed z-40"
-        style={{
-          right: "20px",
-          bottom: "20px",
-          background: "var(--color-highlighter)",
-          border: "1px solid var(--color-rule)",
-          boxShadow: "var(--shadow-card)",
-          color: "var(--color-ink)",
-          padding: "12px 18px",
-          cursor: "pointer",
-        }}
+        aria-label={t("ask.open")}
+        className="ask"
       >
-        ASK TALAP ↗
+        <i aria-hidden="true" />
+        {t("ask.open")} ↗
       </button>
     );
   }
@@ -130,93 +111,74 @@ export default function AskTalap() {
   return (
     <aside
       role="dialog"
-      aria-label="Talap study assistant"
+      aria-label={t("ask.open")}
       className="fixed z-50 flex flex-col rise"
       style={{
         right: "20px",
         bottom: "20px",
         width: "min(400px, calc(100vw - 40px))",
         height: "min(560px, calc(100vh - 40px))",
-        background: "var(--color-sheet)",
-        border: "1px solid var(--color-rule)",
-        boxShadow: "var(--shadow-card)",
+        background: "var(--color-cream-paper)",
+        border: "1px solid var(--color-forest-ink)",
+        borderRadius: "var(--radius-cards)",
+        overflow: "hidden",
+        boxShadow: "var(--shadow-lifted)",
       }}
     >
       <div
         className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-        style={{ background: "var(--color-ink)", borderBottom: "1px solid var(--color-rule)" }}
+        style={{
+          background: "var(--color-whisper-gray)",
+          borderBottom: "1px solid var(--color-pencil-gray)",
+        }}
       >
         <div className="flex items-center gap-2">
-          <span className="mark t-micro">ASK TALAP</span>
+          <span className="mono">{t("ask.open")}</span>
           {mode === "offline" && (
-            <span
-              className="t-micro px-2 py-1"
-              style={{ border: "1px solid var(--color-canvas)", color: "var(--color-canvas)" }}
-            >
-              OFFLINE
-            </span>
+            <span className="tag tag--outline">{t("tutor.offline")}</span>
           )}
         </div>
         <button
           onClick={() => setOpen(false)}
-          className="t-label"
-          style={{
-            background: "transparent",
-            border: "2px solid var(--color-canvas)",
-            color: "var(--color-canvas)",
-            padding: "4px 10px",
-            cursor: "pointer",
-          }}
+          className="btn btn--outline btn--sm"
+          aria-label={t("common.close")}
         >
-          CLOSE ✕
+          {t("common.close")} ✕
         </button>
       </div>
 
       <div ref={logRef} className="grow overflow-y-auto p-3 flex flex-col gap-2.5">
-        <div className="panel-flat p-3">
-          <p className="text-[14px] m-0" style={{ lineHeight: 1.4 }}>
-            {OPENING}
-          </p>
-        </div>
+        <p className="msg msg--ai">{t("ask.opening")}</p>
 
         {messages.map((message, i) => (
-          <div
+          <p
             key={i}
-            className="p-3"
-            style={{
-              border: "1px solid var(--color-rule)",
-              background:
-                message.role === "user" ? "var(--color-highlighter)" : "var(--color-sheet)",
-              alignSelf: message.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "94%",
-            }}
+            className={`msg whitespace-pre-wrap ${
+              message.role === "user" ? "msg--me" : "msg--ai"
+            }`}
           >
-            <span className="t-micro block mb-1" style={{ opacity: 0.6 }}>
-              {message.role === "user" ? "YOU" : "TALAP"}
-            </span>
-            <p className="text-[14px] whitespace-pre-wrap m-0" style={{ lineHeight: 1.45 }}>
-              {renderRichText(message.content)}
-            </p>
-          </div>
+            {renderRichText(message.content)}
+          </p>
         ))}
 
-        {busy && <Thinking label="Thinking" />}
+        {busy && (
+          <p className="msg msg--ai" aria-live="polite">
+            <span className="typing">
+              <i />
+              <i />
+              <i />
+            </span>
+          </p>
+        )}
 
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
-            {CHIPS.map((chip) => (
+            {chips.map((chip) => (
               <button
                 key={chip}
                 onClick={() => void ask(chip)}
-                className="t-micro press-soft text-left"
-                style={{
-                  border: "1px solid var(--color-rule)",
-                  background: "var(--color-study)",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  textTransform: "none",
-                  letterSpacing: 0,
-                }}
+                className="btn btn--quiet btn--sm"
+                style={{ textAlign: "left" }}
               >
                 {chip}
               </button>
@@ -227,7 +189,7 @@ export default function AskTalap() {
 
       <form
         className="shrink-0 p-3 flex gap-2"
-        style={{ borderTop: "1px solid var(--color-rule)" }}
+        style={{ borderTop: "1px solid var(--color-pencil-gray)" }}
         onSubmit={(event) => {
           event.preventDefault();
           const text = draft.trim();
@@ -241,22 +203,15 @@ export default function AskTalap() {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           maxLength={600}
-          placeholder="Ask about the exam…"
-          className="grow px-3 py-2 text-[14px]"
-          style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}
+          placeholder={t("tutor.placeholder")}
+          className="field grow"
         />
         <button
           type="submit"
           disabled={busy || !draft.trim()}
-          className="press-soft t-label px-4"
-          style={{
-            background: busy ? "var(--color-paper)" : "var(--color-ink)",
-            color: "var(--color-canvas)",
-            border: "1px solid var(--color-rule)",
-            cursor: busy ? "wait" : "pointer",
-          }}
+          className="btn btn--primary btn--sm"
         >
-          SEND
+          {t("tutor.send")}
         </button>
       </form>
     </aside>

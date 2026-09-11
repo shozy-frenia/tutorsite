@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -55,6 +57,7 @@ const MOVE_MS = 520;
  * real link to the paper.
  */
 export default function PaperCoverflow({ papers }: Props) {
+  const t = useT();
   const n = papers.length;
   const [active, setActive] = useState(0);
   const lockRef = useRef(false);
@@ -92,7 +95,7 @@ export default function PaperCoverflow({ papers }: Props) {
       <div
         role="group"
         aria-roledescription="carousel"
-        aria-label="Mock papers"
+        aria-label={t("nav.mockPapers")}
         tabIndex={0}
         onKeyDown={onKeyDown}
         style={{
@@ -149,10 +152,11 @@ export default function PaperCoverflow({ papers }: Props) {
                   height: CARD_H,
                   display: "flex",
                   flexDirection: "column",
-                  background: "var(--color-canvas)",
-                  color: "var(--color-ink)",
-                  border: "1px solid var(--color-rule)",
-                  boxShadow: "var(--shadow-card)",
+                  background: "var(--color-cream-paper)",
+                  color: "var(--color-forest-ink)",
+                  border: "1px solid var(--color-forest-ink)",
+                  borderRadius: "var(--radius-cards)",
+                  boxShadow: "var(--shadow-lifted)",
                   transformOrigin: "center center",
                   transform: `translate(-50%, -50%) translateX(${rel * STEP_X}px) translateZ(${-rank * DEPTH}px) rotateY(${-rel * TILT}deg) scale(${Math.max(0.4, 1 - rank * SCALE_STEP)})`,
                   transition: `transform ${MOVE_MS}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${MOVE_MS}ms ease`,
@@ -164,98 +168,96 @@ export default function PaperCoverflow({ papers }: Props) {
                 <div
                   className="px-4 py-3"
                   style={{
-                    background: "var(--color-highlighter)",
-                    borderBottom: "1px solid var(--color-rule)",
+                    background: "var(--color-highlighter-yellow)",
+                    borderBottom: "1px solid var(--color-forest-ink)",
                   }}
                 >
-                  <span className="t-micro">
-                    GRADE {paper.gradeYear} · {paper.subject.toUpperCase()}
+                  <span className="mono">
+                    {t("nav.grade", { year: paper.gradeYear })} · {paper.subject}
                   </span>
-                  <h3 className="t-subheading mt-1" style={{ lineHeight: 0.95 }}>
-                    {paper.title}
-                  </h3>
+                  <h3 className="sub mt-1">{paper.title}</h3>
                 </div>
 
                 <div className="px-4 py-3 grow flex flex-col gap-3">
-                  <span className="t-label" style={{ opacity: 0.65 }}>
-                    {paper.sitting}
-                  </span>
+                  <span className="caption muted">{paper.sitting}</span>
 
                   <dl className="grid grid-cols-3 m-0">
                     {[
-                      ["QUESTIONS", paper.questions],
-                      ["MARKS", paper.marks],
-                      ["MINUTES", paper.minutes],
+                      [t("common.questions"), paper.questions],
+                      [t("common.marks"), paper.marks],
+                      [t("common.minutes"), paper.minutes],
                     ].map(([label, value], index) => (
                       <div
                         key={label}
                         style={{
-                          borderRight: index < 2 ? "1px solid var(--color-rule)" : undefined,
+                          borderRight:
+                            index < 2
+                              ? "1px solid var(--color-whisper-gray)"
+                              : undefined,
                           paddingRight: 10,
                           paddingLeft: index > 0 ? 10 : 0,
                         }}
                       >
-                        <dt className="t-micro m-0" style={{ opacity: 0.6 }}>
-                          {label}
-                        </dt>
-                        <dd className="t-mono m-0" style={{ fontSize: 26, fontWeight: 700 }}>
-                          {value}
-                        </dd>
+                        <dt className="mono muted m-0">{label}</dt>
+                        <dd className="paper-card__stat m-0">{value}</dd>
                       </div>
                     ))}
                   </dl>
 
                   <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0">
                     {paper.topics.map((topic) => (
-                      <li
-                        key={topic}
-                        className="t-micro px-2 py-1"
-                        style={{ border: "1px solid var(--color-rule)" }}
-                      >
+                      <li key={topic} className="tag tag--plain">
                         {topic}
                       </li>
                     ))}
                   </ul>
 
                   <div className="flex flex-wrap gap-2 mt-auto">
-                    <span
-                      className="t-micro px-2 py-1"
-                      style={{ background: "var(--color-ink)", color: "var(--color-canvas)" }}
-                    >
-                      {paper.calculator ? "CALCULATOR" : "NO CALCULATOR"}
+                    <span className="tag chip-strong">
+                      {paper.calculator
+                        ? t("library.calculator")
+                        : t("library.noCalculator")}
                     </span>
                     <span
-                      className="t-micro px-2 py-1"
-                      style={{
-                        border: "1px solid var(--color-rule)",
-                        background: paper.pastPaper ? "var(--color-acid-lime)" : "transparent",
-                      }}
+                      className={
+                        paper.pastPaper ? "tag tag--mint" : "tag tag--outline"
+                      }
                     >
-                      {paper.pastPaper ? "PAST PAPER" : "PRACTICE"}
+                      {paper.pastPaper
+                        ? t("library.pastPaper")
+                        : t("library.practice")}
                     </span>
                   </div>
                 </div>
 
                 <div
-                  className="px-4 py-3 t-label"
+                  className="px-4 py-3 body-sm"
                   style={{
-                    borderTop: "1px solid var(--color-rule)",
-                    background: isActive ? "var(--color-ink)" : "var(--color-paper)",
-                    color: isActive ? "var(--color-canvas)" : "var(--color-ink)",
+                    borderTop: "1px solid var(--color-pencil-gray)",
+                    background: isActive
+                      ? "var(--color-forest-ink)"
+                      : "var(--color-whisper-gray)",
+                    color: isActive
+                      ? "var(--color-cream-paper)"
+                      : "var(--color-forest-ink)",
+                    fontWeight: 500,
                     transition: "background 200ms ease, color 200ms ease",
                   }}
                 >
-                  {isActive ? "SIT THIS PAPER →" : "BRING TO FRONT"}
+                  {isActive ? t("library.sit") : t("library.bringToFront")}
                 </div>
 
-                {/* Everything off-centre recedes rather than competing. */}
+                {/* Everything off-centre recedes rather than competing.
+                    The scrim is paper, not ink: washing towards the canvas
+                    fades a card the way distance does, where a dark veil over
+                    the yellow header just turns it olive. */}
                 <span
                   aria-hidden
                   style={{
                     position: "absolute",
                     inset: 0,
-                    background: "var(--color-ink)",
-                    opacity: isActive ? 0 : 0.3,
+                    background: "var(--color-cream-paper)",
+                    opacity: isActive ? 0 : 0.55,
                     transition: `opacity ${MOVE_MS}ms ease`,
                     pointerEvents: "none",
                   }}
@@ -273,8 +275,8 @@ export default function PaperCoverflow({ papers }: Props) {
           aria-label="Previous paper"
           className="press-soft t-label"
           style={{
-            border: "1px solid var(--color-rule)",
-            boxShadow: "var(--shadow-card)",
+            border: "1px solid var(--color-forest-ink)",
+            borderRadius: "var(--radius-md)",
             background: "var(--color-canvas)",
             padding: "10px 18px",
             cursor: "pointer",
@@ -291,8 +293,8 @@ export default function PaperCoverflow({ papers }: Props) {
           aria-label="Next paper"
           className="press-soft t-label"
           style={{
-            border: "1px solid var(--color-rule)",
-            boxShadow: "var(--shadow-card)",
+            border: "1px solid var(--color-forest-ink)",
+            borderRadius: "var(--radius-md)",
             background: "var(--color-canvas)",
             padding: "10px 18px",
             cursor: "pointer",

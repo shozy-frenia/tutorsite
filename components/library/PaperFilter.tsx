@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { readStore, type Profile } from "@/lib/storage";
 import { PARALLEL_LABEL, examSubjectsFor, stageFor } from "@/data/curriculum";
+import { useT, useLocale } from "@/components/i18n/LocaleProvider";
+import { subjectName } from "@/lib/i18n";
 
 /**
  * Filter banner for the paper library.
@@ -24,6 +26,8 @@ export default function PaperFilter({
   /** Every seeded paper, as (gradeYear, subjectId) pairs. */
   available: Array<{ gradeYear: number; subjectId: string }>;
 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -62,16 +66,11 @@ export default function PaperFilter({
 
   if (!profile) {
     return (
-      <div
-        className="panel-flat px-5 py-4 mb-5 flex items-center justify-between gap-4 flex-wrap"
-        style={{ background: "var(--color-paper)", borderColor: "transparent" }}
-      >
-        <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
-          Showing every paper. Set up a profile and the library narrows to the exams you
-          actually sit.
-        </p>
-        <Link href="/dashboard" className="btn btn-sm btn-primary no-underline shrink-0">
-          Set up a profile →
+      <div className="filter-bar card card--plain">
+        <p className="body-sm">{t("library.showingAll")}</p>
+        <Link href="/dashboard" className="btn btn--yellow btn--sm shrink-0">
+          <span className="btn__arrow">→</span>
+          {t("library.setUpProfile")}
         </Link>
       </div>
     );
@@ -98,42 +97,34 @@ export default function PaperFilter({
       {filtering && showRules && (
         <style>{`${showRules} { display: flex; }`}</style>
       )}
-      <div
-        className="panel px-5 py-4 mb-5 flex items-start justify-between gap-4 flex-wrap"
-        style={{
-          background: "var(--color-highlighter-wash)",
-          borderColor: "transparent",
-        }}
-      >
-      <div className="min-w-0">
-        <span className="t-micro" style={{ opacity: 0.7 }}>
-          {profile.name.toUpperCase()} · GRADE {profile.gradeYear} ·{" "}
-          {PARALLEL_LABEL[profile.parallel].toUpperCase()}
-        </span>
-        <p className="text-[15px] m-0 mt-1" style={{ lineHeight: 1.35 }}>
-          {showAll
-            ? "Showing every paper in the library."
-            : `Showing only your ${stageFor(profile.gradeYear)?.load ?? "exam subjects"}.`}
-        </p>
-        <ul className="flex flex-wrap gap-1.5 mt-2 list-none p-0">
-          {subjects.map((subject) => (
-            <li
-              key={subject.id}
-              className="chip"
-              style={{ background: "var(--color-sheet)", borderColor: "transparent" }}
-            >
-              {subject.glyph} {subject.name}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div className="filter-bar card card--yellow">
+        <div className="min-w-0">
+          <span className="mono" style={{ opacity: 0.7 }}>
+            {profile.name} · {t("nav.grade", { year: profile.gradeYear })} ·{" "}
+            {t(`profile.parallel.${profile.parallel}`)}
+          </span>
+          <p className="body-sm" style={{ marginTop: 4 }}>
+            {showAll
+              ? t("library.showingAllNow")
+              : t("library.showingOnly", {
+                  load: t(`stage.${profile.gradeYear}.load`),
+                })}
+          </p>
+          <ul className="filter-bar__subjects">
+            {subjects.map((subject) => (
+              <li key={subject.id} className="tag tag--outline">
+                {subject.glyph} {subjectName(subject, locale)}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <button
+          type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="btn btn-sm btn-outline shrink-0 whitespace-nowrap"
-          style={{ background: "var(--color-sheet)" }}
+          className="btn btn--outline btn--sm shrink-0"
         >
-          {showAll ? "Show only mine" : "Show everything"}
+          {showAll ? t("library.showOnlyMine") : t("library.showEverything")}
         </button>
       </div>
 
@@ -148,16 +139,13 @@ export default function PaperFilter({
  * simply empty and broken.
  */
 function NoMatchNotice({ year }: { year: number }) {
+  const t = useT();
   return (
     <div
-      className="panel-flat px-5 py-4 mb-5 empty-notice"
-      style={{ background: "var(--color-paper)" }}
+      className="card card--tint empty-notice"
+      style={{ marginBottom: "var(--spacing-20)" }}
     >
-      <p className="text-[15px] m-0" style={{ lineHeight: 1.35 }}>
-        No papers seeded for your Grade {year} subjects yet. Use{" "}
-        <strong>Show everything</strong> above to practise on another year&rsquo;s papers in
-        the meantime.
-      </p>
+      <p className="body-sm">{t("library.noMatch", { year })}</p>
     </div>
   );
 }

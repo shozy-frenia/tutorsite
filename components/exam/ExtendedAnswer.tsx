@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useState } from "react";
 import type { Question } from "@/lib/exam-types";
 
@@ -54,6 +56,7 @@ export default function ExtendedAnswer({
   onChange,
   onMarked,
 }: Props) {
+  const t = useT();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [marking, setMarking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,14 +85,14 @@ export default function ExtendedAnswer({
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? "Could not mark this answer.");
+        setError(payload.error ?? t("extended.markFailed"));
         return;
       }
 
       setAssessment(payload);
       onMarked(payload.total);
     } catch {
-      setError("Could not reach the examiner. Check your connection.");
+      setError(t("extended.examinerUnreachable"));
     } finally {
       setMarking(false);
     }
@@ -152,13 +155,12 @@ export default function ExtendedAnswer({
           onChange={(event) => onChange(event.target.value)}
           rows={14}
           maxLength={12_000}
-          placeholder="Write your answer here…"
+          placeholder={t("extended.placeholder")}
           className="px-4 py-3 text-[16px]"
           style={{
-            border: "1px solid var(--color-rule)",
-            background: "var(--color-sheet)",
-            boxShadow: "var(--shadow-card)",
-            resize: "vertical",
+            border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+            background: "var(--color-cream-paper)",
+                        resize: "vertical",
             lineHeight: 1.5,
           }}
         />
@@ -172,13 +174,12 @@ export default function ExtendedAnswer({
           style={{
             background: count >= floor ? "var(--color-ink)" : "var(--color-paper)",
             color: count >= floor ? "var(--color-canvas)" : "var(--color-ink)",
-            border: "1px solid var(--color-rule)",
-            boxShadow: "var(--shadow-card)",
-            padding: "10px 18px",
+            border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+                        padding: "10px 18px",
             cursor: marking ? "wait" : count >= floor ? "pointer" : "not-allowed",
           }}
         >
-          {marking ? "EXAMINER IS READING…" : "MARK MY ANSWER"}
+          {marking ? t("extended.examinerReading") : t("extended.markMyAnswer")}
         </button>
         {count < floor && (
           <span className="t-micro" style={{ opacity: 0.55 }}>
@@ -190,7 +191,7 @@ export default function ExtendedAnswer({
       {error && (
         <div
           className="p-3 t-label"
-          style={{ border: "1px solid var(--color-rule)", background: "var(--color-signal-red)" }}
+          style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-signal-red)" }}
         >
           {error}
         </div>
@@ -201,10 +202,12 @@ export default function ExtendedAnswer({
         <div className="rise flex flex-col gap-3">
           <div
             className="flex items-center justify-between gap-3 flex-wrap px-4 py-3"
-            style={{ border: "1px solid var(--color-rule)", background: "var(--color-highlighter)" }}
+            style={{ border: "1px solid var(--color-forest-ink)", borderRadius: "var(--radius-md)", background: "var(--color-highlighter)" }}
           >
             <span className="t-label">
-              {assessment.mode === "offline" ? "SELF-MARK GUIDE" : "EXAMINER'S MARK"}
+              {assessment.mode === "offline"
+                ? t("extended.selfMarkGuide")
+                : t("extended.examinersMark")}
             </span>
             {assessment.mode !== "offline" && (
               <span style={{ fontSize: 28, fontWeight: 800, lineHeight: 1 }}>
@@ -228,7 +231,7 @@ export default function ExtendedAnswer({
                     key={source.ref}
                     className="t-micro px-2 py-1"
                     style={{
-                      border: "1px solid var(--color-rule)",
+                      border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                       background: used ? "var(--color-acid-lime)" : "transparent",
                       opacity: used ? 1 : 0.5,
                     }}
@@ -265,7 +268,7 @@ export default function ExtendedAnswer({
                       key={i}
                       className="grow"
                       style={{
-                        border: "1px solid var(--color-rule)",
+                        border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                         borderLeftWidth: i === 0 ? 1 : 0,
                         background:
                           i < criterion.awarded ? "var(--color-ink)" : "transparent",
@@ -283,8 +286,8 @@ export default function ExtendedAnswer({
                 <p
                   className="text-[14px] mt-2 m-0 px-3 py-2 whitespace-pre-wrap"
                   style={{
-                    borderLeft: "1px solid var(--color-rule)",
-                    background: "var(--color-study)",
+                    borderLeft: "1px solid var(--color-pencil-gray)",
+                    background: "var(--color-whisper-gray)",
                     lineHeight: 1.4,
                   }}
                 >
@@ -309,7 +312,7 @@ export default function ExtendedAnswer({
           {assessment.summary && (
             <p
               className="text-[15px] p-4 m-0"
-              style={{ border: "1px solid var(--color-rule)", lineHeight: 1.45 }}
+              style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", lineHeight: 1.45 }}
             >
               {assessment.summary}
             </p>

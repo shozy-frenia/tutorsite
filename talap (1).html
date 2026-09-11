@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Talap — Ace Cambridge Exams Without the Burnout</title>
+<meta name="description" content="Mock exams, real NIS grade boundaries and an AI tutor for students sitting the Cambridge International Examination (МЭСК) at Nazarbayev Intellectual Schools.">
+<meta name="theme-color" content="#fcfaf5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Inter:opsz,wght@14..32,300..700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TALAP — SayBriefly design system
+   ============================================================ */
+:root{
+  --color-forest-ink:#1a3300;
+  --color-highlighter-yellow:#ffe95c;
+  --color-cream-paper:#fcfaf5;
+  --color-pencil-gray:#b6b6b6;
+  --color-whisper-gray:#f1f1f1;
+  --color-sticky-note-teal:#a8e5e5;
+  --color-sticky-note-mint:#d5f5c2;
+  --color-sticky-note-blush:#f6d0ff;
+  --color-terracotta:#cb5521;
+
+  --font-bricolage-grotesque:'Bricolage Grotesque',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-inter:'Inter',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-roboto-mono:'Roboto Mono',ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+
+  --text-micro:11px;      --leading-micro:1.3;
+  --text-caption:14px;    --leading-caption:1.5;
+  --text-body-sm:16px;    --leading-body-sm:1.5;
+  --text-body:18px;       --leading-body:1.5;
+  --text-body-lg:20px;    --leading-body-lg:1.38;
+  --text-subheading:clamp(22px,2.4vw,28px);   --leading-subheading:1.25;
+  --text-heading-sm:clamp(28px,3.4vw,40px);   --leading-heading-sm:1.1;
+  --text-heading:clamp(34px,4.6vw,55px);      --leading-heading:1;    --tracking-heading:0.04em;
+  --text-heading-lg:clamp(38px,5.4vw,66px);   --leading-heading-lg:1; --tracking-heading-lg:0.05em;
+  --text-display:clamp(40px,6.6vw,90px);      --leading-display:1;    --tracking-display:0.05em;
+
+  --fw-light:300; --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700; --fw-extrabold:800;
+
+  --spacing-8:8px;   --spacing-16:16px; --spacing-24:24px; --spacing-32:32px;
+  --spacing-40:40px; --spacing-48:48px; --spacing-56:56px; --spacing-64:64px;
+  --spacing-80:80px; --spacing-96:96px; --spacing-120:120px;
+
+  --page-max-width:1200px;
+  --gutter:clamp(20px,4vw,40px);
+  --section-gap:clamp(64px,9vw,120px);
+
+  --radius-sm:3px; --radius-md:6px; --radius-xl:12px; --radius-2xl:16px; --radius-full:9999px;
+  --radius-nav:16px; --radius-tags:9999px; --radius-cards:12px; --radius-buttons:6px;
+
+  --shadow-subtle:rgba(0,0,0,0.05) 0px 1px 2px 0px;
+  --shadow-subtle-2:rgba(0,0,0,0.1) 0px 1px 3px 0px,rgba(0,0,0,0.1) 0px 1px 2px -1px;
+  --shadow-xl:rgba(255,235,90,0.01) 0px 527px 211px 0px,rgba(255,235,90,0.05) 0px 297px 178px 0px,rgba(255,235,90,0.09) 0px 132px 132px 0px,rgba(255,235,90,0.1) 0px 33px 72px 0px;
+
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-io:cubic-bezier(.65,.05,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html,body{margin:0;padding:0}
+body{
+  background:var(--color-cream-paper);color:var(--color-forest-ink);
+  font-family:var(--font-inter);font-size:var(--text-body-sm);line-height:var(--leading-body-sm);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;
+}
+body.is-locked{overflow:hidden;height:100vh}
+img,svg,video{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+ul,ol{margin:0;padding:0;list-style:none}
+p{margin:0}
+h1,h2,h3,h4,h5{margin:0;font-weight:var(--fw-semibold)}
+table{border-collapse:separate;border-spacing:0}
+::selection{background:var(--color-highlighter-yellow);color:var(--color-forest-ink)}
+:focus-visible{outline:2px solid var(--color-forest-ink);outline-offset:3px}
+
+.shell{width:100%;max-width:var(--page-max-width);margin-inline:auto;padding-inline:var(--gutter)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Type */
+.display{font-family:var(--font-bricolage-grotesque);font-weight:var(--fw-extrabold);font-size:var(--text-display);line-height:var(--leading-display);letter-spacing:var(--tracking-display)}
+.h{font-family:var(--font-bricolage-grotesque);font-weight:var(--fw-extrabold);font-size:var(--text-heading);line-height:var(--leading-heading);letter-spacing:var(--tracking-heading)}
+.h-sm{font-size:var(--text-heading-sm);line-height:var(--leading-heading-sm);font-weight:var(--fw-bold);letter-spacing:-0.01em}
+.sub{font-size:var(--text-subheading);line-height:var(--leading-subheading);font-weight:var(--fw-semibold)}
+.lead{font-size:var(--text-body-lg);line-height:var(--leading-body-lg);font-weight:var(--fw-regular)}
+.body{font-size:var(--text-body);line-height:var(--leading-body);font-weight:var(--fw-regular)}
+.body-sm{font-size:var(--text-body-sm);line-height:var(--leading-body-sm)}
+.caption{font-size:var(--text-caption);line-height:var(--leading-caption)}
+.micro{font-size:var(--text-micro);line-height:var(--leading-micro)}
+.mono{font-family:var(--font-roboto-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.muted{color:var(--color-pencil-gray)}
+.center{text-align:center}
+.measure{max-width:640px}
+.measure-mx{max-width:640px;margin-inline:auto}
+
+/* Highlighter */
+.hl{position:relative;display:inline-block;padding-inline:.1em}
+.hl > span{position:relative;z-index:1}
+.hl::before{content:"";position:absolute;left:0;right:0;top:.10em;bottom:.08em;z-index:0;
+  background:var(--color-highlighter-yellow);border-radius:3px;
+  transform:scaleX(0);transform-origin:left;transition:transform .85s var(--ease-out) var(--hl-delay,.35s)}
+.is-in .hl::before{transform:scaleX(1)}
+.hl--teal::before{background:var(--color-sticky-note-teal)}
+.hl--mint::before{background:var(--color-sticky-note-mint)}
+.hl--blush::before{background:var(--color-sticky-note-blush)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font-family:var(--font-inter);font-weight:var(--fw-medium);font-size:var(--text-body-sm);line-height:1;
+  padding:19px 40px;border-radius:var(--radius-buttons);
+  transition:transform .4s var(--ease-out),box-shadow .4s var(--ease-out),background .3s ease,color .3s ease}
+.btn--sm{padding:10px 18px;font-size:var(--text-caption)}
+.btn--primary{background:var(--color-forest-ink);color:var(--color-cream-paper);box-shadow:var(--shadow-subtle)}
+.btn--primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-subtle-2)}
+.btn--outline{border:1px solid var(--color-forest-ink);color:var(--color-forest-ink)}
+.btn--outline:hover{background:var(--color-forest-ink);color:var(--color-cream-paper);transform:translateY(-2px)}
+.btn--mint{background:var(--color-sticky-note-mint)}
+.btn--teal{background:var(--color-sticky-note-teal)}
+.btn--mint:hover,.btn--teal:hover{transform:translateY(-2px);box-shadow:var(--shadow-subtle-2)}
+.btn__arrow{display:inline-block;transition:transform .4s var(--ease-out)}
+.btn:hover .btn__arrow{transform:translateX(4px)}
+.link-plain{border-bottom:1px solid var(--color-forest-ink);padding-bottom:2px;font-size:var(--text-caption);transition:opacity .3s ease}
+.link-plain:hover{opacity:.6}
+
+.tag{display:inline-flex;align-items:center;gap:6px;background:var(--color-highlighter-yellow);
+  color:var(--color-forest-ink);border-radius:var(--radius-tags);padding:5px 12px;
+  font-family:var(--font-roboto-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;line-height:1.3}
+.tag--outline{background:transparent;border:1px solid var(--color-forest-ink)}
+.tag--plain{background:var(--color-whisper-gray)}
+
+/* ============================================================
+   Preloader
+   ============================================================ */
+.preloader{position:fixed;inset:0;z-index:400;background:var(--color-cream-paper);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  transition:opacity .7s ease .3s,visibility .7s .3s}
+.preloader.is-done{opacity:0;visibility:hidden}
+.pre-mark{display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(14px);
+  transition:opacity .7s ease,transform .8s var(--ease-out)}
+.preloader.is-ready .pre-mark{opacity:1;transform:none}
+.pre-scribble{width:190px;height:44px}
+.pre-scribble path{stroke:var(--color-forest-ink);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:420;stroke-dashoffset:420;transition:stroke-dashoffset 1.5s var(--ease-out) .15s}
+.preloader.is-ready .pre-scribble path{stroke-dashoffset:0}
+.pre-track{width:min(240px,50vw);height:6px;background:var(--color-whisper-gray);border-radius:var(--radius-full);overflow:hidden}
+.pre-track i{display:block;height:100%;width:0%;background:var(--color-highlighter-yellow)}
+.pre-pct{font-family:var(--font-roboto-mono);font-size:12px;color:var(--color-pencil-gray)}
+
+/* ============================================================
+   Logo + Nav
+   ============================================================ */
+.logo{display:inline-flex;align-items:center;gap:10px}
+.logo__mark{width:36px;height:36px;flex:none;border-radius:var(--radius-md);background:var(--color-highlighter-yellow);
+  display:grid;place-items:center;font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:17px;
+  letter-spacing:.02em;transition:transform .5s var(--ease-out)}
+.logo:hover .logo__mark{transform:rotate(-8deg)}
+.logo__word{font-weight:var(--fw-bold);font-size:20px;letter-spacing:-0.02em}
+.logo__word sup{font-size:9px;font-weight:var(--fw-medium);vertical-align:super;opacity:.6}
+
+.nav{position:fixed;top:16px;left:0;right:0;z-index:200;padding-inline:var(--gutter);transition:transform .6s var(--ease-out)}
+.nav.is-hidden{transform:translateY(-160%)}
+.nav__inner{max-width:var(--page-max-width);margin-inline:auto;background:var(--color-cream-paper);
+  border:1px solid var(--color-pencil-gray);border-radius:var(--radius-nav);box-shadow:var(--shadow-xl);
+  display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-16);padding:10px 12px 10px 14px}
+.nav__links{display:flex;align-items:center;gap:var(--spacing-8)}
+.nav__item{position:relative}
+.nav__trigger{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--radius-md);
+  font-size:var(--text-caption);font-weight:var(--fw-medium);transition:background .3s ease}
+.nav__trigger:hover{background:var(--color-whisper-gray)}
+.nav__item.is-open > .nav__trigger{background:var(--color-highlighter-yellow)}
+.nav__trigger svg{transition:transform .4s var(--ease-out)}
+.nav__item.is-open .nav__trigger svg{transform:rotate(180deg)}
+.nav__drop{position:absolute;top:calc(100% + 10px);left:0;min-width:250px;background:var(--color-cream-paper);
+  border:1px solid var(--color-pencil-gray);border-radius:var(--radius-cards);padding:8px;
+  display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity .3s ease,transform .4s var(--ease-out),visibility .3s}
+.nav__item.is-open .nav__drop{opacity:1;visibility:visible;transform:none}
+.nav__drop a{padding:9px 12px;border-radius:var(--radius-md);font-size:var(--text-caption);font-weight:var(--fw-medium);transition:background .25s ease}
+.nav__drop a:hover{background:var(--color-sticky-note-mint)}
+.nav__drop a span{display:block;font-family:var(--font-roboto-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-top:2px}
+.nav__right{display:flex;align-items:center;gap:var(--spacing-8)}
+.burger{display:none;width:38px;height:38px;border:1px solid var(--color-forest-ink);border-radius:var(--radius-md);position:relative}
+.burger i{position:absolute;left:11px;right:11px;height:1.6px;background:var(--color-forest-ink);transition:transform .45s var(--ease-out)}
+.burger i:nth-child(1){top:14px}
+.burger i:nth-child(2){bottom:14px}
+body.menu-open .burger i:nth-child(1){transform:translateY(4px) rotate(45deg)}
+body.menu-open .burger i:nth-child(2){transform:translateY(-4.6px) rotate(-45deg)}
+.mnav{position:fixed;inset:0;z-index:190;background:var(--color-cream-paper);padding:96px var(--gutter) var(--gutter);
+  overflow-y:auto;clip-path:inset(0 0 100% 0);transition:clip-path .75s var(--ease-io);pointer-events:none}
+body.menu-open .mnav{clip-path:inset(0 0 0 0);pointer-events:auto}
+.mnav h4{font-family:var(--font-roboto-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-pencil-gray);margin-bottom:8px}
+.mnav .grp{margin-bottom:var(--spacing-32)}
+.mnav a{display:block;font-size:22px;font-weight:var(--fw-semibold);padding-block:8px}
+
+/* ============================================================
+   Sections
+   ============================================================ */
+.section{padding-block:var(--section-gap)}
+.eyebrow{font-family:var(--font-roboto-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55}
+.head{display:flex;flex-direction:column;gap:var(--spacing-24);align-items:center;text-align:center;margin-bottom:var(--spacing-56)}
+.head--left{align-items:flex-start;text-align:left}
+
+/* Hero */
+.hero{padding-top:calc(88px + var(--spacing-56));padding-bottom:var(--spacing-48);position:relative;overflow:hidden}
+.hero__grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:var(--spacing-56);align-items:center}
+.hero__cta{display:flex;gap:var(--spacing-16);flex-wrap:wrap;margin-top:var(--spacing-40)}
+.hero__note{margin-top:var(--spacing-16)}
+
+.doodle{position:absolute;pointer-events:none;opacity:.26;color:var(--color-forest-ink)}
+.doodle svg{overflow:visible}
+.doodle path,.doodle circle{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.doodle--a{top:120px;left:-14px;width:140px}
+.doodle--b{bottom:40px;right:-10px;width:160px}
+@media (max-width:1100px){.doodle{display:none}}
+
+/* ============================================================
+   Grade ladder
+   ============================================================ */
+.ladder{border:1px solid var(--color-forest-ink);border-radius:var(--radius-cards);padding:var(--spacing-24);background:var(--color-cream-paper)}
+.ladder__top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:var(--spacing-24)}
+.ladder__read{display:flex;align-items:baseline;gap:10px}
+.ladder__mark{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:44px;line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.ladder__grade{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:26px;letter-spacing:.03em;
+  background:var(--color-highlighter-yellow);border-radius:var(--radius-sm);padding:2px 10px;transition:background .35s ease}
+.ladder__rungs{display:flex;flex-direction:column-reverse;gap:6px}
+.rung{display:grid;grid-template-columns:46px minmax(0,1fr) 62px;align-items:center;gap:10px;
+  padding:7px 8px;border-radius:var(--radius-md);cursor:pointer;
+  transition:background .3s ease,transform .4s var(--ease-out)}
+.rung:hover{background:var(--color-whisper-gray);transform:translateX(3px)}
+.rung.is-on{background:var(--color-highlighter-yellow)}
+.rung__g{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:18px;letter-spacing:.03em}
+.rung__bar{height:10px;border-radius:var(--radius-full);background:var(--color-whisper-gray);overflow:hidden}
+.rung__bar i{display:block;height:100%;width:0;border-radius:var(--radius-full);background:var(--rc,var(--color-sticky-note-mint));
+  transition:width 1s var(--ease-out)}
+.ladder.is-in .rung__bar i{width:var(--w,50%)}
+.rung__n{font-family:var(--font-roboto-mono);font-size:12px;text-align:right;opacity:.7;font-variant-numeric:tabular-nums}
+.ladder__slider{margin-top:var(--spacing-24);position:relative;height:44px;touch-action:none;cursor:grab}
+.ladder__slider.is-drag{cursor:grabbing}
+.ladder__track{position:absolute;left:0;right:0;top:16px;height:12px;border-radius:var(--radius-full);overflow:hidden;display:flex}
+.ladder__seg{height:100%}
+.ladder__handle{position:absolute;top:8px;width:28px;height:28px;margin-left:-14px;border-radius:var(--radius-full);
+  background:var(--color-cream-paper);border:2px solid var(--color-forest-ink);box-shadow:var(--shadow-subtle-2);
+  transition:transform .25s var(--ease-out)}
+.ladder__slider:hover .ladder__handle,.ladder__slider.is-drag .ladder__handle{transform:scale(1.12)}
+.ladder__ticks{display:flex;justify-content:space-between;margin-top:2px;font-family:var(--font-roboto-mono);font-size:11px;opacity:.55}
+.ladder__hint{margin-top:var(--spacing-16);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ============================================================
+   Ticker
+   ============================================================ */
+.ticker{background:var(--color-highlighter-yellow);border-block:1px solid var(--color-forest-ink);overflow:hidden;padding-block:14px}
+.ticker__track{display:flex;gap:0;width:max-content;animation:marq 34s linear infinite}
+.ticker:hover .ticker__track{animation-play-state:paused}
+@keyframes marq{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.ticker__item{font-family:var(--font-roboto-mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  white-space:nowrap;padding-inline:22px;display:inline-flex;align-items:center;gap:22px}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card{border-radius:var(--radius-cards);padding:var(--spacing-24);background:var(--color-cream-paper);border:1px solid var(--color-forest-ink)}
+.card--mint{background:var(--color-sticky-note-mint);border-color:transparent}
+.card--teal{background:var(--color-sticky-note-teal);border-color:transparent}
+.card--blush{background:var(--color-sticky-note-blush);border-color:transparent}
+.card--yellow{background:var(--color-highlighter-yellow);border-color:transparent}
+.card--plain{border-color:var(--color-pencil-gray)}
+.card--tilt{transition:transform .5s var(--ease-out)}
+.card--tilt:hover{transform:rotate(-1deg) translateY(-4px)}
+
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--spacing-24)}
+.feat{display:flex;flex-direction:column;gap:var(--spacing-16)}
+.feat__t{font-size:20px;font-weight:var(--fw-semibold);line-height:1.25}
+.feat--wide{grid-column:span 2}
+
+/* Grades */
+.grades{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--spacing-24)}
+.grade{display:flex;flex-direction:column;gap:var(--spacing-16)}
+.grade__num{display:flex;align-items:baseline;gap:6px}
+.grade__num b{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:46px;line-height:.9;letter-spacing:.02em}
+.grade__list{display:flex;flex-direction:column;gap:6px;margin-top:auto}
+.grade__list li{display:flex;gap:10px;align-items:center;font-size:var(--text-caption);
+  padding:8px 10px;border-radius:var(--radius-md);background:rgba(26,51,0,.05)}
+.grade__list li b{font-family:var(--font-roboto-mono);font-weight:400;width:16px;flex:none;text-align:center}
+.grade__foot{font-family:var(--font-roboto-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.65;padding-top:10px;border-top:1px solid rgba(26,51,0,.15)}
+
+/* ============================================================
+   Boundary table
+   ============================================================ */
+.bt__controls{display:flex;justify-content:space-between;gap:var(--spacing-16);flex-wrap:wrap;margin-bottom:var(--spacing-24)}
+.seg{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--color-pencil-gray);border-radius:var(--radius-md)}
+.seg button{padding:8px 14px;border-radius:var(--radius-sm);font-family:var(--font-roboto-mono);font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;transition:background .3s ease}
+.seg button[aria-pressed="true"]{background:var(--color-forest-ink);color:var(--color-cream-paper)}
+.bt__meta{display:flex;gap:var(--spacing-16);flex-wrap:wrap;align-items:center;margin-bottom:var(--spacing-16)}
+.bt__scroll{overflow-x:auto;cursor:grab;border:1px solid var(--color-pencil-gray);border-radius:var(--radius-cards)}
+.bt__scroll.is-drag{cursor:grabbing}
+.bt{width:100%;min-width:720px}
+.bt th,.bt td{padding:12px 14px;font-size:var(--text-caption);text-align:center;border-bottom:1px solid var(--color-whisper-gray)}
+.bt th{font-family:var(--font-roboto-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:400;
+  background:var(--color-whisper-gray);position:sticky;top:0}
+.bt th:first-child,.bt td:first-child{text-align:left;font-weight:var(--fw-medium);min-width:230px}
+.bt td{font-variant-numeric:tabular-nums}
+.bt tbody tr{transition:background .25s ease}
+.bt tbody tr:hover{background:var(--color-whisper-gray)}
+.bt .cmax{font-family:var(--font-roboto-mono);opacity:.7}
+.bt .cA2{background:rgba(255,233,92,.55);font-weight:var(--fw-semibold)}
+.bt .cnone{opacity:.35}
+.bt__note{margin-top:var(--spacing-24)}
+.bt__empty{padding:var(--spacing-40) var(--spacing-24);text-align:center}
+
+/* ============================================================
+   Tutor
+   ============================================================ */
+.tutor{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:var(--spacing-56);align-items:start}
+.tutor__points{display:flex;flex-direction:column;gap:10px;margin-top:var(--spacing-32)}
+.tutor__points li{padding:14px 16px;border:1px solid var(--color-pencil-gray);border-radius:var(--radius-md);
+  transition:background .3s ease,border-color .3s ease,transform .4s var(--ease-out)}
+.tutor__points li:hover{background:var(--color-highlighter-yellow);border-color:var(--color-forest-ink);transform:translateX(3px)}
+.tutor__points b{display:block;font-family:var(--font-roboto-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:3px;font-weight:400}
+
+.app{border:1px solid var(--color-forest-ink);border-radius:var(--radius-cards);overflow:hidden;background:var(--color-cream-paper)}
+.app__bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--color-pencil-gray);background:var(--color-whisper-gray)}
+.app__score{padding:var(--spacing-24);border-bottom:1px solid var(--color-pencil-gray)}
+.app__row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.app__big{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:40px;line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.app__grade{font-family:var(--font-bricolage-grotesque);font-weight:800;font-size:20px;letter-spacing:.03em;
+  background:var(--color-highlighter-yellow);border-radius:var(--radius-sm);padding:2px 10px}
+.app__scale{margin-top:var(--spacing-16)}
+.app__bar2{height:10px;border-radius:var(--radius-full);background:var(--color-whisper-gray);overflow:hidden;position:relative}
+.app__bar2 i{display:block;height:100%;width:0;background:var(--color-sticky-note-mint);transition:width 1.4s var(--ease-out) .3s}
+.app.is-in .app__bar2 i{width:var(--p,55%)}
+.app__ticks{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--font-roboto-mono);font-size:11px;opacity:.5}
+.chat{padding:var(--spacing-24);display:flex;flex-direction:column;gap:12px;max-height:330px;overflow-y:auto}
+.msg{max-width:86%;padding:12px 14px;border-radius:var(--radius-cards);font-size:var(--text-caption);line-height:1.5;
+  opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .6s var(--ease-out)}
+.msg.is-on{opacity:1;transform:none}
+.msg--me{align-self:flex-end;background:var(--color-forest-ink);color:var(--color-cream-paper);border-bottom-right-radius:var(--radius-sm)}
+.msg--ai{align-self:flex-start;background:var(--color-sticky-note-mint);border-bottom-left-radius:var(--radius-sm)}
+.typing{display:inline-flex;gap:4px;align-items:center}
+.typing i{width:6px;height:6px;border-radius:var(--radius-full);background:var(--color-forest-ink);opacity:.35;animation:blink 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}
+.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}
+.app__input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--color-pencil-gray)}
+.app__input input{flex:1;padding:12px 14px;border:1px solid var(--color-pencil-gray);border-radius:var(--radius-md);
+  font:inherit;font-size:var(--text-caption);background:transparent;color:var(--color-forest-ink)}
+.app__input input:focus{outline:none;border-color:var(--color-forest-ink)}
+
+/* Divider */
+.divider{padding-block:var(--spacing-48);display:flex;justify-content:center}
+.divider svg{width:min(760px,90%);height:auto;overflow:visible}
+.divider path{fill:none;stroke:var(--color-forest-ink);stroke-width:2;stroke-linecap:round;opacity:.35;
+  stroke-dasharray:1200;stroke-dashoffset:1200;transition:stroke-dashoffset 2s var(--ease-out)}
+.divider.is-in path{stroke-dashoffset:0}
+
+/* Final + footer */
+.final{text-align:center;padding-block:var(--section-gap)}
+.footer{border-top:1px solid var(--color-pencil-gray);padding-block:var(--spacing-56) var(--spacing-32)}
+.footer__top{display:grid;grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,1fr));gap:var(--spacing-40);align-items:start}
+.footer__col h4{font-family:var(--font-roboto-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:12px;font-weight:400}
+.footer__col a,.footer__col li{display:block;font-size:var(--text-caption);padding-block:4px}
+.footer__col a{transition:opacity .3s ease}
+.footer__col a:hover{opacity:.6}
+.footer__bottom{margin-top:var(--spacing-56);padding-top:var(--spacing-24);border-top:1px solid var(--color-whisper-gray)}
+
+/* Floating ask */
+.ask{position:fixed;right:var(--gutter);bottom:var(--gutter);z-index:180;
+  display:inline-flex;align-items:center;gap:8px;padding:14px 20px;border-radius:var(--radius-full);
+  background:var(--color-forest-ink);color:var(--color-cream-paper);
+  font-family:var(--font-roboto-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  box-shadow:var(--shadow-subtle-2);transform:translateY(140%);transition:transform .8s var(--ease-out),background .3s ease}
+.ask.is-in{transform:none}
+.ask:hover{background:#24460a}
+.ask i{width:7px;height:7px;border-radius:var(--radius-full);background:var(--color-highlighter-yellow);
+  animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.6}}
+
+/* Reveals */
+[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease-out),transform .95s var(--ease-out)}
+[data-reveal].is-in{opacity:1;transform:none}
+[data-hl]{opacity:0;transform:translateY(20px);transition:opacity .9s var(--ease-out),transform 1s var(--ease-out)}
+[data-hl].is-in{opacity:1;transform:none}
+[data-stagger] > *{opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease-out),transform .9s var(--ease-out)}
+[data-stagger].is-in > *{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+  .preloader{display:none}
+  [data-reveal],[data-hl],[data-stagger] > *{opacity:1;transform:none}
+  .hl::before{transform:scaleX(1)}
+  .divider path{stroke-dashoffset:0}
+  .msg{opacity:1;transform:none}
+}
+
+@media (max-width:1024px){
+  .hero__grid{grid-template-columns:1fr;gap:var(--spacing-40)}
+  .feats{grid-template-columns:1fr}
+  .feat--wide{grid-column:auto}
+  .grades{grid-template-columns:1fr}
+  .tutor{grid-template-columns:1fr;gap:var(--spacing-32)}
+  .footer__top{grid-template-columns:1fr;gap:var(--spacing-32)}
+}
+@media (max-width:900px){
+  .nav__links,.nav__right .btn--outline,.nav__right .btn--primary{display:none}
+  .burger{display:block}
+  .ask{right:16px;bottom:16px;padding:12px 16px}
+}
+</style>
+</head>
+<body class="is-locked">
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="pre-mark">
+    <span class="logo__mark">T</span>
+    <svg class="pre-scribble" viewBox="0 0 190 44" aria-hidden="true">
+      <path d="M6 30c4-12 9-16 12-6s5 14 9 4 6-16 10-6 5 15 9 5 6-15 10-6 5 14 9 4 6-15 10-6 5 15 9 5 6-15 10-6 5 14 9 4 6-15 10-6 5 15 9 5 6-14 10-5 5 13 9 3"/>
+    </svg>
+  </div>
+  <div class="pre-track"><i id="preBar"></i></div>
+  <span class="pre-pct" id="prePct">0%</span>
+</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a class="logo" href="#top" aria-label="Talap home">
+      <span class="logo__mark" aria-hidden="true">T</span>
+      <span class="logo__word">TALAP<sup>®</sup></span>
+      <span class="tag" style="font-size:10px;padding:3px 9px">МЭСК · NIS</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary"></nav>
+    <div class="nav__right">
+      <a class="btn btn--outline btn--sm" href="#tutor">↳ Dashboard</a>
+      <a class="btn btn--primary btn--sm" href="#start"><span class="btn__arrow">→</span>Start a mock</a>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+<div class="mnav" id="mnav" aria-hidden="true"></div>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <span class="doodle doodle--a" aria-hidden="true">
+      <svg viewBox="0 0 140 120"><path d="M8 98c12-42 30-66 50-72s32 6 28 24-28 24-40 10S58 20 88 12s44 10 46 32"/><path d="M114 36l14-6-4 15"/></svg>
+    </span>
+    <span class="doodle doodle--b" aria-hidden="true">
+      <svg viewBox="0 0 160 120"><path d="M12 24h116a13 13 0 0 1 0 26H42a13 13 0 0 0 0 26h100"/><circle cx="140" cy="94" r="11"/></svg>
+    </span>
+
+    <div class="shell hero__grid">
+      <div>
+        <span class="tag" data-reveal>МЭСК · NIS · Cambridge</span>
+        <h1 class="display" style="margin-top:var(--spacing-24)" data-hl>
+          Ace Cambridge exams <span class="hl"><span>without the burnout</span></span>
+        </h1>
+        <p class="lead measure" style="margin-top:var(--spacing-32)" data-reveal>
+          Mock papers taken from the real thing, marked against the real boundary table, with a tutor
+          that explains the one step you actually got wrong.
+        </p>
+        <p class="body-sm measure muted" style="margin-top:var(--spacing-16)" data-reveal>
+          Built for students sitting the Cambridge International Examination at Nazarbayev
+          Intellectual Schools. Grades 10, 11 and 12.
+        </p>
+        <div class="hero__cta" data-reveal>
+          <a class="btn btn--primary" href="#start"><span class="btn__arrow">→</span>Sit a mock exam</a>
+          <a class="btn btn--outline" href="#tutor">See the dashboard</a>
+        </div>
+        <p class="caption muted hero__note" data-reveal>no account needed for the first paper.</p>
+      </div>
+
+      <!-- Grade ladder -->
+      <div class="ladder" id="ladder" data-reveal>
+        <div class="ladder__top">
+          <div>
+            <span class="eyebrow">The grade ladder</span>
+            <div class="mono muted" style="margin-top:4px">Maths · Component 1 · /80</div>
+          </div>
+          <div class="ladder__read">
+            <span class="ladder__mark" id="ldMark">44</span>
+            <span class="ladder__grade" id="ldGrade">C</span>
+          </div>
+        </div>
+
+        <div class="ladder__rungs" id="ldRungs"></div>
+
+        <div class="ladder__slider" id="ldSlider" role="slider"
+             aria-label="Marks out of 80" aria-valuemin="0" aria-valuemax="80" aria-valuenow="44" tabindex="0">
+          <div class="ladder__track" id="ldTrack"></div>
+          <span class="ladder__handle" id="ldHandle"></span>
+        </div>
+        <div class="ladder__ticks" id="ldTicks"></div>
+
+        <div class="ladder__hint">
+          <span class="mono muted">Drag · hover · click</span>
+          <span class="mono muted">A* down to U</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TICKER ============ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track" id="ticker"></div>
+  </div>
+
+  <!-- ============ WHAT IT DOES ============ -->
+  <section class="section" id="features">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow" data-reveal>↳ Five things, done properly</span>
+        <h2 class="h measure-mx" data-hl>What it <span class="hl hl--mint"><span>actually does</span></span></h2>
+      </div>
+      <div class="feats" data-stagger id="feats"></div>
+    </div>
+  </section>
+
+  <div class="divider" data-divider></div>
+
+  <!-- ============ GRADES ============ -->
+  <section class="section" id="grades">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow" data-reveal>↳ The architecture</span>
+        <h2 class="h measure-mx" data-hl>Three years, <span class="hl hl--teal"><span>three different exams</span></span></h2>
+      </div>
+      <div class="grades" data-stagger id="grades"></div>
+    </div>
+  </section>
+
+  <div class="divider" data-divider></div>
+
+  <!-- ============ BOUNDARIES ============ -->
+  <section class="section" id="boundaries">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow" data-reveal>Minimum mark per grade</span>
+        <h2 class="h measure-mx" data-hl>The boundaries we <span class="hl"><span>grade against</span></span></h2>
+      </div>
+
+      <div class="bt__controls" data-reveal>
+        <div class="seg" id="btGrades" role="group" aria-label="Grade"></div>
+        <div class="seg" id="btLevels" role="group" aria-label="Level"></div>
+      </div>
+      <div class="bt__meta" data-reveal>
+        <span class="tag tag--plain" id="btStandard">NIS internal / IGCSE standard</span>
+        <span class="caption muted" id="btSubjects">Maths · History · Я1 · Я2 · 1 profile</span>
+        <span class="tag tag--outline" id="btCount">10 subjects</span>
+      </div>
+
+      <div class="bt__scroll" id="btScroll" data-reveal>
+        <table class="bt" id="btTable"></table>
+      </div>
+
+      <p class="body-sm muted measure bt__note" data-reveal>
+        A dash means the published table has no band there. A* is awarded at subject level in every
+        year, but only Grade 12 component tables carry an A* band — Grade 10 and 11 components stop
+        at A. The app grades whatever bands the table actually shows rather than assuming a fixed ladder.
+      </p>
+    </div>
+  </section>
+
+  <div class="divider" data-divider></div>
+
+  <!-- ============ TUTOR ============ -->
+  <section class="section" id="tutor">
+    <div class="shell">
+      <div class="head head--left">
+        <span class="eyebrow" data-reveal>Kazakh · Russian · English</span>
+        <h2 class="h" data-hl>It answers in the <span class="hl hl--blush"><span>language you asked in</span></span></h2>
+      </div>
+
+      <div class="tutor">
+        <div>
+          <h3 class="sub" data-reveal>A tutor that has read the mark scheme.</h3>
+          <p class="body" style="margin-top:var(--spacing-16)" data-reveal>
+            Ask it what a grade needs and it answers from the published boundary table, not a
+            percentage it made up. Ask it about your working and it starts at the step you actually
+            lost the mark on.
+          </p>
+          <ul class="tutor__points" data-stagger id="tutorPoints"></ul>
+          <a class="btn btn--primary" style="margin-top:var(--spacing-32)" href="#start">
+            <span class="btn__arrow">→</span>Try it on a real paper
+          </a>
+        </div>
+
+        <div class="app" id="app" data-reveal>
+          <div class="app__bar">
+            <span class="mono">TALAP<sup>®</sup> · Grade 10 · KZ</span>
+            <span class="mono muted">Maths · Component 1</span>
+          </div>
+          <div class="app__score">
+            <div class="app__row">
+              <span class="app__big">44<span class="mono muted" style="font-size:14px">/80</span></span>
+              <span class="app__grade">Grade C</span>
+            </div>
+            <div class="app__scale">
+              <div class="app__bar2" style="--p:55%"><i></i></div>
+              <div class="app__ticks"><span>16</span><span>26</span><span>36</span><span>46</span><span>56</span><span>80</span></div>
+            </div>
+          </div>
+          <div class="chat" id="chat"></div>
+          <div class="app__input">
+            <input id="chatInput" type="text" placeholder="Ask about the exam…" aria-label="Ask Talap">
+            <button class="btn btn--primary btn--sm" id="chatSend">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL ============ -->
+  <section class="final" id="start">
+    <div class="shell">
+      <h2 class="h measure-mx" data-hl>Start with <span class="hl"><span>one paper</span></span></h2>
+      <p class="body measure-mx" style="margin-top:var(--spacing-24)" data-reveal>
+        90 minutes, 18 questions, no calculator. You will know your grade the second you submit.
+      </p>
+      <div style="margin-top:var(--spacing-40)" data-reveal>
+        <a class="btn btn--primary" href="#start"><span class="btn__arrow">→</span>Choose a mock</a>
+        <p class="caption muted" style="margin-top:12px">no account needed for the first paper.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="shell">
+    <div class="footer__top">
+      <div class="footer__col">
+        <a class="logo" href="#top">
+          <span class="logo__mark" aria-hidden="true">T</span>
+          <span class="logo__word">TALAP<sup>®</sup></span>
+        </a>
+        <p class="caption muted" style="margin-top:var(--spacing-16);max-width:300px">
+          МЭСК preparation for NIS students. Real papers, real boundaries, a tutor that reads your working.
+        </p>
+      </div>
+      <div class="footer__col">
+        <h4>Practise</h4>
+        <a href="#start">↳ Mock papers</a>
+        <a href="#tutor">↳ Dashboard</a>
+        <a href="#boundaries">↳ Boundary tables</a>
+      </div>
+      <div class="footer__col">
+        <h4>Scale</h4>
+        <ul>
+          <li class="mono">↳ A* A B C D E U</li>
+          <li class="caption muted">↳ Official boundaries</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p class="micro muted" style="letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-roboto-mono)">
+        Demo build. Question content transcribed from NIS past papers for study use.
+        Grade boundaries from the published МЭСК table.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<a class="ask" id="ask" href="#tutor"><i></i>Ask Talap ↗</a>
+
+<script>
+(function(){
+"use strict";
+var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function el(t,c,h){var n=document.createElement(t);if(c)n.className=c;if(h!=null)n.innerHTML=h;return n;}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function smooth(t){return t*t*(3-2*t);}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+var NAV = [
+  {label:'Practise', items:[
+    ['Mock papers','Eleven full sittings','#start'],
+    ['Dashboard','Mastery, streaks, projection','#tutor'],
+    ['Ask Talap','Kazakh, Russian or English','#tutor']
+  ]},
+  {label:'The exam', items:[
+    ['Grade 10','Core + one profile','#grades'],
+    ['Grade 11','English + second language','#grades'],
+    ['Grade 12','Core + two profiles','#grades'],
+    ['Boundary tables','Minimum mark per grade','#boundaries']
+  ]},
+  {label:'What it does', href:'#features'}
+];
+
+var TICKER = ['11 full mock papers','163 questions','552 marks','22 official boundary tables',
+              'no calculator','90 minutes','A* to U'];
+
+var FEATS = [
+  {tag:'NIS specific', t:'Real papers, not approximations', tone:'card--mint',
+   d:'Two full Grade 10 Mathematics Paper 1 sittings, transcribed question by question with the mark scheme that earns each mark.'},
+  {tag:'Official scale', t:'The actual boundary table', tone:'card--plain',
+   d:'A C in Maths Paper 1 starts at 36/80. A C in Chemistry Paper 1 starts at 44/90. We use the published tables, never a flat percentage.'},
+  {tag:'AI powered', t:'A tutor that reads your working', tone:'card--teal',
+   d:'It starts from the step you missed, quotes the mark scheme wording, and answers in Kazakh, Russian or English — whichever you wrote in.'},
+  {tag:'Infinite drill', t:'Same topic, same tariff, new numbers', tone:'card--plain',
+   d:'Ask for another question at this level and get one: same syllabus strand, same mark count, same number of reasoning steps.'},
+  {tag:'Tracked', t:'Every attempt, plotted', tone:'card--blush', wide:true,
+   d:'Mastery by topic, grade projection from U to A*, and the streak counter that makes you open it tomorrow.'}
+];
+
+var GRADES = [
+  {n:'10', tone:'card--plain', t:'Core + one profile', std:'NIS internal / IGCSE standard',
+   d:'Mathematics, History of Kazakhstan, both languages, and one profile subject of four. Paper 1 in Maths is 80 marks in 90 minutes with no calculator — pace, not cleverness, is what fails people here.',
+   items:[['∑','Mathematics'],['⌘','History of Kazakhstan'],['Ә','Kazakh Language (L1)'],['Ж','Russian Language & Literature (L2)'],['+','1 profile']],
+   foot:'5 subjects'},
+  {n:'11', tone:'card--mint', t:'English + second language', std:'Cambridge International',
+   d:'Only two exams all year, and they are on completely different mark scales: English is out of 90, the second language out of 100. Both leave very little room between bands.',
+   items:[['✎','English'],['Ж','Russian Language & Literature (L2)']],
+   foot:'2 subjects'},
+  {n:'12', tone:'card--plain', t:'Core + two profiles', std:'A-Level standard',
+   d:'Same shape as Grade 10 but with two profile subjects and a first language only. Mathematics jumps to 230 marks across three papers. This is the grade universities read.',
+   items:[['∑','Mathematics'],['⌘','History of Kazakhstan'],['Ә','Kazakh Language (L1)'],['+','2 profiles']],
+   foot:'5 subjects'}
+];
+
+/* Published Grade 10 subject-level table (from the МЭСК boundary tables) */
+var BOUNDS = {
+  '10':{
+    standard:'NIS internal / IGCSE standard',
+    subjects:'Maths · History · Я1 · Я2 · 1 profile',
+    count:'10 subjects',
+    rows:[
+      ['Mathematics',160,134,114,94,74,53,33,0],
+      ['History of Kazakhstan',150,105,87,69,52,37,23,0],
+      ['Kazakh Language (L1)',100,73,63,53,43,33,23,0],
+      ['Kazakh Language & Literature (L2)',60,55,49,40,31,25,19,0],
+      ['Russian Language (L1)',100,62,53,44,35,26,18,0],
+      ['Russian Language & Literature (L2)',60,51,47,43,39,31,24,0],
+      ['Physics',130,94,82,70,58,45,32,0],
+      ['Biology',130,94,82,70,58,47,36,0],
+      ['Chemistry',130,97,85,73,61,51,42,0],
+      ['Computer Science',150,113,96,79,63,46,30,0]
+    ]
+  },
+  '11':{
+    standard:'Cambridge International',
+    subjects:'English · second language',
+    count:'2 subjects',
+    rows:[
+      ['English',90,null,null,null,null,null,null,0],
+      ['Russian Language & Literature (L2)',100,null,null,null,null,null,null,0]
+    ]
+  },
+  '12':{
+    standard:'A-Level standard',
+    subjects:'Maths · History · Я1 · 2 profiles',
+    count:'5 subjects',
+    rows:[
+      ['Mathematics (three papers)',230,null,null,null,null,null,null,0],
+      ['History of Kazakhstan',null,null,null,null,null,null,null,0],
+      ['Kazakh Language (L1)',null,null,null,null,null,null,null,0],
+      ['Profile subject I',null,null,null,null,null,null,null,0],
+      ['Profile subject II',null,null,null,null,null,null,null,0]
+    ]
+  }
+};
+
+var TUTOR_POINTS = [
+  ['On every page','Ask Talap floats over the library and the dashboard.'],
+  ['Inside a question','The workspace drawer marks your working step by step.'],
+  ['Without a key','It still answers, from the real tables in this repo.']
+];
+
+/* Maths Component 1, out of 80 */
+var LADDER = [
+  {g:'U',  min:0,  c:'var(--color-whisper-gray)'},
+  {g:'E',  min:16, c:'#e4e0cf'},
+  {g:'D',  min:26, c:'var(--color-sticky-note-blush)'},
+  {g:'C',  min:36, c:'var(--color-sticky-note-teal)'},
+  {g:'B',  min:46, c:'var(--color-sticky-note-mint)'},
+  {g:'A',  min:56, c:'var(--color-highlighter-yellow)'},
+  {g:'A*', min:66, c:'#ffd400'}
+];
+var LMAX = 80;
+
+var CHAT = [
+  {who:'me', t:'Сколько нужно на A по математике?'},
+  {who:'ai', t:'В 10 классе математика — 160 баллов за два компонента. A начинается с 114/160 на уровне предмета, а на Компоненте 1 — с 56/80.'},
+  {who:'me', t:'I got 44. What am I missing?'},
+  {who:'ai', t:'44/80 is a C — 12 marks off an A. Your last two attempts both lost method marks on Circle Geometry. Start there.'}
+];
+
+var CHEV = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4l3 3 3-3"/></svg>';
+
+/* ============================================================
+   BUILD
+   ============================================================ */
+function buildNav(){
+  var wrap = document.getElementById('navLinks');
+  NAV.forEach(function(g){
+    if(g.href){ var a = el('a','nav__trigger',g.label); a.href = g.href; wrap.appendChild(a); return; }
+    var item = el('div','nav__item');
+    var btn = el('button','nav__trigger',g.label+CHEV);
+    btn.setAttribute('aria-expanded','false');
+    var drop = el('div','nav__drop');
+    g.items.forEach(function(it){
+      var a = el('a',null,it[0]+'<span>'+it[1]+'</span>'); a.href = it[2]; drop.appendChild(a);
+    });
+    item.appendChild(btn); item.appendChild(drop); wrap.appendChild(item);
+    function set(v){
+      Array.prototype.forEach.call(wrap.querySelectorAll('.nav__item'),function(n){ n.classList.remove('is-open'); });
+      if(v) item.classList.add('is-open');
+      btn.setAttribute('aria-expanded',String(!!v));
+    }
+    item.addEventListener('mouseenter',function(){ set(true); });
+    item.addEventListener('mouseleave',function(){ set(false); });
+    btn.addEventListener('click',function(){ set(!item.classList.contains('is-open')); });
+    Array.prototype.forEach.call(drop.querySelectorAll('a'),function(a){ a.addEventListener('click',function(){ set(false); }); });
+  });
+  document.addEventListener('click',function(e){
+    if(!wrap.contains(e.target)) Array.prototype.forEach.call(wrap.querySelectorAll('.nav__item'),function(n){ n.classList.remove('is-open'); });
+  });
+
+  var m = document.getElementById('mnav');
+  NAV.forEach(function(g){
+    var grp = el('div','grp');
+    grp.appendChild(el('h4',null,g.label));
+    if(g.href){ var a = el('a',null,g.label); a.href = g.href; grp.appendChild(a); }
+    else g.items.forEach(function(it){ var a = el('a',null,it[0]); a.href = it[2]; grp.appendChild(a); });
+    m.appendChild(grp);
+  });
+  var cta = el('a','btn btn--primary','<span class="btn__arrow">→</span>Start a mock');
+  cta.href = '#start'; m.appendChild(cta);
+}
+
+function buildTicker(){
+  var t = document.getElementById('ticker');
+  function chunk(){
+    var s = '';
+    TICKER.forEach(function(x){ s += '<span class="ticker__item">'+x+'<span aria-hidden="true">✦</span></span>'; });
+    return s;
+  }
+  t.innerHTML = chunk() + chunk();
+}
+
+function buildFeats(){
+  var wrap = document.getElementById('feats');
+  FEATS.forEach(function(f){
+    wrap.appendChild(el('article','card '+f.tone+' card--tilt feat'+(f.wide?' feat--wide':''),
+      '<span class="tag'+(f.tone==='card--plain'?'':' tag--outline')+'" style="align-self:flex-start">'+f.tag+'</span>'+
+      '<h3 class="feat__t">'+f.t+'</h3>'+
+      '<p class="body-sm">'+f.d+'</p>'
+    ));
+  });
+}
+
+function buildGrades(){
+  var wrap = document.getElementById('grades');
+  GRADES.forEach(function(g){
+    var items = g.items.map(function(i){ return '<li><b>'+i[0]+'</b>'+i[1]+'</li>'; }).join('');
+    wrap.appendChild(el('article','card '+g.tone+' card--tilt grade',
+      '<div class="grade__num"><b>'+g.n+'</b><span class="mono muted">grade</span></div>'+
+      '<h3 class="feat__t">'+g.t+'</h3>'+
+      '<span class="mono muted">'+g.std+'</span>'+
+      '<p class="body-sm">'+g.d+'</p>'+
+      '<ul class="grade__list">'+items+'</ul>'+
+      '<div class="grade__foot">'+g.foot+'</div>'
+    ));
+  });
+}
+
+function buildTutorPoints(){
+  var wrap = document.getElementById('tutorPoints');
+  TUTOR_POINTS.forEach(function(p){
+    wrap.appendChild(el('li',null,'<b>'+p[0]+'</b><span class="body-sm">'+p[1]+'</span>'));
+  });
+}
+
+/* ---------- Grade ladder ---------- */
+function gradeFor(mark){
+  var g = LADDER[0];
+  for(var i=0;i<LADDER.length;i++) if(mark >= LADDER[i].min) g = LADDER[i];
+  return g;
+}
+function buildLadder(){
+  var rungs = document.getElementById('ldRungs');
+  var track = document.getElementById('ldTrack');
+  var ticks = document.getElementById('ldTicks');
+  var handle = document.getElementById('ldHandle');
+  var slider = document.getElementById('ldSlider');
+  var markEl = document.getElementById('ldMark');
+  var gradeEl = document.getElementById('ldGrade');
+  var ladder = document.getElementById('ladder');
+
+  LADDER.forEach(function(r,i){
+    var next = LADDER[i+1] ? LADDER[i+1].min - 1 : LMAX;
+    var span = next - r.min + 1;
+    var row = el('div','rung');
+    row.setAttribute('data-g', r.g);
+    row.style.setProperty('--rc', r.c);
+    row.style.setProperty('--w', Math.round((next/LMAX)*100)+'%');
+    row.innerHTML = '<span class="rung__g">'+r.g+'</span>'+
+                    '<span class="rung__bar"><i></i></span>'+
+                    '<span class="rung__n">'+r.min+'–'+next+'</span>';
+    row.addEventListener('click',function(){ set(r.min + Math.floor(span/2)); });
+    row.addEventListener('mouseenter',function(){ preview(r.g); });
+    row.addEventListener('mouseleave',function(){ paint(); });
+    rungs.appendChild(row);
+
+    var seg = el('span','ladder__seg');
+    seg.style.width = ((span/(LMAX+1))*100)+'%';
+    seg.style.background = r.c;
+    track.appendChild(seg);
+  });
+
+  [0,16,26,36,46,56,66,80].forEach(function(n){ ticks.appendChild(el('span',null,String(n))); });
+
+  var value = 44;
+  function preview(g){
+    Array.prototype.forEach.call(rungs.children,function(r){
+      r.classList.toggle('is-on', r.getAttribute('data-g') === g);
+    });
+  }
+  function paint(){
+    var g = gradeFor(value);
+    markEl.textContent = value;
+    gradeEl.textContent = g.g;
+    gradeEl.style.background = g.c;
+    handle.style.left = ((value/LMAX)*100)+'%';
+    slider.setAttribute('aria-valuenow', String(value));
+    slider.setAttribute('aria-valuetext', value+' out of 80 — grade '+g.g);
+    preview(g.g);
+  }
+  function set(v){ value = clamp(Math.round(v),0,LMAX); paint(); }
+
+  function fromEvent(e){
+    var r = slider.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    set((x/r.width)*LMAX);
+  }
+  var down = false;
+  slider.addEventListener('mousedown',function(e){ down = true; slider.classList.add('is-drag'); fromEvent(e); });
+  window.addEventListener('mousemove',function(e){ if(down) fromEvent(e); });
+  window.addEventListener('mouseup',function(){ down = false; slider.classList.remove('is-drag'); });
+  slider.addEventListener('touchstart',function(e){ fromEvent(e); },{passive:true});
+  slider.addEventListener('touchmove',function(e){ fromEvent(e); e.preventDefault(); },{passive:false});
+  slider.addEventListener('keydown',function(e){
+    if(e.key === 'ArrowRight' || e.key === 'ArrowUp'){ set(value+1); e.preventDefault(); }
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowDown'){ set(value-1); e.preventDefault(); }
+    if(e.key === 'Home'){ set(0); e.preventDefault(); }
+    if(e.key === 'End'){ set(LMAX); e.preventDefault(); }
+  });
+
+  paint();
+  if('IntersectionObserver' in window && !REDUCED){
+    new IntersectionObserver(function(en){
+      if(en[0].isIntersecting){ ladder.classList.add('is-in'); }
+    },{threshold:.3}).observe(ladder);
+  } else ladder.classList.add('is-in');
+}
+
+/* ---------- Boundary table ---------- */
+function buildBoundaries(){
+  var gWrap = document.getElementById('btGrades');
+  var lWrap = document.getElementById('btLevels');
+  var table = document.getElementById('btTable');
+  var std = document.getElementById('btStandard');
+  var subj = document.getElementById('btSubjects');
+  var cnt = document.getElementById('btCount');
+  var grade = '10', level = 'subject';
+
+  ['10','11','12'].forEach(function(g){
+    var b = el('button',null,'Grade '+g);
+    b.setAttribute('aria-pressed', String(g === grade));
+    b.addEventListener('click',function(){ grade = g; sync(); });
+    gWrap.appendChild(b);
+  });
+  [['subject','Subject level'],['component','By component']].forEach(function(l){
+    var b = el('button',null,l[1]);
+    b.setAttribute('aria-pressed', String(l[0] === level));
+    b.addEventListener('click',function(){ level = l[0]; sync(); });
+    lWrap.appendChild(b);
+  });
+
+  function cell(v, isMax, band){
+    if(v === null || v === undefined) return '<td class="cnone">—</td>';
+    if(isMax) return '<td class="cmax">'+v+'</td>';
+    return '<td'+(band === 'A*' ? ' class="cA2"' : '')+'>'+v+'</td>';
+  }
+
+  function render(){
+    var d = BOUNDS[grade];
+    std.textContent = d.standard;
+    subj.textContent = d.subjects;
+    cnt.textContent = d.count;
+
+    if(level === 'component'){
+      table.innerHTML = '<tbody><tr><td class="bt__empty" colspan="9">'+
+        '<span class="mono muted">Component tables</span>'+
+        '<p class="body-sm" style="margin-top:10px;max-width:52ch;margin-inline:auto">'+
+        'Grade '+grade+' component boundaries are read per paper rather than per subject. '+
+        'Grade 10 and 11 component tables stop at A; only Grade 12 components carry an A* band. '+
+        'Open a mock to see the component table that applies to it.</p></td></tr></tbody>';
+      return;
+    }
+
+    var bands = ['A*','A','B','C','D','E','U'];
+    var head = '<thead><tr><th>Subject</th><th>Max</th>';
+    bands.forEach(function(b){ head += '<th>'+b+'</th>'; });
+    head += '</tr></thead>';
+
+    var body = '<tbody>';
+    d.rows.forEach(function(r){
+      body += '<tr><td>'+r[0]+'</td>';
+      body += cell(r[1], true);
+      for(var i=2;i<=8;i++) body += cell(r[i], false, bands[i-2]);
+      body += '</tr>';
+    });
+    body += '</tbody>';
+    table.innerHTML = head + body;
+  }
+
+  function sync(){
+    Array.prototype.forEach.call(gWrap.children,function(b,i){
+      b.setAttribute('aria-pressed', String(['10','11','12'][i] === grade));
+    });
+    Array.prototype.forEach.call(lWrap.children,function(b,i){
+      b.setAttribute('aria-pressed', String(['subject','component'][i] === level));
+    });
+    render();
+  }
+  sync();
+
+  // drag to scroll
+  var sc = document.getElementById('btScroll');
+  var down=false, sx=0, sl=0;
+  sc.addEventListener('mousedown',function(e){ down=true; sc.classList.add('is-drag'); sx=e.pageX; sl=sc.scrollLeft; });
+  window.addEventListener('mouseup',function(){ down=false; sc.classList.remove('is-drag'); });
+  sc.addEventListener('mousemove',function(e){ if(!down) return; e.preventDefault(); sc.scrollLeft = sl-(e.pageX-sx); });
+}
+
+/* ---------- Chat ---------- */
+function buildChat(){
+  var chat = document.getElementById('chat');
+  var input = document.getElementById('chatInput');
+  var send = document.getElementById('chatSend');
+  var played = false;
+
+  function bubble(who, text, on){
+    var m = el('div','msg msg--'+who+(on?' is-on':''), text);
+    chat.appendChild(m);
+    chat.scrollTop = chat.scrollHeight;
+    return m;
+  }
+
+  function play(){
+    if(played) return;
+    played = true;
+    if(REDUCED){ CHAT.forEach(function(m){ bubble(m.who, m.t, true); }); return; }
+    CHAT.forEach(function(m,i){
+      var b = bubble(m.who, m.t, false);
+      setTimeout(function(){ b.classList.add('is-on'); chat.scrollTop = chat.scrollHeight; }, 500 + i*750);
+    });
+  }
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){ if(en[0].isIntersecting) play(); },{threshold:.3}).observe(chat);
+  } else play();
+
+  var REPLIES = [
+    {k:/a\*|a star|на a\*/i, t:'A* in Grade 10 Maths is 134/160 at subject level. On Component 1 that is 66/80 — you need every method mark on the last two questions.'},
+    {k:/\bA\b|на a\b/i,      t:'A starts at 114/160 at subject level, 56/80 on Component 1. From 44 that is 12 marks.'},
+    {k:/chem/i,              t:'A C in Chemistry Paper 1 starts at 44/90. Subject level, Chemistry caps at 130 with A* at 97.'},
+    {k:/history|истор/i,     t:'History of Kazakhstan is out of 150. C is 52, A is 87, A* is 105.'},
+    {k:/physic|физик/i,      t:'Physics is out of 130. C is 58, A is 82, A* is 94.'},
+    {k:/қаз|kazakh|қазақ/i,  t:'Қазақ тілі (Я1) 100 балдан. C — 43, A — 63, A* — 73.'},
+    {k:/сколько|балл|нужно/i,t:'Скажите предмет и класс — отвечу по опубликованной таблице границ, а не по процентам.'},
+    {k:/.*/,                 t:'Ask me for a grade boundary, or paste your working and I will start at the step that lost the mark.'}
+  ];
+
+  function reply(q){
+    for(var i=0;i<REPLIES.length;i++) if(REPLIES[i].k.test(q)) return REPLIES[i].t;
+    return REPLIES[REPLIES.length-1].t;
+  }
+
+  function submit(){
+    var v = input.value.trim();
+    if(!v) return;
+    bubble('me', v, true);
+    input.value = '';
+    var typing = bubble('ai', '<span class="typing"><i></i><i></i><i></i></span>', true);
+    setTimeout(function(){
+      typing.textContent = reply(v);
+      chat.scrollTop = chat.scrollHeight;
+    }, REDUCED ? 60 : 900);
+  }
+  send.addEventListener('click', submit);
+  input.addEventListener('keydown',function(e){ if(e.key === 'Enter') submit(); });
+}
+
+function buildDividers(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-divider]'),function(d,i){
+    var flip = i % 2 ? -1 : 1, w = 900, n = 9, pts = [];
+    for(var k=0;k<=n;k++) pts.push([(w/n)*k, 30 + Math.sin(k*1.25 + i)*14*flip]);
+    var p = 'M'+pts[0][0]+' '+pts[0][1];
+    for(var k=1;k<pts.length;k++){
+      var a = pts[k-1], b = pts[k], cx = (a[0]+b[0])/2;
+      p += ' C'+cx+' '+a[1]+' '+cx+' '+b[1]+' '+b[0]+' '+b[1];
+    }
+    d.innerHTML = '<svg viewBox="0 0 900 60" aria-hidden="true"><path d="'+p+'"/></svg>';
+  });
+}
+
+/* ============================================================
+   Behaviour
+   ============================================================ */
+function initHeader(){
+  var nav = document.getElementById('nav');
+  var burger = document.getElementById('burger');
+  var m = document.getElementById('mnav');
+  var lastY = window.scrollY;
+  window.addEventListener('scroll',function(){
+    var y = window.scrollY;
+    if(!document.body.classList.contains('menu-open')){
+      if(y > lastY && y > 240) nav.classList.add('is-hidden');
+      else nav.classList.remove('is-hidden');
+    }
+    lastY = y;
+  },{passive:true});
+  burger.addEventListener('click',function(){
+    var open = document.body.classList.toggle('menu-open');
+    document.body.classList.toggle('is-locked',open);
+    burger.setAttribute('aria-expanded',String(open));
+    m.setAttribute('aria-hidden',String(!open));
+  });
+  Array.prototype.forEach.call(m.querySelectorAll('a'),function(a){
+    a.addEventListener('click',function(){
+      document.body.classList.remove('menu-open','is-locked');
+      burger.setAttribute('aria-expanded','false');
+    });
+  });
+}
+
+function initDoodles(){
+  if(REDUCED) return;
+  var ds = document.querySelectorAll('.doodle');
+  if(!ds.length) return;
+  var tx=0,ty=0,cx=0,cy=0;
+  window.addEventListener('mousemove',function(e){
+    tx = e.clientX/window.innerWidth - .5;
+    ty = e.clientY/window.innerHeight - .5;
+  },{passive:true});
+  (function run(){
+    requestAnimationFrame(run);
+    cx += (tx-cx)*0.05; cy += (ty-cy)*0.05;
+    Array.prototype.forEach.call(ds,function(d,i){
+      var k = (i+1)*12;
+      d.style.transform = 'translate3d('+(cx*k)+'px,'+(cy*k*.7)+'px,0) rotate('+(cx*3)+'deg)';
+    });
+  })();
+}
+
+function initReveals(){
+  var targets = document.querySelectorAll('[data-reveal],[data-hl],[data-stagger],[data-divider],.app');
+  if(REDUCED || !('IntersectionObserver' in window)){
+    Array.prototype.forEach.call(targets,function(t){ t.classList.add('is-in'); });
+    return;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-stagger]'),function(g){
+    Array.prototype.forEach.call(g.children,function(c,i){ c.style.transitionDelay = (i*0.09)+'s'; });
+  });
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); }
+    });
+  },{rootMargin:'0px 0px -8% 0px', threshold:0.12});
+  Array.prototype.forEach.call(targets,function(t){ io.observe(t); });
+}
+
+function initAsk(){
+  var ask = document.getElementById('ask');
+  setTimeout(function(){ ask.classList.add('is-in'); }, REDUCED ? 100 : 2800);
+}
+
+function initPreloader(done){
+  var pre = document.getElementById('preloader');
+  var bar = document.getElementById('preBar');
+  var pct = document.getElementById('prePct');
+  if(REDUCED){ document.body.classList.remove('is-locked'); pre.remove(); done(); return; }
+  requestAnimationFrame(function(){ pre.classList.add('is-ready'); });
+  var start = performance.now(), DUR = 1900;
+  function tick(now){
+    var t = clamp((now-start)/DUR,0,1), e = smooth(t);
+    bar.style.width = (e*100)+'%';
+    pct.textContent = Math.round(e*100)+'%';
+    if(t < 1) requestAnimationFrame(tick);
+    else setTimeout(function(){
+      pre.classList.add('is-done');
+      document.body.classList.remove('is-locked');
+      done();
+      setTimeout(function(){ pre.remove(); }, 1400);
+    }, 220);
+  }
+  requestAnimationFrame(tick);
+}
+
+function boot(){
+  buildNav();
+  buildTicker();
+  buildFeats();
+  buildGrades();
+  buildTutorPoints();
+  buildLadder();
+  buildBoundaries();
+  buildChat();
+  buildDividers();
+  initHeader();
+  initDoodles();
+  initAsk();
+  initPreloader(initReveals);
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+})();
+</script>
+</body>
+</html>

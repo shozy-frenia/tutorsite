@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/LocaleProvider";
+
 import { useEffect, useRef, useState } from "react";
 import { evaluate, formatResult, toThreeSigFigs, type AngleMode } from "@/lib/calculator";
 
@@ -79,6 +81,7 @@ const KEYS: Array<Array<{ label: string; insert?: string; action?: "clear" | "ba
   ];
 
 export default function CalculatorPanel() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [expression, setExpression] = useState("");
   const [history, setHistory] = useState<Entry[]>([]);
@@ -127,10 +130,9 @@ export default function CalculatorPanel() {
         onClick={() => setOpen(true)}
         className="press-soft t-label"
         style={{
-          background: "var(--color-sheet)",
-          border: "1px solid var(--color-rule)",
-          boxShadow: "var(--shadow-card)",
-          padding: "10px 18px",
+          background: "var(--color-cream-paper)",
+          border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
+                    padding: "10px 18px",
           cursor: "pointer",
           width: "100%",
         }}
@@ -141,7 +143,7 @@ export default function CalculatorPanel() {
   }
 
   return (
-    <div style={{ border: "1px solid var(--color-rule)", background: "var(--color-sheet)" }}>
+    <div style={{ border: "1px solid var(--color-forest-ink)", borderRadius: "var(--radius-md)", background: "var(--color-cream-paper)" }}>
       <div
         className="flex items-center justify-between gap-2 px-3 py-2"
         style={{ background: "var(--color-ink)" }}
@@ -153,33 +155,26 @@ export default function CalculatorPanel() {
             className="t-micro"
             style={{
               background: "var(--color-highlighter)",
-              border: "1px solid var(--color-rule)",
+              border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
               padding: "3px 8px",
               cursor: "pointer",
               color: "var(--color-ink)",
             }}
-            title="Switch between degrees and radians"
+            title={t("calc.switchMode")}
           >
             {mode.toUpperCase()}
           </button>
           <button
             onClick={() => setOpen(false)}
-            className="t-micro"
-            style={{
-              background: "transparent",
-              border: "1px solid var(--color-canvas)",
-              color: "var(--color-canvas)",
-              padding: "3px 8px",
-              cursor: "pointer",
-            }}
+            className="btn btn--inverse btn--sm"
           >
-            HIDE ✕
+            {t("calc.hide")} ✕
           </button>
         </div>
       </div>
 
       {/* display */}
-      <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--color-rule)" }}>
+      <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--color-pencil-gray)" }}>
         <input
           ref={inputRef}
           value={expression}
@@ -193,7 +188,7 @@ export default function CalculatorPanel() {
           placeholder="type or tap — e.g. acos(11/sqrt(143))"
           spellCheck={false}
           className="w-full px-2 py-2 t-mono text-[16px]"
-          style={{ border: "1px solid var(--color-rule)", background: "var(--color-canvas)" }}
+          style={{ border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)", background: "var(--color-canvas)" }}
         />
 
         <div className="mt-2 flex items-baseline justify-between gap-3 min-h-[26px]">
@@ -212,7 +207,7 @@ export default function CalculatorPanel() {
             </>
           ) : (
             <span className="t-micro" style={{ opacity: 0.4 }}>
-              {mode === "deg" ? "ANGLES IN DEGREES" : "ANGLES IN RADIANS"}
+              {mode === "deg" ? t("calc.degrees") : t("calc.radians")}
             </span>
           )}
         </div>
@@ -228,7 +223,7 @@ export default function CalculatorPanel() {
                 onClick={() => press(key)}
                 className="t-mono"
                 style={{
-                  border: "1px solid var(--color-rule)",
+                  border: "1px solid var(--color-pencil-gray)", borderRadius: "var(--radius-md)",
                   background:
                     key.action === "equals"
                       ? "var(--color-highlighter)"
@@ -251,7 +246,7 @@ export default function CalculatorPanel() {
       {history.length > 0 && (
         <div
           className="px-3 py-2 flex flex-col gap-1"
-          style={{ borderTop: "1px solid var(--color-rule)", background: "var(--color-study)" }}
+          style={{ borderTop: "1px solid var(--color-pencil-gray)", background: "var(--color-whisper-gray)" }}
         >
           <span className="t-micro" style={{ opacity: 0.55 }}>
             HISTORY · ANS = {answer === null ? "—" : formatResult(answer)}
@@ -268,7 +263,7 @@ export default function CalculatorPanel() {
                 cursor: "pointer",
                 opacity: i === 0 ? 1 : 0.6,
               }}
-              title="Put this expression back in the display"
+              title={t("calc.reuse")}
             >
               {entry.expression} = {entry.result}
             </button>
