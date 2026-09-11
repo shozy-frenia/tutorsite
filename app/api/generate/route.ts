@@ -76,9 +76,7 @@ export async function POST(request: Request) {
         ? await generateWithAnthropic(question, paper.title)
         : await generateWithFreeTheAi(question, paper.title);
 
-    if (!generated) {
-      return jsonError("The generator returned an unusable question. Try again.", 502);
-    }
+    if (!generated) return offlineFallback(question, "unusable output");
 
     // The schema cannot enforce arithmetic. Check the tariff ourselves and
     // report it rather than serving a question whose marks do not add up.
@@ -100,9 +98,47 @@ export async function POST(request: Request) {
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
-    const { status, message } = describeError(error);
-    return jsonError(message, status);
+    /**
+     * Serve the deterministic variant rather than an error.
+     *
+     * This route is reached by pressing "give me another question", and the
+     * project already carries a generator that answers that correctly without
+     * a model — same syllabus strand, same tariff, new numbers. Returning a
+     * 502 when one exists means showing a student an error toast while a
+     * perfectly good question sits unused two files away.
+     *
+     * Worth having for a specific reason: Groq validates the model's JSON and
+     * rejects the whole generation with a 400 when it is malformed. A bound
+     * schema makes that far less likely, but "less likely" is not "never", and
+     * a rate limit or a network blip has the same shape.
+     */
+    console.error("generate: falling back to the offline variant —", describeError(error).message);
+    return offlineFallback(question, "generator error");
   }
+}
+
+/**
+ * The offline generator, served with an honest label.
+ *
+ * `mode: "offline"` is what the client already shows for an unconfigured
+ * deploy, so nothing downstream needs to learn a new state — and it is the
+ * truth: this question did not come from a model.
+ */
+function offlineFallback(
+  question: NonNullable<ReturnType<typeof paperById>>["questions"][number],
+  reason: string
+) {
+  const variant = variantFor(question);
+  return Response.json(
+    {
+      question: variant,
+      marksConsistent: true,
+      schemeTotal: variant.markScheme.reduce((sum, step) => sum + step.marks, 0),
+      mode: "offline" as const,
+      degraded: reason,
+    },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
 
 async function generateWithAnthropic(
@@ -157,8 +193,44 @@ async function generateWithFreeTheAi(
     maxTokens: 1_600,
     temperature: 0.8,
     json: true,
+    schema: { name: "generated_question", schema: GENERATED_SCHEMA },
   });
 
   const parsed = GeneratedQuestion.safeParse(extractJson(text));
   return parsed.success ? parsed.data : null;
 }
+
+/**
+ * The same shape as the prose description above, as a schema the backend can
+ * bind the reply to.
+ *
+ * Groq validates the model's JSON and rejects the whole generation with a 400
+ * when it is malformed, and gpt-oss does malform it — a broken escape inside
+ * the nested markScheme array failed this route intermittently. Describing the
+ * shape in the prompt asks nicely; this makes it structurally impossible.
+ *
+ * Duplicated against the prose rather than generated from it on purpose: a
+ * backend without structured outputs still needs the prose, and one schema
+ * generated from the other would be harder to read than both written out.
+ */
+const GENERATED_SCHEMA: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: ["prompt", "topic", "marks", "answer", "markScheme", "hint"],
+  properties: {
+    prompt: { type: "string" },
+    topic: { type: "string" },
+    marks: { type: "integer" },
+    answer: { type: "string" },
+    markScheme: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "marks"],
+        properties: { text: { type: "string" }, marks: { type: "integer" } },
+      },
+    },
+    hint: { type: "string" },
+  },
+};

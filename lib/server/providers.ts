@@ -38,6 +38,17 @@ interface CompatBackend {
   /** Extra body parameters this backend needs on every request. */
   extras: Record<string, unknown>;
   /**
+   * Whether the backend can bind the reply to a JSON schema.
+   *
+   * This is not a nicety. Groq *validates* the model's JSON and rejects the
+   * whole generation with a 400 `json_validate_failed` when it is malformed —
+   * and gpt-oss does malform it, emitting a broken escape inside a nested
+   * array often enough that the question generator failed intermittently in
+   * testing. A bound schema removes the failure mode rather than retrying
+   * into it.
+   */
+  structured: boolean;
+  /**
    * Tokens to add to the caller's budget before sending.
    *
    * On a reasoning model, `max_tokens` caps reasoning *and* answer together,
@@ -67,6 +78,7 @@ function compatBackend(): CompatBackend | null {
        */
       extras: { reasoning_effort: process.env.GROQ_REASONING_EFFORT ?? "low" },
       headroom: 1_024,
+      structured: true,
     };
   }
 
@@ -82,8 +94,12 @@ function compatBackend(): CompatBackend | null {
       key: freeTheAi,
       base: process.env.FREETHEAI_BASE_URL ?? "https://api.freetheai.xyz/v1",
       model: process.env.FREETHEAI_MODEL ?? "bbl/gemini-3.5-flash",
-      extras: {},
       headroom: 0,
+      extras: {},
+      // Gemini-fronting endpoints vary in what they accept here, and a
+      // rejected request is worse than unbound JSON that `extractJson`
+      // already knows how to salvage.
+      structured: false,
     };
   }
 
@@ -122,6 +138,12 @@ export interface CompatOptions {
   temperature?: number;
   /** Ask the endpoint for a JSON object back. */
   json?: boolean;
+  /**
+   * A JSON schema to bind the reply to. Used in preference to plain JSON mode
+   * on backends that support it; ignored elsewhere, where `json` still asks
+   * for an object and `extractJson` salvages what comes back.
+   */
+  schema?: { name: string; schema: Record<string, unknown> };
   signal?: AbortSignal;
 }
 
@@ -143,7 +165,16 @@ async function callCompat(options: CompatOptions, stream: boolean) {
       max_tokens: (options.maxTokens ?? 1_200) + backend.headroom,
       ...backend.extras,
       ...(stream ? { stream: true } : {}),
-      ...(options.json ? { response_format: { type: "json_object" } } : {}),
+      ...(options.schema && backend.structured
+        ? {
+            response_format: {
+              type: "json_schema",
+              json_schema: { name: options.schema.name, strict: true, schema: options.schema.schema },
+            },
+          }
+        : options.json
+          ? { response_format: { type: "json_object" } }
+          : {}),
     }),
   });
 
