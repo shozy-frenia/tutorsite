@@ -28,6 +28,7 @@ import { validateBoundarySet, gradeForMark, answersMatch } from "../lib/grading"
 import { variantFor } from "../lib/offline-variants";
 import { evaluate } from "../lib/calculator";
 import { mergeStores, type Attempt, type Store } from "../lib/storage";
+import { deLatex } from "../lib/rich-text";
 
 let failures = 0;
 const fail = (message: string) => {
@@ -387,6 +388,45 @@ console.log("\nANSWER MATCHING");
       "acceptedAnswers honoured"
   );
 }
+
+/* ------------------------------------------------------------ tutor text */
+
+/**
+ * The model's output, as a student actually sees it.
+ *
+ * The tutor prompt asks for plain Unicode maths and says "no LaTeX" in as
+ * many words, and gpt-oss ignores it often enough to matter — a real marking
+ * explanation came back containing `\\(A(8,4)=8\\times7\\times6\\times5\\)`.
+ * A prompt cannot be relied on for this, so `deLatex` fixes it at render and
+ * these cases are what stop that fix regressing quietly.
+ *
+ * The last two rows matter as much as the conversions: text with no maths in
+ * it must come back byte-identical, and the emphasis markers must survive,
+ * because `renderRichText` splits on them after this runs.
+ */
+console.log("\nTUTOR OUTPUT");
+{
+  const cases: Array<[string, string]> = [
+    ["\\(A(8,4)=8\\times7\\times6\\times5\\).", "A(8,4)=8×7×6×5."],
+    ["\\[\\binom{8}{4}\\times 4! = 70\\]", "C(8, 4)× 4! = 70"],
+    ["\\frac{1}{2} и \\sqrt{9}", "1/2 и √(9)"],
+    ["x \\le 5, y \\ge 3, z \\neq 0", "x ≤ 5, y ≥ 3, z ≠ 0"],
+    ["$$\\pi \\approx 3.14$$", "π ≈ 3.14"],
+    ["\\left(a+b\\right)", "(a+b)"],
+    ["Просто текст без формул", "Просто текст без формул"],
+    ["**Step 1:** use \\(x²\\) here", "**Step 1:** use x² here"],
+  ];
+  let wrong = 0;
+  for (const [input, want] of cases) {
+    const got = deLatex(input);
+    if (got !== want) {
+      fail(`tutor text: ${JSON.stringify(input)} gave ${JSON.stringify(got)}, expected ${JSON.stringify(want)}`);
+      wrong++;
+    }
+  }
+  if (!wrong) pass(`${cases.length} model outputs render as readable maths`);
+}
+
 
 /* ------------------------------------------------------------ calculator */
 

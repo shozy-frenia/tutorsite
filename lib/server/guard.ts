@@ -71,7 +71,7 @@ export function describeError(error: unknown): { status: number; message: string
   if (error instanceof Anthropic.AuthenticationError) {
     return {
       status: 503,
-      message: "The tutor is not configured. Set ANTHROPIC_API_KEY or FREETHEAI_API_KEY.",
+      message: "The tutor is not configured. Set GROQ_API_KEY or ANTHROPIC_API_KEY.",
     };
   }
   if (error instanceof Anthropic.RateLimitError) {

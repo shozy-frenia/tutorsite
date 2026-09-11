@@ -27,7 +27,8 @@ export const TUTOR_SYSTEM = [
   "",
   "Format: plain prose and short numbered steps. Keep it under 200 words unless the",
   "student asks for a full worked solution. Write mathematics in plain Unicode",
-  "(x², √3, π, ≤) — no LaTeX, no markdown tables.",
+  "(x², √3, π, ≤, ×) — never LaTeX. Do not write \\(, \\[, $$, \\times, \\frac or",
+  "\\sqrt: write 8 × 7 × 6 × 5, not 8\\times7\\times6\\times5. No markdown tables.",
 ].join("\n");
 
 /**

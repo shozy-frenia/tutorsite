@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { renderRichText } from "@/lib/rich-text";
 
 /**
  * Site-wide study assistant.
@@ -21,16 +22,6 @@ interface Message {
 }
 
 /** Render **bold** spans; everything else stays plain text. */
-function renderText(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((chunk, i) =>
-    chunk.startsWith("**") && chunk.endsWith("**") ? (
-      <strong key={i}>{chunk.slice(2, -2)}</strong>
-    ) : (
-      <span key={i}>{chunk}</span>
-    )
-  );
-}
-
 export default function AskTalap() {
   const t = useT();
   const chips = [t("ask.chip1"), t("ask.chip2"), t("ask.chip3"), t("ask.chip4")];
@@ -166,7 +157,7 @@ export default function AskTalap() {
               message.role === "user" ? "msg--me" : "msg--ai"
             }`}
           >
-            {renderText(message.content)}
+            {renderRichText(message.content)}
           </p>
         ))}
 

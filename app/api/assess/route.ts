@@ -7,7 +7,7 @@ import {
   ANTHROPIC_MODEL,
   anthropic,
   extractJson,
-  freeTheAiComplete,
+  compatComplete,
   resolveProvider,
 } from "@/lib/server/providers";
 import { ASSESSOR_SYSTEM, assessRequest, wordCount } from "@/lib/tutor-prompt";
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     const raw =
       provider === "anthropic"
         ? await assessWithAnthropic(question, answer)
-        : await assessWithFreeTheAi(question, answer);
+        : await assessWithCompat(question, answer);
 
     if (!raw) {
       return jsonError("The examiner returned an unusable result. Try again.", 502);
@@ -203,7 +203,7 @@ async function assessWithAnthropic(
   return response.parsed_output ?? null;
 }
 
-async function assessWithFreeTheAi(
+async function assessWithCompat(
   question: Question,
   answer: string
 ): Promise<Assessment | null> {
@@ -223,7 +223,7 @@ async function assessWithFreeTheAi(
     "lists the rest. Both are [] when the question supplies no sources.",
   ].join("\n");
 
-  const text = await freeTheAiComplete({
+  const text = await compatComplete({
     messages: [
       { role: "system", content: `${ASSESSOR_SYSTEM}\n\n${shape}` },
       { role: "user", content: assessRequest(question, answer) },
@@ -292,7 +292,7 @@ function selfMarkGuide(question: Question, answer: string) {
   }
 
   notes.push(
-    "Offline mode: set FREETHEAI_API_KEY or ANTHROPIC_API_KEY and the examiner marks this against the bands above."
+    "Offline mode: set GROQ_API_KEY or ANTHROPIC_API_KEY and the examiner marks this against the bands above."
   );
 
   return {

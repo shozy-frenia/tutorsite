@@ -292,13 +292,44 @@ Everywhere else, in the floating **ASK TALAP** panel (`components/AskTalap.tsx`)
 
 ### Providers
 
-`lib/server/providers.ts` supports two backends and uses whichever is configured:
+`lib/server/providers.ts` supports three backends and uses whichever is
+configured, in this order:
 
 | Env var | Backend |
 |---|---|
-| `FREETHEAI_API_KEY` | FreeTheAI, an OpenAI-compatible endpoint fronting Gemini (`bbl/gemini-3.5-flash`). This is what the deployed site runs on. |
-| `GEMINI_API_KEY` | Accepted as an alias for the above, for deployments where the same key already exists under that name. |
-| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs. Takes precedence when both are set. |
+| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs. Takes precedence over everything else when set. |
+| `GROQ_API_KEY` | Groq, OpenAI-compatible, running `openai/gpt-oss-120b`. This is what the deployed site runs on. |
+| `FREETHEAI_API_KEY` | FreeTheAI, OpenAI-compatible, fronting Gemini (`bbl/gemini-3.5-flash`). Kept as a fallback. |
+| `GEMINI_API_KEY` | Accepted as an alias for `FREETHEAI_API_KEY`, for deployments where the same key already exists under that name. |
+
+Groq and FreeTheAI speak the same wire format, so they are two rows in one
+table inside `providers.ts` rather than two copies of the same fetch-and-parse
+code. Only the URL, the model name and any extra body parameters differ.
+
+### Reasoning models need headroom
+
+`gpt-oss-120b` reasons before it answers, and on Groq `max_tokens` caps the
+reasoning and the answer *together* — with reasoning spent first. Asked for
+700 tokens it spent 698 of them thinking and returned an empty string, which
+on the page is indistinguishable from the tutor being broken.
+
+Two things in `providers.ts` handle this, and both matter:
+
+- `reasoning_effort: "low"` is sent on every Groq request. Low rather than
+  off: the step-by-step quality is what makes it a good tutor, and at low
+  effort a marking question costs roughly 200 reasoning tokens instead of
+  four figures. Override with `GROQ_REASONING_EFFORT`.
+- A 1024-token allowance is added to whatever budget the calling route asks
+  for. The routes' numbers describe the answer they want; the reasoning
+  allowance is added once, centrally, rather than in four places.
+
+The streaming parser reads only `choices[].delta.content`. That is what keeps
+the model's chain of thought out of a student's chat window — Groq streams it
+alongside, as `delta.reasoning`, in the same frames.
+
+Optional overrides: `GROQ_BASE_URL` (default
+`https://api.groq.com/openai/v1`), `GROQ_MODEL`, `FREETHEAI_BASE_URL` and
+`FREETHEAI_MODEL`.
 
 Anthropic uses typed structured outputs. The OpenAI-compatible path has no
 schema binding, so the shape is requested in the prompt and validated with Zod
@@ -314,16 +345,12 @@ repository root and `vercel.json` pins the framework preset, so an import needs
 no further build configuration. The one thing to set is the key:
 
 1. **Project → Settings → Environment Variables**
-2. Add `FREETHEAI_API_KEY` (or `GEMINI_API_KEY`) with the key as its value.
+2. Add `GROQ_API_KEY` with the key as its value.
 3. Tick **Production**, **Preview** and **Development** so previews are not
    silently stuck in offline mode.
 4. **Redeploy.** Environment variables are read at request time by the route
    handlers, but a running deployment does not pick up a new variable until it
    is redeployed.
-
-Optional overrides, if the endpoint or model ever moves: `FREETHEAI_BASE_URL`
-(default `https://api.freetheai.xyz/v1`) and `FREETHEAI_MODEL` (default
-`bbl/gemini-3.5-flash`).
 
 Never prefix the key with `NEXT_PUBLIC_`. That prefix inlines a value into the
 client bundle, which would publish the key to every visitor. The three API
@@ -336,112 +363,25 @@ resolving, and `/api/tutor` returns an `X-Tutor-Mode` header.
 
 ## Accounts
 
-`/auth` is the sign-in and registration window. Google and email/password both
-go through Firebase Auth; progress is mirrored to a Firebase **Realtime
-Database** so a paper sat on a phone opens on a laptop.
+`/auth` is the sign-in and registration page, and it runs on **Supabase**:
+email and password as the primary route, a magic link as the way back in after
+a forgotten password. Progress syncs through `lib/supabase/sync.ts`, so a paper
+sat on a phone opens on a laptop.
 
-Accounts are optional by construction. With no Firebase config the app behaves
-exactly as it did before they existed — every paper, the marking and the
-dashboard all work, progress lives in `localStorage`, and `/auth` renders an
-explanation instead of a form rather than throwing.
+Accounts are optional by construction. Leave `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` unset and the app runs exactly as it did before
+they existed: every paper, the marking and the dashboard all work, progress
+lives in `localStorage`, and no sign-in UI renders anywhere.
 
-### Configuring it
+Both of those values are safe in the browser. The anon key only ever returns
+the rows row-level security allows, and every table in `supabase/schema.sql` is
+owner-scoped. The `service_role` key is the one that bypasses RLS — it must
+never appear here or under any `NEXT_PUBLIC_*` name.
 
-Six `NEXT_PUBLIC_FIREBASE_*` variables, from Firebase console → Project
-settings → General → Your apps → Web app → SDK setup and config:
-
-| Variable | Needed for |
-|---|---|
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | sign-in |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | sign-in |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | sign-in |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | sign-in |
-| `NEXT_PUBLIC_FIREBASE_DATABASE_URL` | cross-device sync only |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | optional |
-
-The first four turn accounts on. `DATABASE_URL` is separate on purpose: without
-it an account still works, it just does not carry history between devices, and
-losing sync should not cost someone the ability to sign in at all.
-
-`NEXT_PUBLIC_` is correct here and is not the mistake it would be for the AI
-key. Firebase web config is public by design — it ships inside every client
-bundle that has ever used Firebase, and identifies the project rather than
-authorising anything. What keeps one student's attempts out of another's hands
-is `database.rules.json`, which scopes `students/$uid` to the signed-in user
-and denies everything else. Deploy those rules before the first real user:
-
-```bash
-firebase deploy --only database
-```
-
-Two things must also be set in the Firebase console itself, and neither is
-visible from the code:
-
-1. **Authentication → Sign-in method** — enable Google *and* Email/Password.
-   A provider that is off returns `auth/operation-not-allowed`.
-2. **Authentication → Settings → Authorized domains** — add the production
-   domain. A domain that is missing returns `auth/unauthorized-domain`, and it
-   is the usual reason sign-in works locally and not in production.
-
-#### “No Next.js version detected”
-
-Vercel raises this when it cannot find a `package.json` with `next` in it at
-the directory it is building. Two causes, in order of likelihood:
-
-1. **The branch being built genuinely has no `package.json`.** A revert branch
-   that undoes the initial commit is empty, so its preview build fails exactly
-   this way. That is a fact about the branch, not about the app — check what
-   `git ls-tree --name-only <branch>` actually contains before changing any
-   Vercel setting.
-2. **Root Directory is pointing somewhere else.** Project → Settings → Build
-   and Deployment → Root Directory must be empty (the repository root), since
-   that is where `package.json` lives.
-
-### Running without a key
-
-With no key set, all three routes degrade rather than fail:
-
-- **Ask Talap** answers from `lib/server/knowledge.ts`, which reads the real
-  boundary tables, the curriculum and the seeded papers — so an offline answer
-  about a grade boundary is the published table, not generated prose. A question
-  it cannot answer from data gets an honest "here is what I can do" rather than
-  a guess.
-- **Explain** returns the question's real mark scheme, staged step by step.
-- **Generate** uses the deterministic generators in `lib/offline-variants.ts`,
-  which re-parameterise a real question type and compute the answer
-  arithmetically — correct by construction, and non-calculator by design
-  (Pythagorean triples, exact surds, common angles). Twenty topics have a true
-  generator, spanning both levels: the Grade 10 strands and the A-Level ones
-  (differentiation, integration, differential equations, binomial series,
-  complex numbers, 3D vectors, parametric equations, exponentials and logs).
-  Anything uncovered falls back to a same-tariff question on another topic and
-  says so.
-
-  Level matching is the point: ask for another question on a Grade 12 calculus
-  question and you get calculus at the same mark tariff, not a Grade 10
-  substitute.
-
-To enable the live tutor locally:
-
-```bash
-cp .env.example .env.local
-# then set FREETHEAI_API_KEY (or ANTHROPIC_API_KEY) in .env.local
-npm run dev
-```
-
-`.env.local` is gitignored. Never put a real key in `.env.example`, in source,
-or in a commit — rotate any key that has been pasted into a chat, an issue or a
-diff.
-
-### Security
-
-The key is server-side only — the browser posts to `/api/*` and the route adds
-the credential. `lib/server/guard.ts` handles input validation, per-IP rate
-limiting, request timeouts and error mapping that never leaks upstream detail.
-
-Before production you still need: authentication, a rate limiter that survives
-restarts and works across instances, request logging that does not store answer
-text, and forced HTTPS at the edge.
+Setting it up end to end — the two variables, Supabase's redirect allowlist,
+the schema, and how to check it worked — is in **[DEPLOY.md](DEPLOY.md)**, and
+the migration from the previous storage model is in
+**[MIGRATION.md](MIGRATION.md)**.
 
 ## Design system
 

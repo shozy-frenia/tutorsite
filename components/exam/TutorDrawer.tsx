@@ -4,6 +4,7 @@ import { useT } from "@/components/i18n/LocaleProvider";
 
 import { useEffect, useRef, useState } from "react";
 import Thinking from "@/components/motion/Thinking";
+import { renderRichText } from "@/lib/rich-text";
 import type { Question } from "@/lib/exam-types";
 import type { GeneratedQuestion } from "@/lib/offline-variants";
 
@@ -349,7 +350,7 @@ export default function TutorDrawer({
                     className="text-[15px] whitespace-pre-wrap m-0"
                     style={{ lineHeight: 1.4 }}
                   >
-                    {message.content}
+                    {renderRichText(message.content)}
                     {streaming && i === messages.length - 1 && message.role === "assistant" && (
                       <span className="blink">▍</span>
                     )}

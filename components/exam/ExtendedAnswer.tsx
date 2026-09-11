@@ -36,7 +36,7 @@ interface Assessment {
   sourcesUsed: string[];
   sourcesIgnored: string[];
   summary: string;
-  mode: "offline" | "anthropic" | "freetheai";
+  mode: "offline" | "anthropic" | "groq" | "freetheai";
 }
 
 interface Props {
