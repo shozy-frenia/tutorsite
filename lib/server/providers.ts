@@ -3,48 +3,102 @@ import Anthropic from "@anthropic-ai/sdk";
 /**
  * Model provider layer.
  *
- * The app supports two backends and picks whichever is configured:
+ * The app supports three backends and picks whichever is configured:
  *
  *   anthropic  — ANTHROPIC_API_KEY (or ANTHROPIC_AUTH_TOKEN). Uses the
  *                official SDK with claude-opus-5 and adaptive thinking.
- *   freetheai  — FREETHEAI_API_KEY or GEMINI_API_KEY. An OpenAI-compatible
- *                endpoint fronting Gemini, which is what this project runs on.
+ *   groq       — GROQ_API_KEY. OpenAI-compatible, running gpt-oss-120b.
+ *                This is what the project runs on now.
+ *   freetheai  — FREETHEAI_API_KEY or GEMINI_API_KEY. OpenAI-compatible,
+ *                fronting Gemini. Kept as a fallback.
  *
- * With neither key set the routes fall back to offline mode, which answers
- * from the question's own mark scheme rather than failing.
+ * With no key set the routes fall back to offline mode, which answers from the
+ * question's own mark scheme rather than failing.
+ *
+ * Groq and FreeTheAI speak the same wire format, so they are two rows in one
+ * table rather than two copies of the same fetch-and-parse code. The only
+ * things that genuinely differ are the URL, the model name, and whether the
+ * backend needs extra body parameters — which is what `extras` is for.
  *
  * Keys are read from the environment on the server only — locally from
  * `.env.local`, in production from the Vercel project's environment variables.
  * Never inline a key in source: this file is committed, `.env.local` is not.
  */
 
-export type Provider = "anthropic" | "freetheai" | "offline";
+export type Provider = "anthropic" | "groq" | "freetheai" | "offline";
 
 export const ANTHROPIC_MODEL = "claude-opus-5";
 
-const FREETHEAI_BASE =
-  process.env.FREETHEAI_BASE_URL ?? "https://api.freetheai.xyz/v1";
-const FREETHEAI_MODEL = process.env.FREETHEAI_MODEL ?? "bbl/gemini-3.5-flash";
+/** An OpenAI-compatible backend, as far as this app needs to know one. */
+interface CompatBackend {
+  name: "groq" | "freetheai";
+  key: string;
+  base: string;
+  model: string;
+  /** Extra body parameters this backend needs on every request. */
+  extras: Record<string, unknown>;
+  /**
+   * Tokens to add to the caller's budget before sending.
+   *
+   * On a reasoning model, `max_tokens` caps reasoning *and* answer together,
+   * and reasoning is spent first. gpt-oss-120b asked for 700 tokens spent 698
+   * of them thinking and returned an empty string — which is indistinguishable
+   * from the tutor being broken, and is exactly the fault five of twenty-six
+   * pilots reported. The callers' budgets describe the answer they want, so
+   * the reasoning allowance is added here rather than in four routes.
+   */
+  headroom: number;
+}
 
-/**
- * The FreeTheAI credential. Two names are accepted because the same key is
- * often already deployed as GEMINI_API_KEY — the endpoint fronts Gemini, so
- * that is what people call it. FREETHEAI_API_KEY wins if both are set.
- */
-export const freeTheAiKey = (): string | undefined =>
-  process.env.FREETHEAI_API_KEY || process.env.GEMINI_API_KEY;
+function compatBackend(): CompatBackend | null {
+  const groq = process.env.GROQ_API_KEY;
+  if (groq) {
+    return {
+      name: "groq",
+      key: groq,
+      base: process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1",
+      model: process.env.GROQ_MODEL ?? "openai/gpt-oss-120b",
+      /**
+       * Low, not off. gpt-oss reasons before answering whatever you ask, and
+       * at the default effort it will happily spend a four-figure budget on
+       * it. Low keeps the step-by-step quality that makes it a good tutor —
+       * measured at roughly 200 reasoning tokens for a marking question —
+       * without the answer being crowded out.
+       */
+      extras: { reasoning_effort: process.env.GROQ_REASONING_EFFORT ?? "low" },
+      headroom: 1_024,
+    };
+  }
+
+  /**
+   * The FreeTheAI credential. Two names are accepted because the same key is
+   * often already deployed as GEMINI_API_KEY — the endpoint fronts Gemini, so
+   * that is what people call it. FREETHEAI_API_KEY wins if both are set.
+   */
+  const freeTheAi = process.env.FREETHEAI_API_KEY || process.env.GEMINI_API_KEY;
+  if (freeTheAi) {
+    return {
+      name: "freetheai",
+      key: freeTheAi,
+      base: process.env.FREETHEAI_BASE_URL ?? "https://api.freetheai.xyz/v1",
+      model: process.env.FREETHEAI_MODEL ?? "bbl/gemini-3.5-flash",
+      extras: {},
+      headroom: 0,
+    };
+  }
+
+  return null;
+}
 
 export function resolveProvider(): Provider {
   if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) {
     return "anthropic";
   }
-  if (freeTheAiKey()) return "freetheai";
-  return "offline";
+  return compatBackend()?.name ?? "offline";
 }
 
 /** Human-readable label for the X-Tutor-Mode response header. */
-export const providerLabel = (provider: Provider): string =>
-  provider === "offline" ? "offline" : provider;
+export const providerLabel = (provider: Provider): string => provider;
 
 export const anthropic = (): Anthropic =>
   new Anthropic({ maxRetries: 2, timeout: 60_000 });
@@ -55,11 +109,15 @@ export interface ChatTurn {
 }
 
 /* ========================================================================
-   FreeTheAI (OpenAI-compatible)
+   OpenAI-compatible backends (Groq, FreeTheAI)
    ======================================================================== */
 
-interface FreeTheAiOptions {
+export interface CompatOptions {
   messages: ChatTurn[];
+  /**
+   * Room for the answer, in tokens. The backend's reasoning allowance is
+   * added on top of this — see CompatBackend.headroom.
+   */
   maxTokens?: number;
   temperature?: number;
   /** Ask the endpoint for a JSON object back. */
@@ -67,22 +125,23 @@ interface FreeTheAiOptions {
   signal?: AbortSignal;
 }
 
-async function callFreeTheAi(options: FreeTheAiOptions, stream: boolean) {
-  const key = freeTheAiKey();
-  if (!key) throw new Error("FREETHEAI_API_KEY (or GEMINI_API_KEY) is not set");
+async function callCompat(options: CompatOptions, stream: boolean) {
+  const backend = compatBackend();
+  if (!backend) throw new Error("No OpenAI-compatible key is set (GROQ_API_KEY or FREETHEAI_API_KEY)");
 
-  const response = await fetch(`${FREETHEAI_BASE}/chat/completions`, {
+  const response = await fetch(`${backend.base}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
+      Authorization: `Bearer ${backend.key}`,
     },
     signal: options.signal ?? AbortSignal.timeout(60_000),
     body: JSON.stringify({
-      model: FREETHEAI_MODEL,
+      model: backend.model,
       messages: options.messages,
       temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 1_200,
+      max_tokens: (options.maxTokens ?? 1_200) + backend.headroom,
+      ...backend.extras,
       ...(stream ? { stream: true } : {}),
       ...(options.json ? { response_format: { type: "json_object" } } : {}),
     }),
@@ -92,8 +151,8 @@ async function callFreeTheAi(options: FreeTheAiOptions, stream: boolean) {
     // Read the body for the server log, but never return it to the browser —
     // upstream errors can echo request detail.
     const detail = await response.text().catch(() => "");
-    console.error("FreeTheAI error", response.status, detail.slice(0, 500));
-    const error = new Error(`FreeTheAI responded ${response.status}`);
+    console.error(`${backend.name} error`, response.status, detail.slice(0, 500));
+    const error = new Error(`${backend.name} responded ${response.status}`);
     (error as Error & { status?: number }).status = response.status;
     throw error;
   }
@@ -102,8 +161,8 @@ async function callFreeTheAi(options: FreeTheAiOptions, stream: boolean) {
 }
 
 /** Single-shot completion. Returns the assistant text. */
-export async function freeTheAiComplete(options: FreeTheAiOptions): Promise<string> {
-  const response = await callFreeTheAi(options, false);
+export async function compatComplete(options: CompatOptions): Promise<string> {
+  const response = await callCompat(options, false);
   const data = (await response.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
@@ -117,11 +176,16 @@ export async function freeTheAiComplete(options: FreeTheAiOptions): Promise<stri
  * events carrying `choices[].delta.content`. Some deployments ignore
  * `stream: true` and answer with a plain JSON body instead, so this checks
  * the content type and handles both rather than assuming.
+ *
+ * Reading only `delta.content` also does something load-bearing on a
+ * reasoning model: gpt-oss streams its chain of thought as `delta.reasoning`
+ * in the same frames. Ignoring that field is what keeps the model's working
+ * out of a student's chat window.
  */
-export async function freeTheAiStream(
-  options: FreeTheAiOptions
+export async function compatStream(
+  options: CompatOptions
 ): Promise<ReadableStream<Uint8Array>> {
-  const response = await callFreeTheAi(options, true);
+  const response = await callCompat(options, true);
   const encoder = new TextEncoder();
   const contentType = response.headers.get("content-type") ?? "";
 
@@ -139,7 +203,7 @@ export async function freeTheAiStream(
   }
 
   const reader = response.body?.getReader();
-  if (!reader) throw new Error("FreeTheAI returned no body");
+  if (!reader) throw new Error("The tutor backend returned no body");
 
   const decoder = new TextDecoder();
 

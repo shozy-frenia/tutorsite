@@ -9,7 +9,7 @@ import {
 import {
   ANTHROPIC_MODEL,
   anthropic,
-  freeTheAiComplete,
+  compatComplete,
   providerLabel,
   resolveProvider,
   type ChatTurn,
@@ -28,7 +28,8 @@ export const dynamic = "force-dynamic";
  *
  * The site-wide assistant, as opposed to /api/tutor which is bound to one
  * exam question. Same provider layer: Anthropic if ANTHROPIC_API_KEY is set,
- * otherwise FreeTheAI if FREETHEAI_API_KEY (or GEMINI_API_KEY) is, otherwise
+ * otherwise Groq if GROQ_API_KEY is, then FreeTheAI if FREETHEAI_API_KEY (or
+ * GEMINI_API_KEY) is, otherwise
  * an offline answer built from the boundary tables and curriculum in this
  * repository.
  *
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     const reply =
       provider === "anthropic"
         ? await askAnthropic(messages)
-        : await freeTheAiComplete({
+        : await compatComplete({
             messages: [
               { role: "system", content: ASSISTANT_SYSTEM },
               ...messages,

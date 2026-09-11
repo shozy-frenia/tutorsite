@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Thinking from "@/components/motion/Thinking";
+import { renderRichText } from "@/lib/rich-text";
 import { usePathname } from "next/navigation";
 
 /**
@@ -31,16 +32,6 @@ const OPENING =
   "I am the Talap study assistant. Ask me what you sit this year, what a grade actually needs, or anything on the syllabus — in Kazakh, Russian or English.";
 
 /** Render **bold** spans; everything else stays plain text. */
-function renderText(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((chunk, i) =>
-    chunk.startsWith("**") && chunk.endsWith("**") ? (
-      <strong key={i}>{chunk.slice(2, -2)}</strong>
-    ) : (
-      <span key={i}>{chunk}</span>
-    )
-  );
-}
-
 export default function AskTalap() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -204,7 +195,7 @@ export default function AskTalap() {
               {message.role === "user" ? "YOU" : "TALAP"}
             </span>
             <p className="text-[14px] whitespace-pre-wrap m-0" style={{ lineHeight: 1.45 }}>
-              {renderText(message.content)}
+              {renderRichText(message.content)}
             </p>
           </div>
         ))}

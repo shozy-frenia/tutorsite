@@ -292,13 +292,44 @@ Everywhere else, in the floating **ASK TALAP** panel (`components/AskTalap.tsx`)
 
 ### Providers
 
-`lib/server/providers.ts` supports two backends and uses whichever is configured:
+`lib/server/providers.ts` supports three backends and uses whichever is
+configured, in this order:
 
 | Env var | Backend |
 |---|---|
-| `FREETHEAI_API_KEY` | FreeTheAI, an OpenAI-compatible endpoint fronting Gemini (`bbl/gemini-3.5-flash`). This is what the deployed site runs on. |
-| `GEMINI_API_KEY` | Accepted as an alias for the above, for deployments where the same key already exists under that name. |
-| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs. Takes precedence when both are set. |
+| `ANTHROPIC_API_KEY` | Anthropic, `claude-opus-5` with adaptive thinking and structured outputs. Takes precedence over everything else when set. |
+| `GROQ_API_KEY` | Groq, OpenAI-compatible, running `openai/gpt-oss-120b`. This is what the deployed site runs on. |
+| `FREETHEAI_API_KEY` | FreeTheAI, OpenAI-compatible, fronting Gemini (`bbl/gemini-3.5-flash`). Kept as a fallback. |
+| `GEMINI_API_KEY` | Accepted as an alias for `FREETHEAI_API_KEY`, for deployments where the same key already exists under that name. |
+
+Groq and FreeTheAI speak the same wire format, so they are two rows in one
+table inside `providers.ts` rather than two copies of the same fetch-and-parse
+code. Only the URL, the model name and any extra body parameters differ.
+
+### Reasoning models need headroom
+
+`gpt-oss-120b` reasons before it answers, and on Groq `max_tokens` caps the
+reasoning and the answer *together* — with reasoning spent first. Asked for
+700 tokens it spent 698 of them thinking and returned an empty string, which
+on the page is indistinguishable from the tutor being broken.
+
+Two things in `providers.ts` handle this, and both matter:
+
+- `reasoning_effort: "low"` is sent on every Groq request. Low rather than
+  off: the step-by-step quality is what makes it a good tutor, and at low
+  effort a marking question costs roughly 200 reasoning tokens instead of
+  four figures. Override with `GROQ_REASONING_EFFORT`.
+- A 1024-token allowance is added to whatever budget the calling route asks
+  for. The routes' numbers describe the answer they want; the reasoning
+  allowance is added once, centrally, rather than in four places.
+
+The streaming parser reads only `choices[].delta.content`. That is what keeps
+the model's chain of thought out of a student's chat window — Groq streams it
+alongside, as `delta.reasoning`, in the same frames.
+
+Optional overrides: `GROQ_BASE_URL` (default
+`https://api.groq.com/openai/v1`), `GROQ_MODEL`, `FREETHEAI_BASE_URL` and
+`FREETHEAI_MODEL`.
 
 Anthropic uses typed structured outputs. The OpenAI-compatible path has no
 schema binding, so the shape is requested in the prompt and validated with Zod
@@ -314,16 +345,12 @@ repository root and `vercel.json` pins the framework preset, so an import needs
 no further build configuration. The one thing to set is the key:
 
 1. **Project → Settings → Environment Variables**
-2. Add `FREETHEAI_API_KEY` (or `GEMINI_API_KEY`) with the key as its value.
+2. Add `GROQ_API_KEY` with the key as its value.
 3. Tick **Production**, **Preview** and **Development** so previews are not
    silently stuck in offline mode.
 4. **Redeploy.** Environment variables are read at request time by the route
    handlers, but a running deployment does not pick up a new variable until it
    is redeployed.
-
-Optional overrides, if the endpoint or model ever moves: `FREETHEAI_BASE_URL`
-(default `https://api.freetheai.xyz/v1`) and `FREETHEAI_MODEL` (default
-`bbl/gemini-3.5-flash`).
 
 Never prefix the key with `NEXT_PUBLIC_`. That prefix inlines a value into the
 client bundle, which would publish the key to every visitor. The three API
@@ -425,7 +452,7 @@ To enable the live tutor locally:
 
 ```bash
 cp .env.example .env.local
-# then set FREETHEAI_API_KEY (or ANTHROPIC_API_KEY) in .env.local
+# then set GROQ_API_KEY (or ANTHROPIC_API_KEY) in .env.local
 npm run dev
 ```
 

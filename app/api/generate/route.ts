@@ -12,7 +12,7 @@ import {
   ANTHROPIC_MODEL,
   anthropic,
   extractJson,
-  freeTheAiComplete,
+  compatComplete,
   resolveProvider,
 } from "@/lib/server/providers";
 import { GENERATOR_SYSTEM, generateRequest } from "@/lib/tutor-prompt";
@@ -149,7 +149,7 @@ async function generateWithFreeTheAi(
     "The markScheme marks must sum to the total marks.",
   ].join("\n");
 
-  const text = await freeTheAiComplete({
+  const text = await compatComplete({
     messages: [
       { role: "system", content: `${GENERATOR_SYSTEM}\n\n${shape}` },
       { role: "user", content: generateRequest(question, paperTitle) },

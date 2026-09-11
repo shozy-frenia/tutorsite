@@ -11,7 +11,7 @@ import {
 import {
   ANTHROPIC_MODEL,
   anthropic,
-  freeTheAiStream,
+  compatStream,
   providerLabel,
   resolveProvider,
   type ChatTurn,
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     const stream =
       provider === "anthropic"
         ? await anthropicStream(conversation)
-        : await freeTheAiStream({
+        : await compatStream({
             messages: [
               { role: "system", content: TUTOR_SYSTEM },
               ...conversation,
@@ -198,7 +198,7 @@ function offlineExplanation(question: Question, studentAnswer: string): string {
 
   lines.push("");
   lines.push(
-    "(Offline mode: set ANTHROPIC_API_KEY or FREETHEAI_API_KEY to get a tutor that responds to your specific working.)"
+    "(Offline mode: set GROQ_API_KEY or ANTHROPIC_API_KEY to get a tutor that responds to your specific working.)"
   );
 
   return lines.join("\n");
